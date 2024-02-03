@@ -1,2 +1,1 @@
-# sanlitor
-An Editor Text based in Notepad++ but cross-platform
+A text editor based in Notepad++ but cross-platform
