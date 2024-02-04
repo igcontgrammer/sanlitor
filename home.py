@@ -1,6 +1,6 @@
 from PySide6 import QtWidgets as qwt, QtCore as qtc, QtGui as gui
 from typing import Final
-from menu_bar import MenuBar
+from menus.menu_bar import MenuBar
 
 
 class Home(qwt.QMainWindow):
@@ -13,8 +13,7 @@ class Home(qwt.QMainWindow):
     def __init__(self):
         super().__init__()
         self.set_main_window_config()
-        self.menu = MenuBar(self)
-        self.menu.show()
+        self.menu = MenuBar(home=self)
         # create toolbar
         # create central widget (text editor)
         # status bar (at the bottom)
