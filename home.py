@@ -1,9 +1,9 @@
-from PySide6 import QtWidgets as qwt, QtCore as qtc, QtGui as gui
 from typing import Final
 from menus.menu_bar import MenuBar
+from PySide6.QtWidgets import QMainWindow
 
 
-class Home(qwt.QMainWindow):
+class Home(QMainWindow):
     _MAIN_WINDOW_TITLE: Final[str] = "Sanlitor"
     _MAIN_WINDOW_MIN_HEIGHT: Final[int] = 300
     _MAIN_WINDOW_MIN_WIDTH: Final[int] = 400
@@ -12,17 +12,18 @@ class Home(qwt.QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self.set_main_window_config()
+        self._set_main_window_config()
         self.menu = MenuBar(home=self)
         # create toolbar
         # create central widget (text editor)
         # status bar (at the bottom)
 
-    def set_main_window_config(self):
+    def _set_main_window_config(self) -> None:
         self.setWindowTitle(self._MAIN_WINDOW_TITLE)
-        self.set_dimensions()
+        self._set_dimensions()
+        pass
 
-    def set_dimensions(self) -> None:
+    def _set_dimensions(self) -> None:
         self.setMinimumHeight(self._MAIN_WINDOW_MIN_HEIGHT)
         self.setMinimumWidth(self._MAIN_WINDOW_MIN_WIDTH)
         self.resize(self._MAIN_WINDOW_DEFAULT_WIDTH, self._MAIN_WINDOW_DEFAULT_HEIGHT)

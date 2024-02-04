@@ -1,4 +1,6 @@
-from PySide6 import QtWidgets as qwt, QtCore as qtc, QtGui as gui
+from PySide6.QtWidgets import QMenu
+from PySide6.QtGui import QAction
+from PySide6.QtCore import Slot
 from typing import Final
 from enum import Enum
 from utils import Utils
@@ -22,24 +24,23 @@ class EditMenuShortcuts(Enum):
     SELECT_ALL = "Ctrl+A"
 
 
-class EditMenu(qwt.QMenu):
+class EditMenu(QMenu):
     _MENU_NAME: Final[str] = "Edit"
 
     def __init__(self):
         super().__init__()
-        self._edit_menu = qwt.QMenu(self._MENU_NAME)
+        self._edit_menu = QMenu(self._MENU_NAME)
         self.add_menus()
 
     @property
-    def get_menu(self) -> qwt.QMenu:
+    def get_menu(self) -> QMenu:
         return self._edit_menu
 
     def add_menus(self) -> None:
         self._edit_menu.addAction(self.undo_action())
-        pass
 
-    def undo_action(self) -> gui.QAction:
-        undo_action = gui.QAction(EditMenuActionsNames.UNDO.value, self)
+    def undo_action(self) -> QAction:
+        undo_action = QAction(EditMenuActionsNames.UNDO.value, self)
         Utils().config_action(
             action=undo_action,
             shortcut=EditMenuShortcuts.UNDO.value,
@@ -48,7 +49,6 @@ class EditMenu(qwt.QMenu):
         )
         return undo_action
 
-    @qtc.Slot()
+    @Slot()
     def undo(self) -> None:
         print("Undo...")
-        pass
