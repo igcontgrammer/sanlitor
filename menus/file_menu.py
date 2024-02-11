@@ -1,38 +1,40 @@
+from dataclasses import dataclass
 from typing import Final
-from enum import Enum
 from utils import Utils
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QMenu
 from PySide6.QtCore import Slot
 
 
-class FileMenuActionsNames(Enum):
-    NEW = "New"
-    OPEN = "Open..."
-    OPEN_FOLDER = "Open Folder..."
-    RELOAD_FROM_DISK = "Reaload from disk"
-    SAVE = "Save"
-    SAVE_AS = "Save As..."
-    SAVE_COPY_AS = "Save a Copy As..."
-    SAVE_ALL = "Save All"
-    RENAME = "Rename..."
-    CLOSE = "Close"
-    CLOSE_ALL = "Close All"
-    PRINT = "Print"
-    EXIT = "Exit"
+@dataclass(frozen=True)
+class FileMenuActionsNames:
+    NEW: str = "New"
+    OPEN: str = "Open..."
+    OPEN_FOLDER: str = "Open Folder..."
+    RELOAD_FROM_DISK: str = "Reload from disk"
+    SAVE: str = "Save"
+    SAVE_AS: str = "Save As..."
+    SAVE_COPY_AS: str = "Save a Copy As..."
+    SAVE_ALL: str = "Save All"
+    RENAME: str = "Rename..."
+    CLOSE: str = "Close"
+    CLOSE_ALL: str = "Close All"
+    PRINT: str = "Print"
+    EXIT: str = "Exit"
 
 
-class FileMenuActionsShortcuts(Enum):
-    NEW = "Ctrl+N"
-    OPEN = "Ctrl+O"
-    OPEN_FOLDER = "Ctrl+Shift+O"
-    RELOAD_FROM_DISK = "Ctrl+R"
-    SAVE = "Ctrl+S"
-    SAVE_AS = "Ctrl+S"
-    SAVE_ALL = "Ctrl+Shift+S"
-    CLOSE = "Ctrl+W"
-    CLOSE_ALL = "Ctrl+Shift+W"
-    EXIT = "Alt+F4"
+@dataclass(frozen=True)
+class FileMenuActionsShortcuts:
+    NEW: str = "Ctrl+N"
+    OPEN: str = "Ctrl+O"
+    OPEN_FOLDER: str = "Ctrl+Shift+O"
+    RELOAD_FROM_DISK: str = "Ctrl+R"
+    SAVE: str = "Ctrl+S"
+    SAVE_AS: str = "Ctrl+S"
+    SAVE_ALL: str = "Ctrl+Shift+S"
+    CLOSE: str = "Ctrl+W"
+    CLOSE_ALL: str = "Ctrl+Shift+W"
+    EXIT: str = "Alt+F4"
 
 
 class FileMenu(QMenu):
@@ -57,41 +59,41 @@ class FileMenu(QMenu):
     # ************* actions *************
 
     def _open_file_action(self) -> QAction:
-        open_file_action = QAction(FileMenuActionsNames.OPEN.value, self)
+        open_file_action = QAction(FileMenuActionsNames.OPEN, self)
         Utils().config_action(
             action=open_file_action,
             status_tip="Open a file",
-            shortcut=FileMenuActionsShortcuts.OPEN.value,
+            shortcut=FileMenuActionsShortcuts.OPEN,
             method=self._open_file,
         )
         return open_file_action
 
     def _new_file_action(self) -> QAction:
-        new_file_action = QAction(FileMenuActionsNames.NEW.value, self)
+        new_file_action = QAction(FileMenuActionsNames.NEW, self)
         Utils().config_action(
             action=new_file_action,
             status_tip="Create a new file",
-            shortcut=FileMenuActionsShortcuts.NEW.value,
+            shortcut=FileMenuActionsShortcuts.NEW,
             method=self._new_file,
         )
         return new_file_action
 
     def _save_file_action(self) -> QAction:
-        save_file_action = QAction(FileMenuActionsNames.SAVE.value, self)
+        save_file_action = QAction(FileMenuActionsNames.SAVE, self)
         Utils().config_action(
             action=save_file_action,
             status_tip="Save a file",
-            shortcut=FileMenuActionsShortcuts.SAVE.value,
+            shortcut=FileMenuActionsShortcuts.SAVE,
             method=self._save_file,
         )
         return save_file_action
 
     def _save_all_files_action(self) -> QAction:
-        save_all_files_action = QAction(FileMenuActionsNames.SAVE_ALL.value, self)
+        save_all_files_action = QAction(FileMenuActionsNames.SAVE_ALL, self)
         Utils().config_action(
             action=save_all_files_action,
             status_tip="Save all files",
-            shortcut=FileMenuActionsShortcuts.SAVE_ALL.value,
+            shortcut=FileMenuActionsShortcuts.SAVE_ALL,
             method=self._save_all_files,
         )
         return save_all_files_action

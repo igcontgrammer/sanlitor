@@ -1,11 +1,11 @@
-from PySide6 import QtWidgets as qwt, QtCore as qtc, QtGui as gui
+from PySide6.QtGui import QAction
 
 
 class Utils:
 
     @staticmethod
     def config_action(
-        action: gui.QAction, status_tip: str, shortcut: str, method: object
+        action: QAction, status_tip: str, shortcut: str, method: object
     ) -> None:
         action.setStatusTip(status_tip)
         action.setShortcut(shortcut)

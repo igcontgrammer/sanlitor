@@ -1,27 +1,29 @@
+from dataclasses import dataclass
 from PySide6.QtWidgets import QMenu
 from PySide6.QtGui import QAction
 from PySide6.QtCore import Slot
 from typing import Final
-from enum import Enum
 from utils import Utils
 
 
-class EditMenuActionsNames(Enum):
-    UNDO = "Undo"
-    REDO = "Redo"
-    CUT = "Cut"
-    COPY = "Copy"
-    PASTE = "Paste"
-    SELECT_ALL = "Select all"
+@dataclass(frozen=True)
+class EditMenuActionsNames:
+    UNDO: str = "Undo"
+    REDO: str = "Redo"
+    CUT: str = "Cut"
+    COPY: str = "Copy"
+    PASTE: str = "Paste"
+    SELECT_ALL: str = "Select All"
 
 
-class EditMenuShortcuts(Enum):
-    UNDO = "Ctrl+Z"
-    REDO = "Ctrl+Shift+Z"
-    CUT = "Ctrl+X"
-    COPY = "Ctrl+C"
-    PASTE = "Ctrl+V"
-    SELECT_ALL = "Ctrl+A"
+@dataclass(frozen=True)
+class EditMenuShortcuts:
+    UNDO: str = "Ctrl+Z"
+    REDO: str = "Ctrl+Shift+Z"
+    CUT: str = "Ctrl+X"
+    COPY: str = "Ctrl+C"
+    PASTE: str = "Ctrl+V"
+    SELECT_ALL: str = "Ctrl+A"
 
 
 class EditMenu(QMenu):
@@ -30,25 +32,25 @@ class EditMenu(QMenu):
     def __init__(self):
         super().__init__()
         self._edit_menu = QMenu(self._MENU_NAME)
-        self.add_menus()
+        self._add_menus()
 
     @property
     def get_menu(self) -> QMenu:
         return self._edit_menu
 
-    def add_menus(self) -> None:
-        self._edit_menu.addAction(self.undo_action())
+    def _add_menus(self) -> None:
+        self._edit_menu.addAction(self._undo_action())
 
-    def undo_action(self) -> QAction:
-        undo_action = QAction(EditMenuActionsNames.UNDO.value, self)
+    def _undo_action(self) -> QAction:
+        undo_action = QAction(EditMenuActionsNames.UNDO, self)
         Utils().config_action(
             action=undo_action,
-            shortcut=EditMenuShortcuts.UNDO.value,
+            shortcut=EditMenuShortcuts.UNDO,
             status_tip="Undo",
-            method=self.undo,
+            method=self._undo,
         )
         return undo_action
 
     @Slot()
-    def undo(self) -> None:
+    def _undo(self) -> None:
         print("Undo...")
