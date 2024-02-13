@@ -1,7 +1,6 @@
 from PySide6.QtWidgets import QToolBar, QFileIconProvider
 from PySide6.QtGui import QAction
 from PySide6.QtCore import Slot
-from typing import Dict, Any
 
 
 """
@@ -70,30 +69,25 @@ class ToolBar(QToolBar):
         )
         save_action.triggered.connect(self._save)
 
-    def _save_all_action(self) -> QAction:
+    def _save_all_action(self) -> None:
         save_all_action = QAction("Save All", self)
         save_all_action.triggered.connect(self._save_all)
-        return save_all_action
 
-    def _close_action(self) -> QAction:
+    def _close_action(self) -> None:
         close_action = QAction("Close", self)
         close_action.triggered.connect(self._close)
-        return close_action
 
-    def _close_all_action(self) -> QAction:
+    def _close_all_action(self) -> None:
         close_all_action = QAction("Close All", self)
         close_all_action.triggered.connect(self._close_all)
-        return close_all_action
 
-    def _print_action(self) -> QAction:
+    def _print_action(self) -> None:
         print_action = QAction("Print", self)
         print_action.triggered.connect(self._print)
-        return print_action
 
-    def _cut_action(self) -> QAction:
+    def _cut_action(self) -> None:
         cut_action = QAction("Cut", self)
         cut_action.triggered.connect(self._cut)
-        return cut_action
 
     @Slot()
     def _new(self) -> None:

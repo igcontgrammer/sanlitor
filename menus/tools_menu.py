@@ -6,11 +6,13 @@ from PySide6.QtWidgets import QMenu
 from PySide6.QtCore import Slot
 
 
-class HelpMenu(QMenu):
+class ToolsMenu(QMenu):
+    _MENU_NAME: Final[str] = "Tools"
+
     def __init__(self):
         super().__init__()
-        self._help_menu = QMenu("Help")
+        self._tool_menu = QMenu(self._MENU_NAME)
 
     @property
     def get_menu(self) -> QMenu:
-        return self._help_menu
+        return self._tool_menu

@@ -6,11 +6,11 @@ from PySide6.QtWidgets import QMenu
 from PySide6.QtCore import Slot
 
 
-class HelpMenu(QMenu):
+class TerminalMenu(QMenu):
     def __init__(self):
         super().__init__()
-        self._help_menu = QMenu("Help")
+        self._terminal_menu = QMenu("Terminal")
 
     @property
     def get_menu(self) -> QMenu:
-        return self._help_menu
+        return self._terminal_menu
