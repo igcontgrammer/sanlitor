@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import Final
-from . import QMenu, QAction, Slot, ConfigAction, SectionsNames
+from . import QMenu, QAction, Slot, ActionHelper, SectionsNames
 
 
 @dataclass(frozen=True)
@@ -38,7 +38,7 @@ class SearchMenu(QMenu):
 
     def _search_action(self) -> None:
         search_action = QAction(SearchMenuActionsNames.SEARCH, self)
-        ConfigAction().config_action(
+        ActionHelper().config(
             action=search_action,
             shortcut=SearchMenuShortcuts.SEARCH,
             status_tip="Search",
@@ -48,7 +48,7 @@ class SearchMenu(QMenu):
 
     def _search_in_files_action(self) -> None:
         search_in_files_action = QAction(SearchMenuActionsNames.SEARCH_IN_FILES, self)
-        ConfigAction().config_action(
+        ActionHelper().config(
             action=search_in_files_action,
             shortcut=SearchMenuShortcuts.SEARCH_IN_FILES,
             status_tip="Search in files",
@@ -58,7 +58,7 @@ class SearchMenu(QMenu):
 
     def _next_action(self) -> None:
         next_action = QAction(SearchMenuActionsNames.NEXT, self)
-        ConfigAction().config_action(
+        ActionHelper().config(
             action=next_action,
             shortcut=SearchMenuShortcuts.NEXT,
             status_tip="Search Next",
@@ -68,7 +68,7 @@ class SearchMenu(QMenu):
 
     def _back_action(self) -> None:
         back_action = QAction(SearchMenuActionsNames.BACK, self)
-        ConfigAction().config_action(
+        ActionHelper().config(
             action=back_action,
             shortcut=SearchMenuShortcuts.BACK,
             status_tip="Search Back",

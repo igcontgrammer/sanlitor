@@ -1,4 +1,4 @@
-from . import QMenu, QAction, Slot, ConfigAction, SectionsNames
+from . import QMenu, QAction, Slot, ActionHelper, SectionsNames
 
 
 class HelpMenu(QMenu):
@@ -17,7 +17,7 @@ class HelpMenu(QMenu):
 
     def _show_all_commands_action(self) -> None:
         show_all_commands_action = QAction("Show All Commands", self)
-        ConfigAction().config_action(
+        ActionHelper().config(
             action=show_all_commands_action,
             status_tip="Show All Commands",
             shortcut="",
@@ -27,7 +27,7 @@ class HelpMenu(QMenu):
 
     def _documentation_action(self) -> None:
         documentation_action = QAction("Documentation", self)
-        ConfigAction().config_action(
+        ActionHelper().config(
             action=documentation_action,
             status_tip="Documentation",
             shortcut="",

@@ -5,7 +5,7 @@ from . import (
     QMenu,
     QAction,
     Slot,
-    ConfigAction,
+    ActionHelper,
     SectionsNames,
     QFileDialog,
     QCoreApplication as coreapp,
@@ -67,7 +67,7 @@ class FileMenu(QMenu):
 
     def _open_file_action(self) -> None:
         open_file_action = QAction(FileMenuActionsNames.OPEN, self)
-        ConfigAction().config_action(
+        ActionHelper().config(
             action=open_file_action,
             status_tip="Open a file",
             shortcut=FileMenuActionsShortcuts.OPEN,
@@ -77,7 +77,7 @@ class FileMenu(QMenu):
 
     def _new_file_action(self) -> None:
         new_file_action = QAction(FileMenuActionsNames.NEW, self)
-        ConfigAction().config_action(
+        ActionHelper().config(
             action=new_file_action,
             status_tip="Create a new file",
             shortcut=FileMenuActionsShortcuts.NEW,
@@ -87,7 +87,7 @@ class FileMenu(QMenu):
 
     def _save_file_action(self) -> None:
         save_file_action = QAction(FileMenuActionsNames.SAVE, self)
-        ConfigAction().config_action(
+        ActionHelper().config(
             action=save_file_action,
             status_tip="Save a file",
             shortcut=FileMenuActionsShortcuts.SAVE,
@@ -97,7 +97,7 @@ class FileMenu(QMenu):
 
     def _save_as_action(self) -> None:
         save_as_action = QAction(FileMenuActionsNames.SAVE_AS, self)
-        ConfigAction().config_action(
+        ActionHelper().config(
             action=save_as_action,
             status_tip="Save a file as...",
             shortcut=FileMenuActionsShortcuts.SAVE_AS,
@@ -107,7 +107,7 @@ class FileMenu(QMenu):
 
     def _save_all_files_action(self) -> None:
         save_all_files_action = QAction(FileMenuActionsNames.SAVE_ALL, self)
-        ConfigAction().config_action(
+        ActionHelper().config(
             action=save_all_files_action,
             status_tip="Save all files",
             shortcut=FileMenuActionsShortcuts.SAVE_ALL,
@@ -117,7 +117,7 @@ class FileMenu(QMenu):
 
     def _close_file_action(self) -> None:
         close_file_action = QAction(FileMenuActionsNames.CLOSE, self)
-        ConfigAction().config_action(
+        ActionHelper().config(
             action=close_file_action,
             status_tip="Close a file",
             shortcut=FileMenuActionsShortcuts.CLOSE,
@@ -127,7 +127,7 @@ class FileMenu(QMenu):
 
     def _close_all_files_action(self) -> None:
         close_all_files_action = QAction(FileMenuActionsNames.CLOSE_ALL, self)
-        ConfigAction().config_action(
+        ActionHelper().config(
             action=close_all_files_action,
             status_tip="Close all files",
             shortcut=FileMenuActionsShortcuts.CLOSE_ALL,
@@ -137,7 +137,7 @@ class FileMenu(QMenu):
 
     def _print_action(self) -> None:
         print_action = QAction(FileMenuActionsNames.PRINT, self)
-        ConfigAction().config_action(
+        ActionHelper().config(
             action=print_action,
             status_tip="Print a file",
             shortcut="",
@@ -147,7 +147,7 @@ class FileMenu(QMenu):
 
     def _exit_action(self) -> None:
         exit_action = QAction(FileMenuActionsNames.EXIT, self)
-        ConfigAction().config_action(
+        ActionHelper().config(
             action=exit_action,
             status_tip="Exit the application",
             shortcut=FileMenuActionsShortcuts.EXIT,
@@ -163,6 +163,7 @@ class FileMenu(QMenu):
             self, coreapp.translate("file_menu", "Abrir archivo"), dir=home_dir
         )
         if file:
+            # TODO: si es un archivo, recoger su extension
             print(file)
 
     @Slot()

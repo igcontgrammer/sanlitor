@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from . import QMenu, QAction, Slot, ConfigAction, SectionsNames
+from . import QMenu, QAction, Slot, ActionHelper, SectionsNames
 
 
 @dataclass(frozen=True)
@@ -24,7 +24,7 @@ class ToolsMenu(QMenu):
 
     def _base_64_encode_action(self) -> None:
         base_64_encode = QAction(ToolsMenuActionsNames.BASE_64_ENCODE, self)
-        ConfigAction().config_action(
+        ActionHelper().config(
             action=base_64_encode,
             shortcut="",
             status_tip="Base 64 Encode",
@@ -34,7 +34,7 @@ class ToolsMenu(QMenu):
 
     def _base_64_decode_action(self) -> None:
         base_64_decode = QAction(ToolsMenuActionsNames.BASE_64_DECODE, self)
-        ConfigAction().config_action(
+        ActionHelper().config(
             action=base_64_decode,
             shortcut="",
             status_tip="Base 64 Decode",

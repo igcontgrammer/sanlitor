@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import Final
-from . import QMenu, QAction, Slot, ConfigAction, SectionsNames
+from . import QMenu, QAction, Slot, ActionHelper, SectionsNames
 
 
 @dataclass(frozen=True)
@@ -24,7 +24,7 @@ class EditMenuShortcuts:
 
 
 class EditMenu(QMenu):
-    config_action = ConfigAction()
+    config_action = ActionHelper()
 
     def __init__(self):
         super().__init__()
@@ -45,7 +45,7 @@ class EditMenu(QMenu):
 
     def _undo_action(self) -> None:
         undo_action = QAction(EditMenuActionsNames.UNDO, self)
-        ConfigAction().config_action(
+        ActionHelper().config(
             action=undo_action,
             shortcut=EditMenuShortcuts.UNDO,
             status_tip="Undo",
@@ -55,7 +55,7 @@ class EditMenu(QMenu):
 
     def _redo_action(self) -> None:
         redo_action = QAction(EditMenuActionsNames.REDO, self)
-        ConfigAction().config_action(
+        ActionHelper().config(
             action=redo_action,
             shortcut=EditMenuShortcuts.REDO,
             status_tip="Redo",
@@ -65,7 +65,7 @@ class EditMenu(QMenu):
 
     def _cut_action(self) -> None:
         cut_action = QAction(EditMenuActionsNames.CUT, self)
-        ConfigAction().config_action(
+        ActionHelper().config(
             action=cut_action,
             shortcut=EditMenuShortcuts.CUT,
             status_tip="Cut",
@@ -75,7 +75,7 @@ class EditMenu(QMenu):
 
     def _copy_action(self) -> None:
         copy_action = QAction(EditMenuActionsNames.COPY, self)
-        ConfigAction().config_action(
+        ActionHelper().config(
             action=copy_action,
             shortcut=EditMenuShortcuts.COPY,
             status_tip="Copy",
@@ -85,7 +85,7 @@ class EditMenu(QMenu):
 
     def _paste_action(self) -> None:
         paste_action = QAction(EditMenuActionsNames.PASTE, self)
-        ConfigAction().config_action(
+        ActionHelper().config(
             action=paste_action,
             shortcut=EditMenuShortcuts.PASTE,
             status_tip="Paste",
@@ -95,7 +95,7 @@ class EditMenu(QMenu):
 
     def _select_all_action(self) -> None:
         select_all_action = QAction(EditMenuActionsNames.SELECT_ALL, self)
-        ConfigAction().config_action(
+        ActionHelper().config(
             action=select_all_action,
             shortcut=EditMenuShortcuts.SELECT_ALL,
             status_tip="Select All",

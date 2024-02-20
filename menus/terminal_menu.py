@@ -1,4 +1,4 @@
-from . import QMenu, QAction, Slot, ConfigAction, SectionsNames
+from . import QMenu, QAction, Slot, ActionHelper, SectionsNames
 
 
 class TerminalMenu(QMenu):
@@ -17,7 +17,7 @@ class TerminalMenu(QMenu):
 
     def _add_new_terminal_action(self) -> None:
         new_terminal = QAction("New Terminal", self)
-        ConfigAction().config_action(
+        ActionHelper().config(
             new_terminal,
             "Ctrl+Shift+T",
             "",
@@ -27,7 +27,7 @@ class TerminalMenu(QMenu):
 
     def _split_terminal_action(self) -> None:
         split_terminal = QAction("Split Terminal", self)
-        ConfigAction().config_action(
+        ActionHelper().config(
             split_terminal,
             "Ctrl+Shift+D",
             "",
