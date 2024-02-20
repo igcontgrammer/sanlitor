@@ -52,7 +52,6 @@ class FileMenu(QMenu):
         self._home = home
         self._create_actions()
 
-    @property
     def get_menu(self) -> QMenu:
         return self._file_menu
 

@@ -8,7 +8,6 @@ class SettingsMenu(QMenu):
         self._settings_menu = QMenu(SectionsNames.SETTINGS)
         self._create_actions()
 
-    @property
     def get_menu(self) -> QMenu:
         return self._settings_menu
 

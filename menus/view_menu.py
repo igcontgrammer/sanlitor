@@ -34,7 +34,6 @@ class ViewMenu(QMenu):
         self._view_menu = QMenu(SectionsNames.VIEW)
         self._create_actions()
 
-    @property
     def get_menu(self) -> QMenu:
         return self._view_menu
 

@@ -18,7 +18,6 @@ class EncodingMenu(QMenu):
         self._encoding_menu = QMenu(SectionsNames.ENCODING)
         self._create_actions()
 
-    @property
     def get_menu(self) -> QMenu:
         return self._encoding_menu
 

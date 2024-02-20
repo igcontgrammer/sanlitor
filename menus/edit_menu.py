@@ -31,7 +31,6 @@ class EditMenu(QMenu):
         self._edit_menu = QMenu(SectionsNames.EDIT)
         self._create_actions()
 
-    @property
     def get_menu(self) -> QMenu:
         return self._edit_menu
 

@@ -10,8 +10,8 @@ class LanguageMenu(QMenu):
         super().__init__()
         self._language_menu = QMenu(SectionsNames.LANGUAGE)
         self._languages_actions = self._get_languages_actions()
-        self._create_languages_menus()
-        self._create_languages_actions()
+        self.__create_languages_menus()
+        self.__create_languages_actions()
 
     @property
     def get_menu(self) -> QMenu:
@@ -58,7 +58,7 @@ class LanguageMenu(QMenu):
             Languages.OCAML: self._add_ocaml_action,
         }
 
-    def _create_languages_menus(self) -> None:
+    def __create_languages_menus(self) -> None:
         self._add_plain_text_action()
         self._add_assembly_action()
         self._add_languages_options_actions()
@@ -73,7 +73,7 @@ class LanguageMenu(QMenu):
             menu = QMenu(name)
             self._language_menu.addMenu(menu)
 
-    def _create_languages_actions(self) -> None:
+    def __create_languages_actions(self) -> None:
         for language_key, languages in self._LANGUAGES_OPTIONS.items():
             for action in self._language_menu.actions():
                 if action.text() == language_key:

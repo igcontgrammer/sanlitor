@@ -26,7 +26,6 @@ class SearchMenu(QMenu):
         self._search_menu = QMenu(SectionsNames.SEARCH)
         self._create_actions()
 
-    @property
     def get_menu(self) -> QMenu:
         return self._search_menu
 

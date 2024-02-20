@@ -14,7 +14,6 @@ class ToolsMenu(QMenu):
         self._tools_menu = QMenu(SectionsNames.TOOLS)
         self._create_actions()
 
-    @property
     def get_menu(self) -> QMenu:
         return self._tools_menu
 
