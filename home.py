@@ -2,8 +2,8 @@ from typing import Final
 from PySide6.QtWidgets import QMainWindow
 from menus.menu import MenuBar
 from toolbar import ToolBar
-from editor import Editor
 from statusbar import StatusBar
+from tab import Tab
 
 
 class Home(QMainWindow):
@@ -15,32 +15,39 @@ class Home(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self._set_main_window_config()
-        self._call_main_widgets()
+        self.__set_main_window_default_config()
+        self.__call_main_widgets()
+        self._tab = Tab()
+        self.setCentralWidget(self._tab.get_tab())
 
-    def _set_main_window_config(self) -> None:
+    def get_tab(self) -> Tab:
+        return self._tab
+
+    def __set_main_window_default_config(self) -> None:
         self.setWindowTitle(self._MAIN_WINDOW_TITLE)
-        self._set_dimensions()
+        self.__set_default_dimensions()
 
-    def _set_dimensions(self) -> None:
+    def __call_main_widgets(self) -> None:
+        self.__set_main_window_default_config()
+        self._set_menu()
+        self._set_toolbar()
+        self._set_status_bar()
+
+    def __set_default_dimensions(self) -> None:
         self.setMinimumHeight(self._MAIN_WINDOW_MIN_HEIGHT)
         self.setMinimumWidth(self._MAIN_WINDOW_MIN_WIDTH)
         self.resize(self._MAIN_WINDOW_DEFAULT_WIDTH, self._MAIN_WINDOW_DEFAULT_HEIGHT)
 
-    def _call_main_widgets(self) -> None:
-        self._set_main_window_config()
+    def _set_menu(self) -> None:
         self.menu = MenuBar(home=self)
-        self._set_toolbar()
-        self._set_editor()
-        self._set_status_bar()
+
+    # TODO: buscar en la memoria, los ultimos tabs que haya abierto el usuario
+    def _get_last_opened_tab(self) -> Tab:
+        pass
 
     def _set_toolbar(self) -> None:
         self.toolbar = ToolBar()
         self.addToolBar(self.toolbar.get_toolbar)
-
-    def _set_editor(self) -> None:
-        self.editor = Editor()
-        self.setCentralWidget(self.editor.get_editor)
 
     def _set_status_bar(self) -> None:
         self.statusbar = StatusBar()

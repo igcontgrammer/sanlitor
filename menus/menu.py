@@ -17,7 +17,7 @@ class MenuBar(QMainWindow):
     def __init__(self, home: QMainWindow):
         super().__init__()
         self._menu = home.menuBar()
-        self._file_menu = FileMenu()
+        self._file_menu = FileMenu(home=home)
         self._edit_menu = EditMenu()
         self._search_menu = SearchMenu()
         self._view_menu = ViewMenu()

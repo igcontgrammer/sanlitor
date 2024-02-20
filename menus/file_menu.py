@@ -1,13 +1,14 @@
 import os
 from dataclasses import dataclass
 from typing import Final
+from extensions import Extensions
+from PySide6.QtWidgets import QFileDialog, QMessageBox
 from . import (
     QMenu,
     QAction,
     Slot,
     ActionHelper,
     SectionsNames,
-    QFileDialog,
     QCoreApplication as coreapp,
 )
 
@@ -45,9 +46,10 @@ class FileMenuActionsShortcuts:
 
 class FileMenu(QMenu):
 
-    def __init__(self):
+    def __init__(self, home):
         super().__init__()
         self._file_menu = QMenu(SectionsNames.FILE)
+        self._home = home
         self._create_actions()
 
     @property
@@ -157,14 +159,34 @@ class FileMenu(QMenu):
 
     @Slot()
     def _open_file(self) -> None:
-        print("Opening a file...")
         home_dir = os.path.expanduser("~")
         file = QFileDialog.getOpenFileName(
             self, coreapp.translate("file_menu", "Abrir archivo"), dir=home_dir
         )
         if file:
-            # TODO: si es un archivo, recoger su extension
-            print(file)
+            path = file[0]
+            extension_detected = os.path.splitext(path)[1]
+            if extension_detected not in Extensions.get_available_extensions():
+                QMessageBox.critical(
+                    self,
+                    "Error",
+                    coreapp.translate("file_menu", "Extensión no permitida."),
+                )
+                return
+            self._set_content_on_open_file(path)
+
+    def _set_content_on_open_file(self, path: str) -> None:
+        with open(path, "r") as file:
+            content = file.read()
+            if len(content) > 0:
+                from home import Home
+
+                self._home: Home
+                tab = self._home.get_tab()
+                if tab.is_default():
+                    tab.set_content(content)
+                    tab.change_tab_name(0, os.path.basename(path))
+            return
 
     @Slot()
     def _new_file(self) -> None:
