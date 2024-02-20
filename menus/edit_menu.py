@@ -1,9 +1,6 @@
 from dataclasses import dataclass
 from typing import Final
-from common.config_action import ConfigAction
-from PySide6.QtWidgets import QMenu
-from PySide6.QtGui import QAction
-from PySide6.QtCore import Slot
+from . import QMenu, QAction, Slot, ConfigAction, SectionsNames
 
 
 @dataclass(frozen=True)
@@ -27,19 +24,18 @@ class EditMenuShortcuts:
 
 
 class EditMenu(QMenu):
-    _MENU_NAME: Final[str] = "Edit"
     config_action = ConfigAction()
 
     def __init__(self):
         super().__init__()
-        self._edit_menu = QMenu(self._MENU_NAME)
-        self._call_menus()
+        self._edit_menu = QMenu(SectionsNames.EDIT)
+        self._create_actions()
 
     @property
     def get_menu(self) -> QMenu:
         return self._edit_menu
 
-    def _call_menus(self) -> None:
+    def _create_actions(self) -> None:
         self._undo_action()
         self._redo_action()
         self._cut_action()

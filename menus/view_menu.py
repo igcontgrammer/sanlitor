@@ -1,9 +1,6 @@
 from dataclasses import dataclass
 from typing import Final
-from common.config_action import ConfigAction
-from PySide6.QtGui import QAction
-from PySide6.QtWidgets import QMenu
-from PySide6.QtCore import Slot
+from . import QMenu, QAction, Slot, ConfigAction, SectionsNames
 
 
 @dataclass(frozen=True)
@@ -31,18 +28,17 @@ class ViewMenuShortcuts:
 
 
 class ViewMenu(QMenu):
-    _MENU_NAME: Final[str] = "View"
 
     def __init__(self):
         super().__init__()
-        self._view_menu = QMenu(self._MENU_NAME)
-        self._call_menus()
+        self._view_menu = QMenu(SectionsNames.VIEW)
+        self._create_actions()
 
     @property
     def get_menu(self) -> QMenu:
         return self._view_menu
 
-    def _call_menus(self) -> None:
+    def _create_actions(self) -> None:
         self._toggle_full_screen_action()
         self._distraction_free_mode_action()
         self._zoom_action()

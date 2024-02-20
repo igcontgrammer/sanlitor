@@ -1,9 +1,15 @@
+import os
 from dataclasses import dataclass
 from typing import Final
-from common.config_action import ConfigAction
-from PySide6.QtGui import QAction
-from PySide6.QtWidgets import QMenu
-from PySide6.QtCore import Slot
+from . import (
+    QMenu,
+    QAction,
+    Slot,
+    ConfigAction,
+    SectionsNames,
+    QFileDialog,
+    QCoreApplication as coreapp,
+)
 
 
 @dataclass(frozen=True)
@@ -38,18 +44,17 @@ class FileMenuActionsShortcuts:
 
 
 class FileMenu(QMenu):
-    _MENU_NAME: Final[str] = "File"
 
     def __init__(self):
         super().__init__()
-        self._file_menu = QMenu(self._MENU_NAME)
-        self._call_menus()
+        self._file_menu = QMenu(SectionsNames.FILE)
+        self._create_actions()
 
     @property
     def get_menu(self) -> QMenu:
         return self._file_menu
 
-    def _call_menus(self) -> None:
+    def _create_actions(self) -> None:
         self._open_file_action()
         self._new_file_action()
         self._save_file_action()
@@ -153,7 +158,12 @@ class FileMenu(QMenu):
     @Slot()
     def _open_file(self) -> None:
         print("Opening a file...")
-        pass
+        home_dir = os.path.expanduser("~")
+        file = QFileDialog.getOpenFileName(
+            self, coreapp.translate("file_menu", "Abrir archivo"), dir=home_dir
+        )
+        if file:
+            print(file)
 
     @Slot()
     def _new_file(self) -> None:

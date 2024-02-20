@@ -1,6 +1,6 @@
 from typing import Final
 from PySide6.QtWidgets import QMainWindow
-from menus.menu_bar import MenuBar
+from menus.menu import MenuBar
 from toolbar import ToolBar
 from editor import Editor
 from statusbar import StatusBar

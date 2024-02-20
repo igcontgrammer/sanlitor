@@ -1,9 +1,6 @@
 from dataclasses import dataclass
 from typing import Final
-from common.config_action import ConfigAction
-from PySide6.QtGui import QAction
-from PySide6.QtWidgets import QMenu
-from PySide6.QtCore import Slot
+from . import QMenu, QAction, Slot, ConfigAction, SectionsNames
 
 
 @dataclass(frozen=True)
@@ -23,18 +20,17 @@ class SearchMenuShortcuts:
 
 
 class SearchMenu(QMenu):
-    _MENU_NAME: Final[str] = "Search"
 
     def __init__(self):
         super().__init__()
-        self._search_menu = QMenu(self._MENU_NAME)
-        self._call_menus()
+        self._search_menu = QMenu(SectionsNames.SEARCH)
+        self._create_actions()
 
     @property
     def get_menu(self) -> QMenu:
         return self._search_menu
 
-    def _call_menus(self) -> None:
+    def _create_actions(self) -> None:
         self._search_action()
         self._search_in_files_action()
         self._next_action()

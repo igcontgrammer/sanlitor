@@ -1,6 +1,7 @@
 import sys
-from PySide6.QtWidgets import QApplication
 from home import Home
+from PySide6.QtWidgets import QApplication
+from PySide6.QtCore import QTranslator, QLocale, QLibraryInfo
 
 
 class Main(QApplication):
@@ -12,4 +13,9 @@ class Main(QApplication):
 
 if __name__ == "__main__":
     app = Main(sys.argv)
+    translator = QTranslator()
+    if translator.load(
+        QLocale.system(), "", "", QLibraryInfo.path(QLibraryInfo.TranslationsPath)
+    ):
+        app.installTranslator(translator)
     exit(app.exec())

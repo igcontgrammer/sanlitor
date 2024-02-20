@@ -1,5 +1,5 @@
-from PySide6.QtGui import QAction  # triggered.connect -> signal
-from PySide6.QtCore import Slot  # slot
+from PySide6.QtGui import QAction
+from PySide6.QtCore import Slot
 
 
 class CommonActions:

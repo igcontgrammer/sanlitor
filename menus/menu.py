@@ -6,10 +6,10 @@ from menus.view_menu import ViewMenu
 from menus.encoding_menu import EncodingMenu
 from menus.language_menu import LanguageMenu
 from menus.settings_menu import SettingsMenu
-from menus.tools_menu import ToolsMenu
 from menus.plugins_menu import PluginsMenu
 from menus.terminal_menu import TerminalMenu
 from menus.help_menu import HelpMenu
+from menus.tools_menus import ToolsMenu
 
 
 class MenuBar(QMainWindow):
@@ -24,13 +24,13 @@ class MenuBar(QMainWindow):
         self._encoding_menu = EncodingMenu()
         self._language_menu = LanguageMenu()
         self._settings_menu = SettingsMenu()
-        self._tool_menu = ToolsMenu()
+        self._tools_menu = ToolsMenu()
         self._plugins_menu = PluginsMenu()
         self._terminal_menu = TerminalMenu()
         self._help_menu = HelpMenu()
-        self._set_menus()
+        self._add_menus()
 
-    def _set_menus(self) -> None:
+    def _add_menus(self) -> None:
         self._menu.addMenu(self._file_menu.get_menu)
         self._menu.addMenu(self._edit_menu.get_menu)
         self._menu.addMenu(self._search_menu.get_menu)
@@ -38,7 +38,7 @@ class MenuBar(QMainWindow):
         self._menu.addMenu(self._encoding_menu.get_menu)
         self._menu.addMenu(self._language_menu.get_menu)
         self._menu.addMenu(self._settings_menu.get_menu)
-        self._menu.addMenu(self._tool_menu.get_menu)
+        self._menu.addMenu(self._tools_menu.get_menu)
         self._menu.addAction(self._plugins_menu.get_menu.menuAction())
         self._menu.addMenu(self._terminal_menu.get_menu)
         self._menu.addMenu(self._help_menu.get_menu)
