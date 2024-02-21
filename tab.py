@@ -16,6 +16,14 @@ class Tab(QTabWidget):
     def get_tab(self) -> QTabWidget:
         return self._tab
 
+    def build_default_tab(self) -> None:
+        self._tab.addTab(self._editor, self._DEFAULT_TAB_NAME)
+        self._tab.tabCloseRequested.connect(self._tab.removeTab)
+        self._tab.setTabsClosable(False)
+
+    def get_tab_name(self) -> str:
+        return self._tab.tabText(self.get_current_tab_index())
+
     def get_tabs_count(self) -> int:
         return self._tab.count()
 
@@ -28,20 +36,22 @@ class Tab(QTabWidget):
     def change_tab_name(self, index: int, new_name: str) -> None:
         self._tab.setTabText(index, new_name)
 
-    def add_new_tab(self, tab_name: str) -> None:
-        self._tab.addTab(self, tab_name)
+    def add_new_tab(self, name: str) -> None:
+        self._tab.addTab(self._editor, name)
 
     def set_content(self, content: str) -> None:
         self._editor.setPlainText(content)
 
+    def get_current_tab_index(self) -> int:
+        return self._tab.currentIndex()
+
+    def set_current_tab(self, index: int) -> None:
+        self._tab.setCurrentIndex(index)
+
     def __configurate_default_tab(self) -> None:
-        self._tab.addTab(self._editor, self._DEFAULT_TAB_NAME)
         self._tab.setTabsClosable(True)
-        self._tab.tabCloseRequested.connect(self.close_tab)
+        self._tab.tabCloseRequested.connect(self.close_tab(index=1))
 
     def close_tab(self, index: int) -> None:
-        if self.is_default():
-            self._editor.clear()
-            self.change_tab_name(0, self._DEFAULT_TAB_NAME)
-            return
+        print("Closing...")
         self._tab.removeTab(index)
