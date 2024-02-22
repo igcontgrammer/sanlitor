@@ -16,3 +16,6 @@ class Editor(QTextEdit):
     @property
     def get_editor(self) -> QTextEdit:
         return self._editor
+
+    def get_new_editor(self) -> QTextEdit:
+        return QTextEdit()

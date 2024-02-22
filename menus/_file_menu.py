@@ -1,6 +1,7 @@
 import os
 from dataclasses import dataclass
 from typing import Final, Optional
+from enum import Enum
 from extensions import Extensions
 from PySide6.QtWidgets import QFileDialog, QMessageBox, QTextEdit
 from . import (
@@ -44,8 +45,9 @@ class FileMenuActionsShortcuts:
     EXIT: Final[str] = "Alt+F4"
 
 
-OPEN_HERE: Final[int] = 0
-OPEN_NEW_TAB: Final[int] = 1
+class OpenFileOptions(Enum):
+    HERE = 0
+    NEW_TAB = 1
 
 
 class FileMenu(QMenu):
@@ -169,7 +171,7 @@ class FileMenu(QMenu):
         if self._has_opened_a_file(file[0]):
             path = file[0]
             extension_detected = os.path.splitext(path)[1]
-            if extension_detected not in Extensions.get_available_extensions():
+            if extension_detected not in Extensions.get_extensions():
                 QMessageBox.critical(
                     self,
                     "Error",
@@ -179,26 +181,23 @@ class FileMenu(QMenu):
             from home import Home
 
             self._home: Home
-            content = self._get_file_selected_content(path)
-            option = self.place_to_set_content_option()
-            if option == OPEN_HERE:
-                current = self._home.get_tab()
-                current.setTabText(current.currentIndex(), os.path.basename(path))
-                current.widget(current.currentIndex()).setPlainText(content)
-            elif option == OPEN_NEW_TAB:
-                new_index = self._home.get_tab().addTab(
-                    QTextEdit(), os.path.basename(path)
-                )
-                self._home.get_tab().setCurrentIndex(new_index)
-            else:
-                return
+            tab_manager = self._home.tab_manager
+            match self.get_open_file_option():
+                case OpenFileOptions.HERE:
+                    tab_manager.change_current_tab_name(os.path.basename(path))
+                    tab_manager.set_content_to_current_tab(self._get_file_content(path))
+                case OpenFileOptions.NEW_TAB:
+                    tab_manager.add_new_tab("Nuevo Tab", self._get_file_content(path))
+                case _:
+                    print("the user doesn't want to open the file")
+                    return
 
-    def _get_file_selected_content(self, path: str) -> Optional[str]:
+    def _get_file_content(self, path: str) -> Optional[str]:
         with open(path, "r") as file:
             content = file.read()
             return content if len(content) > 0 else None
 
-    def place_to_set_content_option(self) -> int:
+    def get_open_file_option(self) -> OpenFileOptions:
         dlg = QMessageBox(self)
         dlg.setWindowTitle(coreapp.translate("file_menu", "Abrir Archivo"))
         dlg.setText(coreapp.translate("file_menu", "¿Dónde desea abrir el archivo?"))
@@ -213,22 +212,7 @@ class FileMenu(QMenu):
         )
         dlg.setIcon(QMessageBox.Question)
         option_selected = dlg.exec_()
-        return option_selected
-
-    def _set_content_on_open_file(self, content: str) -> None:
-        pass
-        # with open(path, "r") as file:
-        #     content = file.read()
-        #     if len(content) > 0:
-        #         from home import Home
-
-        #         self._home: Home
-        #         tab = self._home.get_tab()
-
-        #         if tab.is_default():
-        #             tab.set_content(content)
-        #             tab.change_tab_name(0, os.path.basename(path))
-        #     return
+        return OpenFileOptions.HERE if option_selected == 0 else OpenFileOptions.NEW_TAB
 
     def _has_opened_a_file(self, filepath: str) -> bool:
         return len(filepath) > 0

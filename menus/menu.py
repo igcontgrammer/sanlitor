@@ -1,15 +1,15 @@
 from PySide6.QtWidgets import QMainWindow
-from menus.file_menu import FileMenu
-from menus.edit_menu import EditMenu
-from menus.search_menu import SearchMenu
-from menus.view_menu import ViewMenu
-from menus.encoding_menu import EncodingMenu
-from menus.language_menu import LanguageMenu
-from menus.settings_menu import SettingsMenu
-from menus.plugins_menu import PluginsMenu
-from menus.terminal_menu import TerminalMenu
-from menus.help_menu import HelpMenu
-from menus.tools_menus import ToolsMenu
+from menus._file_menu import FileMenu
+from menus._edit_menu import EditMenu
+from menus._search_menu import SearchMenu
+from menus._view_menu import ViewMenu
+from menus._encoding_menu import EncodingMenu
+from menus._language_menu import LanguageMenu
+from menus._settings_menu import SettingsMenu
+from menus._plugins_menu import PluginsMenu
+from menus._terminal_menu import TerminalMenu
+from menus._help_menu import HelpMenu
+from menus._tools_menus import ToolsMenu
 
 
 class MenuBar(QMainWindow):

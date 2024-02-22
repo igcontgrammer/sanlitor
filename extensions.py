@@ -1,7 +1,5 @@
 from dataclasses import dataclass
-from typing import Tuple
-
-# TODO: en este commit vamos a trabajar en el reconocimiento de las extensiones del archivo abierto
+from typing import List
 
 
 @dataclass(frozen=True)
@@ -37,5 +35,9 @@ class Extensions:
     YAML: str = ".yaml"
 
     @staticmethod
-    def get_available_extensions() -> Tuple[str]:
-        return tuple(getattr(Extensions, field) for field in Extensions.__annotations__)
+    def get_extensions() -> List[str]:
+        return [
+            getattr(Extensions, attr)
+            for attr in dir(Extensions)
+            if not attr.startswith("__") and not callable(getattr(Extensions, attr))
+        ]

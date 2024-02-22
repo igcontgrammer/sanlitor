@@ -1,57 +1,66 @@
-from typing import Final
+from typing import Final, List
 from editor import Editor
 from PySide6.QtWidgets import QTabWidget
+from functools import partial
+
+_DEFAULT_TAB_NAME: Final[str] = "Untitled"
 
 
-class Tab(QTabWidget):
-    _DEFAULT_TAB_NAME: Final[str] = "Untitled"
-    _DEFAULT_TABS_COUNT: Final[int] = 1
+class TabManager(QTabWidget):
 
     def __init__(self):
         super().__init__()
         self._tab = QTabWidget()
         self._editor = Editor().get_editor
-        self.__configurate_default_tab()
+
+    # ************* getters *************
 
     def get_tab(self) -> QTabWidget:
         return self._tab
 
-    def build_default_tab(self) -> None:
-        self._tab.addTab(self._editor, self._DEFAULT_TAB_NAME)
-        self._tab.tabCloseRequested.connect(self._tab.removeTab)
-        self._tab.setTabsClosable(False)
+    def get_current_tab_index(self) -> int:
+        return self._tab.currentIndex()
 
-    def get_tab_name(self) -> str:
-        return self._tab.tabText(self.get_current_tab_index())
+    def _get_tabs_names(self) -> List[str]:
+        tabs_names = []
+        for index in range(self._tab.count()):
+            tabs_names.append(self._tab.tabText(index))
+        return tabs_names
 
     def get_tabs_count(self) -> int:
         return self._tab.count()
 
-    def has_tabs(self) -> bool:
-        return self._tab.count() > 0
+    # ************* setters *************
 
-    def is_default(self) -> bool:
-        return self._tab.count() == self._DEFAULT_TABS_COUNT
+    def set_content_to_current_tab(self, content: str) -> None:
+        self._tab.widget(self.get_current_tab_index()).setPlainText(content)
 
-    def change_tab_name(self, index: int, new_name: str) -> None:
-        self._tab.setTabText(index, new_name)
+    # ************* others *************
 
-    def add_new_tab(self, name: str) -> None:
-        self._tab.addTab(self._editor, name)
-
-    def set_content(self, content: str) -> None:
-        self._editor.setPlainText(content)
-
-    def get_current_tab_index(self) -> int:
-        return self._tab.currentIndex()
-
-    def set_current_tab(self, index: int) -> None:
-        self._tab.setCurrentIndex(index)
-
-    def __configurate_default_tab(self) -> None:
+    def build_default_tab(self) -> None:
+        self._tab.addTab(self._editor, _DEFAULT_TAB_NAME)
         self._tab.setTabsClosable(True)
-        self._tab.tabCloseRequested.connect(self.close_tab(index=1))
+        self._tab.tabCloseRequested.connect(self.on_tab_close_requested)
+
+    # TODO: trabajar en los estados de guardado
+    def on_tab_close_requested(self, index: int) -> None:
+        if self.get_tabs_count() > 1:
+            self._tab.removeTab(index)
+            return
+        self._tab.setTabText(index, _DEFAULT_TAB_NAME)
+        self._editor.clear()
+
+    def add_new_tab(self, tab_name: str, content: str) -> None:
+        new_index = self._tab.addTab(Editor().get_new_editor(), tab_name)
+        self._tab.setCurrentIndex(new_index)
+        self._tab.widget(new_index).setPlainText(content)
+        self._tab.tabCloseRequested.connect(self.on_tab_close_requested)
+
+    def tab_name_already_exists(self, tab_name: str) -> bool:
+        return tab_name in self._get_tabs_names()
+
+    def change_current_tab_name(self, name: str) -> None:
+        self._tab.setTabText(self.get_current_tab_index(), name)
 
     def close_tab(self, index: int) -> None:
-        print("Closing...")
         self._tab.removeTab(index)
