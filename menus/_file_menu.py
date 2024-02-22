@@ -1,9 +1,8 @@
 import os
-from dataclasses import dataclass
-from typing import Final, Optional
-from enum import Enum
+from typing import Optional
 from extensions import Extensions
-from PySide6.QtWidgets import QFileDialog, QMessageBox, QTextEdit
+from ._menus_constants import FileMenuShortcuts, FileMenuActionsNames, OpenFileOptions
+from PySide6.QtWidgets import QFileDialog, QMessageBox
 from . import (
     QMenu,
     QAction,
@@ -12,42 +11,6 @@ from . import (
     SectionsNames,
     QCoreApplication as coreapp,
 )
-
-
-@dataclass(frozen=True)
-class FileMenuActionsNames:
-    NEW: Final[str] = "New"
-    OPEN: Final[str] = "Open..."
-    OPEN_FOLDER: Final[str] = "Open Folder..."
-    RELOAD_FROM_DISK: Final[str] = "Reload from disk"
-    SAVE: Final[str] = "Save"
-    SAVE_AS: Final[str] = "Save As..."
-    SAVE_COPY_AS: Final[str] = "Save a Copy As..."
-    SAVE_ALL: Final[str] = "Save All"
-    RENAME: Final[str] = "Rename..."
-    CLOSE: Final[str] = "Close"
-    CLOSE_ALL: Final[str] = "Close All"
-    PRINT: Final[str] = "Print"
-    EXIT: Final[str] = "Exit"
-
-
-@dataclass(frozen=True)
-class FileMenuActionsShortcuts:
-    NEW: Final[str] = "Ctrl+N"
-    OPEN: Final[str] = "Ctrl+O"
-    OPEN_FOLDER: Final[str] = "Ctrl+Shift+O"
-    RELOAD_FROM_DISK: Final[str] = "Ctrl+R"
-    SAVE: Final[str] = "Ctrl+S"
-    SAVE_AS: Final[str] = "Ctrl+S"
-    SAVE_ALL: Final[str] = "Ctrl+Shift+S"
-    CLOSE: Final[str] = "Ctrl+W"
-    CLOSE_ALL: Final[str] = "Ctrl+Shift+W"
-    EXIT: Final[str] = "Alt+F4"
-
-
-class OpenFileOptions(Enum):
-    HERE = 0
-    NEW_TAB = 1
 
 
 class FileMenu(QMenu):
@@ -76,8 +39,8 @@ class FileMenu(QMenu):
         open_file_action = QAction(FileMenuActionsNames.OPEN, self)
         ActionHelper().config(
             action=open_file_action,
-            status_tip="Open a file",
-            shortcut=FileMenuActionsShortcuts.OPEN,
+            status_tip=coreapp.translate("file_menu", "Open a file"),
+            shortcut=FileMenuShortcuts.OPEN,
             method=self._open_file,
         )
         self._file_menu.addAction(open_file_action)
@@ -86,8 +49,8 @@ class FileMenu(QMenu):
         new_file_action = QAction(FileMenuActionsNames.NEW, self)
         ActionHelper().config(
             action=new_file_action,
-            status_tip="Create a new file",
-            shortcut=FileMenuActionsShortcuts.NEW,
+            status_tip=coreapp.translate("file_menu", "Create a new file"),
+            shortcut=FileMenuShortcuts.NEW,
             method=self._new_file,
         )
         self._file_menu.addAction(new_file_action)
@@ -96,8 +59,8 @@ class FileMenu(QMenu):
         save_file_action = QAction(FileMenuActionsNames.SAVE, self)
         ActionHelper().config(
             action=save_file_action,
-            status_tip="Save a file",
-            shortcut=FileMenuActionsShortcuts.SAVE,
+            status_tip=coreapp.translate("file_menu", "Save a file"),
+            shortcut=FileMenuShortcuts.SAVE,
             method=self._save_file,
         )
         self._file_menu.addAction(save_file_action)
@@ -106,8 +69,8 @@ class FileMenu(QMenu):
         save_as_action = QAction(FileMenuActionsNames.SAVE_AS, self)
         ActionHelper().config(
             action=save_as_action,
-            status_tip="Save a file as...",
-            shortcut=FileMenuActionsShortcuts.SAVE_AS,
+            status_tip=coreapp.translate("file_menu", "Save a file as..."),
+            shortcut=FileMenuShortcuts.SAVE_AS,
             method=self._save_file,
         )
         self._file_menu.addAction(save_as_action)
@@ -116,8 +79,8 @@ class FileMenu(QMenu):
         save_all_files_action = QAction(FileMenuActionsNames.SAVE_ALL, self)
         ActionHelper().config(
             action=save_all_files_action,
-            status_tip="Save all files",
-            shortcut=FileMenuActionsShortcuts.SAVE_ALL,
+            status_tip=coreapp.translate("file_menu", "Save all files"),
+            shortcut=FileMenuShortcuts.SAVE_ALL,
             method=self._save_all_files,
         )
         self._file_menu.addAction(save_all_files_action)
@@ -126,8 +89,8 @@ class FileMenu(QMenu):
         close_file_action = QAction(FileMenuActionsNames.CLOSE, self)
         ActionHelper().config(
             action=close_file_action,
-            status_tip="Close a file",
-            shortcut=FileMenuActionsShortcuts.CLOSE,
+            status_tip=coreapp.translate("file_menu", "Close a file"),
+            shortcut=FileMenuShortcuts.CLOSE,
             method=self._edit_file,
         )
         self._file_menu.addAction(close_file_action)
@@ -136,8 +99,8 @@ class FileMenu(QMenu):
         close_all_files_action = QAction(FileMenuActionsNames.CLOSE_ALL, self)
         ActionHelper().config(
             action=close_all_files_action,
-            status_tip="Close all files",
-            shortcut=FileMenuActionsShortcuts.CLOSE_ALL,
+            status_tip=coreapp.translate("file_menu", "Close all files"),
+            shortcut=FileMenuShortcuts.CLOSE_ALL,
             method=self._edit_file,
         )
         self._file_menu.addAction(close_all_files_action)
@@ -146,7 +109,7 @@ class FileMenu(QMenu):
         print_action = QAction(FileMenuActionsNames.PRINT, self)
         ActionHelper().config(
             action=print_action,
-            status_tip="Print a file",
+            status_tip=coreapp.translate("file_menu", "Print a file"),
             shortcut="",
             method=self._print_file,
         )
@@ -156,8 +119,8 @@ class FileMenu(QMenu):
         exit_action = QAction(FileMenuActionsNames.EXIT, self)
         ActionHelper().config(
             action=exit_action,
-            status_tip="Exit the application",
-            shortcut=FileMenuActionsShortcuts.EXIT,
+            status_tip=coreapp.translate("file_menu", "Exit the application"),
+            shortcut=FileMenuShortcuts.EXIT,
             method=self._exit_application,
         )
         self._file_menu.addAction(exit_action)
@@ -182,12 +145,18 @@ class FileMenu(QMenu):
 
             self._home: Home
             tab_manager = self._home.tab_manager
+            file_name = os.path.basename(path)
             match self.get_open_file_option():
                 case OpenFileOptions.HERE:
-                    tab_manager.change_current_tab_name(os.path.basename(path))
+                    tab_manager.change_current_tab_name(file_name)
                     tab_manager.set_content_to_current_tab(self._get_file_content(path))
+                    tab_manager.add_to_loaded_files(file_name)
                 case OpenFileOptions.NEW_TAB:
-                    tab_manager.add_new_tab("Nuevo Tab", self._get_file_content(path))
+                    if file_name in tab_manager.loaded_files:
+                        # TODO: if already exists, change the file name
+                        return
+                    tab_manager.add_new_tab(file_name, self._get_file_content(path))
+                    tab_manager.add_to_loaded_files(file_name)
                 case _:
                     print("the user doesn't want to open the file")
                     return
@@ -198,20 +167,20 @@ class FileMenu(QMenu):
             return content if len(content) > 0 else None
 
     def get_open_file_option(self) -> OpenFileOptions:
-        dlg = QMessageBox(self)
-        dlg.setWindowTitle(coreapp.translate("file_menu", "Abrir Archivo"))
-        dlg.setText(coreapp.translate("file_menu", "¿Dónde desea abrir el archivo?"))
-        dlg.setStandardButtons(QMessageBox.Cancel)
-        dlg.addButton(coreapp.translate("file_menu", "Aquí"), QMessageBox.AcceptRole)
-        dlg.addButton(
+        msg = QMessageBox(self)
+        msg.setWindowTitle(coreapp.translate("file_menu", "Abrir Archivo"))
+        msg.setText(coreapp.translate("file_menu", "¿Dónde desea abrir el archivo?"))
+        msg.setStandardButtons(QMessageBox.Cancel)
+        msg.addButton(coreapp.translate("file_menu", "Aquí"), QMessageBox.AcceptRole)
+        msg.addButton(
             coreapp.translate("file_menu", "En una nueva pestaña"),
             QMessageBox.AcceptRole,
         )
-        dlg.button(QMessageBox.Cancel).setText(
+        msg.button(QMessageBox.Cancel).setText(
             coreapp.translate("file_menu", "Cancelar")
         )
-        dlg.setIcon(QMessageBox.Question)
-        option_selected = dlg.exec_()
+        msg.setIcon(QMessageBox.Question)
+        option_selected = msg.exec_()
         return OpenFileOptions.HERE if option_selected == 0 else OpenFileOptions.NEW_TAB
 
     def _has_opened_a_file(self, filepath: str) -> bool:

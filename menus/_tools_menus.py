@@ -1,11 +1,5 @@
-from dataclasses import dataclass
+from ._menus_constants import ToolsMenuActionsNames
 from . import QMenu, QAction, Slot, ActionHelper, SectionsNames
-
-
-@dataclass(frozen=True)
-class ToolsMenuActionsNames:
-    BASE_64_ENCODE: str = "Base 64 Encode"
-    BASE_64_DECODE: str = "Base 64 Decode"
 
 
 class ToolsMenu(QMenu):

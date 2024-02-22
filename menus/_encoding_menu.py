@@ -1,14 +1,5 @@
-from dataclasses import dataclass
-from typing import Final
+from ._menus_constants import EncodingMenuActionsNames
 from . import QMenu, QAction, Slot, ActionHelper, SectionsNames
-
-
-@dataclass(frozen=True)
-class EncodingMenuActionsNames:
-    ANSI: Final[str] = "ANSI"
-    UTF_8: Final[str] = "UTF-8"
-    CONVERT_TO_ANSI: Final[str] = "Convert to ANSI"
-    CONVERT_TO_UTF_8: Final[str] = "Convert to UTF-8"
 
 
 class EncodingMenu(QMenu):

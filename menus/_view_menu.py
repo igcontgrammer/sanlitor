@@ -1,30 +1,5 @@
-from dataclasses import dataclass
-from typing import Final
+from ._menus_constants import ViewMenuActionsNames, ViewMenuShortcuts
 from . import QMenu, QAction, Slot, ActionHelper, SectionsNames
-
-
-@dataclass(frozen=True)
-class ViewMenuActionsNames:
-    TOGGLE_FULL_SCREEN: Final[str] = "Toggle full screen"
-    DISTRACTION_FREE_MODE: Final[str] = "Distraction free mode"
-    ZOOM: Final[str] = "Zoom"
-    ZOOM_IN: Final[str] = "Zoom in"
-    ZOOM_OUT: Final[str] = "Zoom out"
-    MOVE_CLONE_CURRENT_DOCUMENT: Final[str] = "Move/clone current document"
-    TAB: Final[str] = "Tab"
-    SUMMARY: Final[str] = "Summary"
-    PROJECT_PANELS: Final[str] = "Project panel"
-    FOLDER_AS_WORKSPACE: Final[str] = "Folder as workspace"
-    DOCUMENT_MAP: Final[str] = "Document Map"
-    DOCUMENT_LIST: Final[str] = "Document List"
-    FUNCTION_LIST: Final[str] = "Function List"
-
-
-@dataclass(frozen=True)
-class ViewMenuShortcuts:
-    TOGGLE_FULL_SCREEN: Final[str] = "F11"
-    ZOOM_IN: Final[str] = "Ctrl++"
-    ZOOM_OUT: Final[str] = "Ctrl+-"
 
 
 class ViewMenu(QMenu):

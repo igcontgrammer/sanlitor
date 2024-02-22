@@ -1,22 +1,5 @@
-from dataclasses import dataclass
-from typing import Final
+from ._menus_constants import SearchMenuActionsNames, SearchMenuShortcuts
 from . import QMenu, QAction, Slot, ActionHelper, SectionsNames
-
-
-@dataclass(frozen=True)
-class SearchMenuActionsNames:
-    SEARCH: Final[str] = "Search"
-    SEARCH_IN_FILES: Final[str] = "Search in files"
-    NEXT: Final[str] = "Search Next"
-    BACK: Final[str] = "Search Back"
-
-
-@dataclass(frozen=True)
-class SearchMenuShortcuts:
-    SEARCH: Final[str] = "Ctrl+F"
-    SEARCH_IN_FILES: Final[str] = "Ctrl+Shift+F"
-    NEXT: Final[str] = "F3"
-    BACK: Final[str] = "Shift+F3"
 
 
 class SearchMenu(QMenu):

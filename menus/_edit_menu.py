@@ -1,26 +1,5 @@
-from dataclasses import dataclass
-from typing import Final
+from ._menus_constants import EditMenuActionsNames, EditMenuShortcuts
 from . import QMenu, QAction, Slot, ActionHelper, SectionsNames
-
-
-@dataclass(frozen=True)
-class EditMenuActionsNames:
-    UNDO: Final[str] = "Undo"
-    REDO: Final[str] = "Redo"
-    CUT: Final[str] = "Cut"
-    COPY: Final[str] = "Copy"
-    PASTE: Final[str] = "Paste"
-    SELECT_ALL: Final[str] = "Select All"
-
-
-@dataclass(frozen=True)
-class EditMenuShortcuts:
-    UNDO: Final[str] = "Ctrl+Z"
-    REDO: Final[str] = "Ctrl+Shift+Z"
-    CUT: Final[str] = "Ctrl+X"
-    COPY: Final[str] = "Ctrl+C"
-    PASTE: Final[str] = "Ctrl+V"
-    SELECT_ALL: Final[str] = "Ctrl+A"
 
 
 class EditMenu(QMenu):

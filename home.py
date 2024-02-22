@@ -3,7 +3,7 @@ from PySide6.QtWidgets import QMainWindow
 from menus.menu import MenuBar
 from toolbar import ToolBar
 from statusbar import StatusBar
-from tab import TabManager
+from tab_manager import TabManager
 
 
 _MAIN_WINDOW_TITLE: Final[str] = "Sanlitor"
