@@ -1,8 +1,9 @@
 import os
-from typing import Optional
 from extensions import Extensions
 from ._menus_constants import FileMenuShortcuts, FileMenuActionsNames, OpenFileOptions
 from PySide6.QtWidgets import QFileDialog, QMessageBox
+from ._menus_constants import MessageTypes
+from .components.messages import Messages
 from . import (
     QMenu,
     QAction,
@@ -134,12 +135,14 @@ class FileMenu(QMenu):
         if self._has_opened_a_file(file[0]):
             path = file[0]
             extension_detected = os.path.splitext(path)[1]
-            if extension_detected not in Extensions.get_extensions():
-                QMessageBox.critical(
-                    self,
-                    "Error",
-                    coreapp.translate("file_menu", "Extensión no permitida."),
+            if extension_detected not in Extensions.available_extensions():
+                msg = Messages(
+                    parent=self,
+                    context="file_menu",
+                    message="Extensión no permitida",
+                    type=MessageTypes.CRITICAL,
                 )
+                msg.show()
                 return
             from home import Home
 
@@ -153,18 +156,22 @@ class FileMenu(QMenu):
                     tab_manager.add_to_loaded_files(file_name)
                 case OpenFileOptions.NEW_TAB:
                     if file_name in tab_manager.loaded_files:
-                        # TODO: if already exists, change the file name
+                        tab_manager.move_to_opened_tab(file_name)
+                        # TODO: si el archivo ya está en los tabs, simplemente se cambia el focus. Se aplica un setCurrentIndex al current tab
                         return
                     tab_manager.add_new_tab(file_name, self._get_file_content(path))
                     tab_manager.add_to_loaded_files(file_name)
                 case _:
-                    print("the user doesn't want to open the file")
-                    return
+                    # TODO: mostrar un dialog de error de sistema?
+                    print("error")
 
-    def _get_file_content(self, path: str) -> Optional[str]:
-        with open(path, "r") as file:
-            content = file.read()
-            return content if len(content) > 0 else None
+    def _get_file_content(self, path: str) -> str:
+        try:
+            with open(path, "r") as file:
+                return file.read()
+        except Exception as e:
+            print(f"exception at get_file_content: {e}")
+            return ""
 
     def get_open_file_option(self) -> OpenFileOptions:
         msg = QMessageBox(self)
@@ -182,6 +189,9 @@ class FileMenu(QMenu):
         msg.setIcon(QMessageBox.Question)
         option_selected = msg.exec_()
         return OpenFileOptions.HERE if option_selected == 0 else OpenFileOptions.NEW_TAB
+
+    def get_file_already_exists_message(self) -> None:
+        print("Hola Mundo")
 
     def _has_opened_a_file(self, filepath: str) -> bool:
         return len(filepath) > 0

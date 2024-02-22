@@ -1,6 +1,15 @@
 from dataclasses import dataclass
 from typing import Final
-from enum import Enum
+from enum import Enum, auto
+
+# ************* MESSAGE TYPES *************
+
+
+class MessageTypes(Enum):
+    QUESTION = auto()
+    WARNING = auto()
+    CRITICAL = auto()
+
 
 # ************* FILE MENU *************
 
@@ -179,5 +188,6 @@ class HelpMenuActionsNames:
     CHECK_FOR_UPDATES: str = "Check for updates..."
 
 
+@dataclass(frozen=True)
 class HelpMenuShortcuts:
     SHOW_ALL_COMMANDS: str = "Ctrl+Shift+P"

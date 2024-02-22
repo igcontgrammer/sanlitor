@@ -35,7 +35,7 @@ class Extensions:
     YAML: str = ".yaml"
 
     @staticmethod
-    def get_extensions() -> List[str]:
+    def available_extensions() -> List[str]:
         return [
             getattr(Extensions, attr)
             for attr in dir(Extensions)

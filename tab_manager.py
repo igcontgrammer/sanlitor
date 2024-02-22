@@ -15,21 +15,24 @@ class TabManager(QTabWidget):
 
     # ************* getters *************
 
+    def get_tab(self) -> QTabWidget:
+        return self._tab
+
     @property
     def loaded_files(self) -> List[str]:
         return self._loaded_files
 
-    def get_tab(self) -> QTabWidget:
-        return self._tab
-
     def get_current_tab_index(self) -> int:
         return self._tab.currentIndex()
 
-    def _get_tabs_names(self) -> List[str]:
-        return [self._tab.tabText(index) for index in range(self._tab.count())]
-
     def get_tabs_count(self) -> int:
         return self._tab.count()
+
+    def move_to_opened_tab(self, name: str):
+        for i in range(self._tab.count()):
+            tab_name = self._tab.tabText(i)
+            if tab_name == name:
+                self._tab.setCurrentIndex(i)
 
     # ************* setters *************
 
@@ -60,11 +63,5 @@ class TabManager(QTabWidget):
         self._tab.setTabText(index, _DEFAULT_TAB_NAME)
         self._editor.clear()
 
-    # def file_was_loaded(self, file_name: str) -> bool:
-    #     return file_name in self._loaded_files
-
     def change_current_tab_name(self, name: str) -> None:
         self._tab.setTabText(self.get_current_tab_index(), name)
-
-    def close_tab(self, index: int) -> None:
-        self._tab.removeTab(index)
