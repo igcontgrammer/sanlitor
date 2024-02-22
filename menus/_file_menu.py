@@ -3,7 +3,7 @@ from extensions import Extensions
 from ._menus_constants import FileMenuShortcuts, FileMenuActionsNames, OpenFileOptions
 from PySide6.QtWidgets import QFileDialog, QMessageBox
 from ._menus_constants import MessageTypes
-from .components.messages import Messages
+from ._components.messages import Messages
 from . import (
     QMenu,
     QAction,
