@@ -23,6 +23,10 @@ class TabManager(QTabWidget):
     def get_loaded_files(self) -> List[str]:
         return list(set(self._loaded_files))
 
+    def file_was_opened(self, filename: str) -> bool:
+        print(f"loaded files: {self.get_loaded_files()}")
+        return filename in self.get_loaded_files()
+
     def get_current_tab_index(self) -> int:
         return self._tab.currentIndex()
 
@@ -36,7 +40,7 @@ class TabManager(QTabWidget):
 
     # ************* others *************
 
-    def move_to_tab(self, filename: str):
+    def move(self, filename: str):
         for i in range(self._tab.count()):
             tab_name = self._tab.tabText(i)
             if tab_name == filename:
@@ -62,6 +66,9 @@ class TabManager(QTabWidget):
 
     # TODO: trabajar en los estados de guardado
     def on_tab_close_requested(self, index: int) -> None:
+        filename = self._tab.tabText(index)
+        if filename in self._loaded_files:
+            self._loaded_files.remove(filename)
         if self.get_tabs_count() > 1:
             self._tab.removeTab(index)
             return

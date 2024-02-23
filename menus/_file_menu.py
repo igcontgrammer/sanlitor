@@ -154,8 +154,8 @@ class FileMenu(QMenu):
         self._home: Home
         tab_manager = self._home.tab_manager
         filename = os.path.basename(path)
-        if filename in tab_manager.get_loaded_files():
-            tab_manager.move_to_tab(filename)
+        if tab_manager.file_was_opened(filename):
+            tab_manager.move(filename)
             return
         try:
             match self.get_open_file_option():
