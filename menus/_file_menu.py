@@ -18,13 +18,13 @@ class FileMenu(QMenu):
 
     def __init__(self, home):
         super().__init__()
-        self._file_menu = QMenu(SectionsNames.FILE)
+        self._menu = QMenu(SectionsNames.FILE)
         self._home = home
         self._create_actions()
 
     @property
     def menu(self) -> QMenu:
-        return self._file_menu
+        return self._menu
 
     def _create_actions(self) -> None:
         self._open_file_action()
@@ -45,7 +45,7 @@ class FileMenu(QMenu):
             shortcut=FileMenuShortcuts.OPEN,
             method=self._open_file,
         )
-        self._file_menu.addAction(open_file_action)
+        self._menu.addAction(open_file_action)
 
     def _new_file_action(self) -> None:
         new_file_action = QAction(FileMenuActionsNames.NEW, self)
@@ -55,7 +55,7 @@ class FileMenu(QMenu):
             shortcut=FileMenuShortcuts.NEW,
             method=self._new_file,
         )
-        self._file_menu.addAction(new_file_action)
+        self._menu.addAction(new_file_action)
 
     def _save_file_action(self) -> None:
         save_file_action = QAction(FileMenuActionsNames.SAVE, self)
@@ -65,7 +65,7 @@ class FileMenu(QMenu):
             shortcut=FileMenuShortcuts.SAVE,
             method=self._save_file,
         )
-        self._file_menu.addAction(save_file_action)
+        self._menu.addAction(save_file_action)
 
     def _save_as_action(self) -> None:
         save_as_action = QAction(FileMenuActionsNames.SAVE_AS, self)
@@ -75,7 +75,7 @@ class FileMenu(QMenu):
             shortcut=FileMenuShortcuts.SAVE_AS,
             method=self._save_file,
         )
-        self._file_menu.addAction(save_as_action)
+        self._menu.addAction(save_as_action)
 
     def _save_all_files_action(self) -> None:
         save_all_files_action = QAction(FileMenuActionsNames.SAVE_ALL, self)
@@ -85,7 +85,7 @@ class FileMenu(QMenu):
             shortcut=FileMenuShortcuts.SAVE_ALL,
             method=self._save_all_files,
         )
-        self._file_menu.addAction(save_all_files_action)
+        self._menu.addAction(save_all_files_action)
 
     def _close_file_action(self) -> None:
         close_file_action = QAction(FileMenuActionsNames.CLOSE, self)
@@ -95,7 +95,7 @@ class FileMenu(QMenu):
             shortcut=FileMenuShortcuts.CLOSE,
             method=self._edit_file,
         )
-        self._file_menu.addAction(close_file_action)
+        self._menu.addAction(close_file_action)
 
     def _close_all_files_action(self) -> None:
         close_all_files_action = QAction(FileMenuActionsNames.CLOSE_ALL, self)
@@ -105,7 +105,7 @@ class FileMenu(QMenu):
             shortcut=FileMenuShortcuts.CLOSE_ALL,
             method=self._edit_file,
         )
-        self._file_menu.addAction(close_all_files_action)
+        self._menu.addAction(close_all_files_action)
 
     def _print_action(self) -> None:
         print_action = QAction(FileMenuActionsNames.PRINT, self)
@@ -115,7 +115,7 @@ class FileMenu(QMenu):
             shortcut="",
             method=self._print_file,
         )
-        self._file_menu.addAction(print_action)
+        self._menu.addAction(print_action)
 
     def _exit_action(self) -> None:
         exit_action = QAction(FileMenuActionsNames.EXIT, self)
@@ -125,7 +125,7 @@ class FileMenu(QMenu):
             shortcut=FileMenuShortcuts.EXIT,
             method=self._exit_application,
         )
-        self._file_menu.addAction(exit_action)
+        self._menu.addAction(exit_action)
 
     # ************* SLOTS *************
 
@@ -158,9 +158,9 @@ class FileMenu(QMenu):
             tab_manager.move(filename)
             return
         try:
-            match self.get_open_file_option():
+            match self._get_open_file_option():
                 case OpenFileOptions.HERE:
-                    # TODO: get to know if file has changes. If it's true, then show a message dialog,to confirm the save or overwritring
+                    # TODO: get to know if file has changes. If it's true, then show a message dialog
                     tab_manager.change_current_tab_name(filename)
                     tab_manager.set_content_to_current_tab(
                         self.get_content_from_file(path)
@@ -170,11 +170,11 @@ class FileMenu(QMenu):
                     tab_manager.add_new_tab(filename, self.get_content_from_file(path))
                     tab_manager.add_to_loaded_files(filename)
         except Exception as e:
-            error_message = f"An error ocurred: {e.__class__.__name__}: {e}"
+            error_message = f"An error ocurred at: {e.__class__.__name__}: {e}"
             print(error_message)
             Messages.system_error(parent=self)
 
-    def get_open_file_option(self) -> OpenFileOptions:
+    def _get_open_file_option(self) -> OpenFileOptions:
         msg = QMessageBox(self)
         msg.setWindowTitle(coreapp.translate("file_menu", "Abrir Archivo"))
         msg.setText(coreapp.translate("file_menu", "¿Dónde desea abrir el archivo?"))

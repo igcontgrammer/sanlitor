@@ -135,12 +135,12 @@ class EncodingMenuActionsNames:
 
 @dataclass(frozen=True)
 class SettingsMenuActionsNames:
-    PREFERENCES: str = "Preferences..."
-    STYLE_CONFIGURATOR: str = "Style Configurator"
-    SHORTCUT_MANAGER: str = "Shortcut Manager"
-    IMPORT: str = "Import"
-    PLUGIN: str = "Plugin"
-    STYLE_THEME: str = "Add Style Theme"
+    PREFERENCES: Final[str] = "Preferences..."
+    STYLE_CONFIGURATOR: Final[str] = "Style Configurator"
+    SHORTCUT_MANAGER: Final[str] = "Shortcut Manager"
+    IMPORT: Final[str] = "Import"
+    PLUGIN: Final[str] = "Plugin"
+    STYLE_THEME: Final[str] = "Add Style Theme"
 
 
 # ************* TOOLS MENU *************
@@ -148,8 +148,8 @@ class SettingsMenuActionsNames:
 
 @dataclass(frozen=True)
 class ToolsMenuActionsNames:
-    BASE_64_ENCODE: str = "Base 64 Encode"
-    BASE_64_DECODE: str = "Base 64 Decode"
+    BASE_64_ENCODE: Final[str] = "Base 64 Encode"
+    BASE_64_DECODE: Final[str] = "Base 64 Decode"
 
 
 # ************* PLUGINS MENU *************
@@ -157,8 +157,8 @@ class ToolsMenuActionsNames:
 
 @dataclass(frozen=True)
 class PluginsMenuActionsNames:
-    PLUGIN_MANAGER: str = "Plugins Manager"
-    OPEN_PLUGINS_FOLDER: str = "Open Plugins Folder"
+    PLUGIN_MANAGER: Final[str] = "Plugins Manager"
+    OPEN_PLUGINS_FOLDER: Final[str] = "Open Plugins Folder"
 
 
 # ************* TERMINAL MENU *************
@@ -166,14 +166,14 @@ class PluginsMenuActionsNames:
 
 @dataclass(frozen=True)
 class TerminalMenuActionsNames:
-    NEW_TERMINAL: str = "New Terminal"
-    SPLIT_TERMINAL: str = "Split Terminal"
+    NEW_TERMINAL: Final[str] = "New Terminal"
+    SPLIT_TERMINAL: Final[str] = "Split Terminal"
 
 
 @dataclass(frozen=True)
 class TerminalMenuShortcuts:
-    NEW_TERMINAL: str = "Ctrl+Shift+T"
-    SPLIT_TERMINAL: str = "Ctrl+Shift+D"
+    NEW_TERMINAL: Final[str] = "Ctrl+Shift+T"
+    SPLIT_TERMINAL: Final[str] = "Ctrl+Shift+D"
 
 
 # ************* HELP MENU *************
@@ -181,13 +181,13 @@ class TerminalMenuShortcuts:
 
 @dataclass(frozen=True)
 class HelpMenuActionsNames:
-    SHOW_ALL_COMMANDS: str = "Show All Commands"
-    DOCUMENTATION: str = "Documentation"
-    TIPS_AND_TRICKS: str = "Tips and tricks"
-    REPORT_ISSUE: str = "Report Issue"
-    CHECK_FOR_UPDATES: str = "Check for updates..."
+    SHOW_ALL_COMMANDS: Final[str] = "Show All Commands"
+    DOCUMENTATION: Final[str] = "Documentation"
+    TIPS_AND_TRICKS: Final[str] = "Tips and tricks"
+    REPORT_ISSUE: Final[str] = "Report Issue"
+    CHECK_FOR_UPDATES: Final[str] = "Check for updates..."
 
 
 @dataclass(frozen=True)
 class HelpMenuShortcuts:
-    SHOW_ALL_COMMANDS: str = "Ctrl+Shift+P"
+    SHOW_ALL_COMMANDS: Final[str] = "Ctrl+Shift+P"

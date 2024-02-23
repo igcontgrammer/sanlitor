@@ -24,7 +24,6 @@ class TabManager(QTabWidget):
         return list(set(self._loaded_files))
 
     def file_was_opened(self, filename: str) -> bool:
-        print(f"loaded files: {self.get_loaded_files()}")
         return filename in self.get_loaded_files()
 
     def get_current_tab_index(self) -> int:

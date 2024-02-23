@@ -1,16 +1,17 @@
 from dataclasses import dataclass
+from typing import Final
 
 
 @dataclass(frozen=True)
 class SectionsNames:
-    FILE: str = "File"
-    EDIT: str = "Edit"
-    SEARCH: str = "Search"
-    VIEW: str = "View"
-    ENCODING: str = "Encoding"
-    LANGUAGE: str = "Language"
-    SETTINGS: str = "Settings"
-    TOOLS: str = "Tools"
-    PLUGINS: str = "Plugins"
-    TERMINAL: str = "Terminal"
-    HELP: str = "Help"
+    FILE: Final[str] = "File"
+    EDIT: Final[str] = "Edit"
+    SEARCH: Final[str] = "Search"
+    VIEW: Final[str] = "View"
+    ENCODING: Final[str] = "Encoding"
+    LANGUAGE: Final[str] = "Language"
+    SETTINGS: Final[str] = "Settings"
+    TOOLS: Final[str] = "Tools"
+    PLUGINS: Final[str] = "Plugins"
+    TERMINAL: Final[str] = "Terminal"
+    HELP: Final[str] = "Help"
