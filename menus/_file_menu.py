@@ -127,6 +127,8 @@ class FileMenu(QMenu):
         )
         self._file_menu.addAction(exit_action)
 
+    # ************* SLOTS *************
+
     @Slot()
     def _open_file(self) -> None:
         file = QFileDialog.getOpenFileName(
@@ -150,7 +152,7 @@ class FileMenu(QMenu):
         from home import Home
 
         self._home: Home
-        tab_manager = self._home.get_manager()
+        tab_manager = self._home.tab_manager
         filename = os.path.basename(path)
         if filename in tab_manager.get_loaded_files():
             tab_manager.move_to_tab(filename)
@@ -160,10 +162,12 @@ class FileMenu(QMenu):
                 case OpenFileOptions.HERE:
                     # TODO: get to know if file has changes. If it's true, then show a message dialog,to confirm the save or overwritring
                     tab_manager.change_current_tab_name(filename)
-                    tab_manager.set_content_to_current_tab(self._get_file_content(path))
+                    tab_manager.set_content_to_current_tab(
+                        self.get_content_from_file(path)
+                    )
                     tab_manager.add_to_loaded_files(filename)
                 case OpenFileOptions.NEW_TAB:
-                    tab_manager.add_new_tab(filename, self._get_file_content(path))
+                    tab_manager.add_new_tab(filename, self.get_content_from_file(path))
                     tab_manager.add_to_loaded_files(filename)
         except Exception as e:
             error_message = f"An error ocurred: {e.__class__.__name__}: {e}"
@@ -187,7 +191,7 @@ class FileMenu(QMenu):
         option_selected = msg.exec_()
         return OpenFileOptions.HERE if option_selected == 0 else OpenFileOptions.NEW_TAB
 
-    def _get_file_content(self, path: str) -> str:
+    def get_content_from_file(self, path: str) -> str:
         try:
             with open(path, "r") as file:
                 return file.read()

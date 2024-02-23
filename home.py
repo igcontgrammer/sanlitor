@@ -1,9 +1,9 @@
 from typing import Final
-from PySide6.QtWidgets import QMainWindow
 from menus.menu import MenuBar
 from toolbar import ToolBar
 from statusbar import StatusBar
 from tab_manager import TabManager
+from PySide6.QtWidgets import QMainWindow
 
 
 _MAIN_WINDOW_TITLE: Final[str] = "Sanlitor"
@@ -23,7 +23,8 @@ class Home(QMainWindow):
         self._tab_manager.build_default_tab()
         self.setCentralWidget(self._tab_manager.tab)
 
-    def get_manager(self) -> TabManager:
+    @property
+    def tab_manager(self) -> TabManager:
         return self._tab_manager
 
     def _set_menu(self) -> None:
