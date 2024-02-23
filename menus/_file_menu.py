@@ -163,11 +163,11 @@ class FileMenu(QMenu):
                     # TODO: get to know if file has changes. If it's true, then show a message dialog
                     tab_manager.change_current_tab_name(filename)
                     tab_manager.set_content_to_current_tab(
-                        self.get_content_from_file(path)
+                        self._get_content_from_file(path)
                     )
                     tab_manager.add_to_loaded_files(filename)
                 case OpenFileOptions.NEW_TAB:
-                    tab_manager.add_new_tab(filename, self.get_content_from_file(path))
+                    tab_manager.add_new_tab(filename, self._get_content_from_file(path))
                     tab_manager.add_to_loaded_files(filename)
         except Exception as e:
             error_message = f"An error ocurred at: {e.__class__.__name__}: {e}"
@@ -191,12 +191,13 @@ class FileMenu(QMenu):
         option_selected = msg.exec_()
         return OpenFileOptions.HERE if option_selected == 0 else OpenFileOptions.NEW_TAB
 
-    def get_content_from_file(self, path: str) -> str:
+    def _get_content_from_file(self, path: str) -> str:
         try:
             with open(path, "r") as file:
                 return file.read()
         except Exception as e:
-            print(f"exception at get_file_content: {e}")
+            error_message = f"Error found at: {e.__class__.__name__}. Message: {e}"
+            print(error_message)
             return ""
 
     def _has_opened_a_file(self, filepath: str) -> bool:
