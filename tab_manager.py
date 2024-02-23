@@ -16,7 +16,8 @@ class TabManager(QTabWidget):
 
     # ************* getters *************
 
-    def get_tab(self) -> QTabWidget:
+    @property
+    def tab(self) -> QTabWidget:
         return self._tab
 
     def get_loaded_files(self) -> List[str]:

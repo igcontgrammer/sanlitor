@@ -21,7 +21,7 @@ class Home(QMainWindow):
         self.__call_main_widgets()
         self._tab_manager = TabManager()
         self._tab_manager.build_default_tab()
-        self.setCentralWidget(self._tab_manager.get_tab())
+        self.setCentralWidget(self._tab_manager.tab)
 
     def get_manager(self) -> TabManager:
         return self._tab_manager
