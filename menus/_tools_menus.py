@@ -8,7 +8,8 @@ class ToolsMenu(QMenu):
         self._tools_menu = QMenu(SectionsNames.TOOLS)
         self._create_actions()
 
-    def get_menu(self) -> QMenu:
+    @property
+    def menu(self) -> QMenu:
         return self._tools_menu
 
     def _create_actions(self) -> None:

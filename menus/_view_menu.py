@@ -9,7 +9,8 @@ class ViewMenu(QMenu):
         self._view_menu = QMenu(SectionsNames.VIEW)
         self._create_actions()
 
-    def get_menu(self) -> QMenu:
+    @property
+    def menu(self) -> QMenu:
         return self._view_menu
 
     def _create_actions(self) -> None:

@@ -23,8 +23,7 @@ class Home(QMainWindow):
         self._tab_manager.build_default_tab()
         self.setCentralWidget(self._tab_manager.get_tab())
 
-    @property
-    def tab_manager(self) -> TabManager:
+    def get_manager(self) -> TabManager:
         return self._tab_manager
 
     def _set_menu(self) -> None:
@@ -36,11 +35,11 @@ class Home(QMainWindow):
 
     def _set_toolbar(self) -> None:
         self.toolbar = ToolBar()
-        self.addToolBar(self.toolbar.get_toolbar)
+        self.addToolBar(self.toolbar.get_toolbar())
 
     def _set_status_bar(self) -> None:
         self.statusbar = StatusBar()
-        self.setStatusBar(self.statusbar.get_status_bar)
+        self.setStatusBar(self.statusbar.get_status_bar())
 
     def __set_main_window_default_config(self) -> None:
         self.setWindowTitle(_MAIN_WINDOW_TITLE)

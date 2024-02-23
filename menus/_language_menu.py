@@ -14,7 +14,7 @@ class LanguageMenu(QMenu):
         self.__create_languages_actions()
 
     @property
-    def get_menu(self) -> QMenu:
+    def menu(self) -> QMenu:
         return self._language_menu
 
     _LANGUAGES_OPTIONS: Final[Dict[str, Tuple[str]]] = {

@@ -10,7 +10,8 @@ class EditMenu(QMenu):
         self._edit_menu = QMenu(SectionsNames.EDIT)
         self._create_actions()
 
-    def get_menu(self) -> QMenu:
+    @property
+    def menu(self) -> QMenu:
         return self._edit_menu
 
     def _create_actions(self) -> None:

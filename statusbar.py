@@ -7,7 +7,6 @@ class StatusBar(QStatusBar):
         self._status_bar = QStatusBar()
         self._set_default_settings()
 
-    @property
     def get_status_bar(self) -> QStatusBar:
         return self._status_bar
 

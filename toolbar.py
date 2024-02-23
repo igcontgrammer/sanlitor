@@ -24,7 +24,6 @@ class ToolBar(QToolBar):
         self._set_default_settings()
         self._set_actions()
 
-    @property
     def get_toolbar(self) -> QToolBar:
         return self._toolbar
 

@@ -22,7 +22,8 @@ class FileMenu(QMenu):
         self._home = home
         self._create_actions()
 
-    def get_menu(self) -> QMenu:
+    @property
+    def menu(self) -> QMenu:
         return self._file_menu
 
     def _create_actions(self) -> None:
@@ -128,50 +129,46 @@ class FileMenu(QMenu):
 
     @Slot()
     def _open_file(self) -> None:
-        home_dir = os.path.expanduser("~")
         file = QFileDialog.getOpenFileName(
-            self, coreapp.translate("file_menu", "Abrir archivo"), dir=home_dir
+            self,
+            coreapp.translate("file_menu", "Abrir archivo"),
+            dir=os.path.expanduser("~"),
         )
-        if self._has_opened_a_file(file[0]):
-            path = file[0]
-            extension_detected = os.path.splitext(path)[1]
-            if extension_detected not in Extensions.available_extensions():
-                msg = Messages(
-                    parent=self,
-                    context="file_menu",
-                    message="Extensión no permitida",
-                    type=MessageTypes.CRITICAL,
-                )
-                msg.show()
-                return
-            from home import Home
+        if not self._has_opened_a_file(file[0]):
+            return None
+        path = file[0]
+        extension_detected = os.path.splitext(path)[1]
+        if extension_detected not in Extensions.available_extensions():
+            msg = Messages(
+                parent=self,
+                context="file_menu",
+                message="Extensión no permitida",
+                type=MessageTypes.CRITICAL,
+            )
+            msg.show()
+            return
+        from home import Home
 
-            self._home: Home
-            tab_manager = self._home.tab_manager
-            file_name = os.path.basename(path)
+        self._home: Home
+        tab_manager = self._home.get_manager()
+        filename = os.path.basename(path)
+        if filename in tab_manager.get_loaded_files():
+            tab_manager.move_to_tab(filename)
+            return
+        try:
             match self.get_open_file_option():
                 case OpenFileOptions.HERE:
-                    tab_manager.change_current_tab_name(file_name)
+                    # TODO: get to know if file has changes. If it's true, then show a message dialog,to confirm the save or overwritring
+                    tab_manager.change_current_tab_name(filename)
                     tab_manager.set_content_to_current_tab(self._get_file_content(path))
-                    tab_manager.add_to_loaded_files(file_name)
+                    tab_manager.add_to_loaded_files(filename)
                 case OpenFileOptions.NEW_TAB:
-                    if file_name in tab_manager.loaded_files:
-                        tab_manager.move_to_opened_tab(file_name)
-                        # TODO: si el archivo ya está en los tabs, simplemente se cambia el focus. Se aplica un setCurrentIndex al current tab
-                        return
-                    tab_manager.add_new_tab(file_name, self._get_file_content(path))
-                    tab_manager.add_to_loaded_files(file_name)
-                case _:
-                    # TODO: mostrar un dialog de error de sistema?
-                    print("error")
-
-    def _get_file_content(self, path: str) -> str:
-        try:
-            with open(path, "r") as file:
-                return file.read()
+                    tab_manager.add_new_tab(filename, self._get_file_content(path))
+                    tab_manager.add_to_loaded_files(filename)
         except Exception as e:
-            print(f"exception at get_file_content: {e}")
-            return ""
+            error_message = f"An error ocurred: {e.__class__.__name__}: {e}"
+            print(error_message)
+            Messages.system_error(parent=self)
 
     def get_open_file_option(self) -> OpenFileOptions:
         msg = QMessageBox(self)
@@ -190,8 +187,13 @@ class FileMenu(QMenu):
         option_selected = msg.exec_()
         return OpenFileOptions.HERE if option_selected == 0 else OpenFileOptions.NEW_TAB
 
-    def get_file_already_exists_message(self) -> None:
-        print("Hola Mundo")
+    def _get_file_content(self, path: str) -> str:
+        try:
+            with open(path, "r") as file:
+                return file.read()
+        except Exception as e:
+            print(f"exception at get_file_content: {e}")
+            return ""
 
     def _has_opened_a_file(self, filepath: str) -> bool:
         return len(filepath) > 0

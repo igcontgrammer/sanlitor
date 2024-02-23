@@ -1,6 +1,7 @@
 from typing import Final, List
 from editor import Editor
 from PySide6.QtWidgets import QTabWidget
+from PySide6.QtCore import QCoreApplication as coreapp
 
 _DEFAULT_TAB_NAME: Final[str] = "Untitled"
 
@@ -10,7 +11,7 @@ class TabManager(QTabWidget):
     def __init__(self):
         super().__init__()
         self._tab = QTabWidget()
-        self._editor = Editor().get_editor
+        self._editor = Editor().editor
         self._loaded_files: List[str] = []
 
     # ************* getters *************
@@ -18,21 +19,14 @@ class TabManager(QTabWidget):
     def get_tab(self) -> QTabWidget:
         return self._tab
 
-    @property
-    def loaded_files(self) -> List[str]:
-        return self._loaded_files
+    def get_loaded_files(self) -> List[str]:
+        return list(set(self._loaded_files))
 
     def get_current_tab_index(self) -> int:
         return self._tab.currentIndex()
 
     def get_tabs_count(self) -> int:
         return self._tab.count()
-
-    def move_to_opened_tab(self, name: str):
-        for i in range(self._tab.count()):
-            tab_name = self._tab.tabText(i)
-            if tab_name == name:
-                self._tab.setCurrentIndex(i)
 
     # ************* setters *************
 
@@ -41,8 +35,18 @@ class TabManager(QTabWidget):
 
     # ************* others *************
 
-    def add_to_loaded_files(self, file_name: str) -> None:
-        self._loaded_files.append(file_name)
+    def move_to_tab(self, filename: str):
+        for i in range(self._tab.count()):
+            tab_name = self._tab.tabText(i)
+            if tab_name == filename:
+                self._tab.setCurrentIndex(i)
+                break
+
+    def add_to_loaded_files(self, filename: str) -> None:
+        self._loaded_files.append(filename)
+
+    def remove_from_loaded_files(self, filename: str) -> None:
+        self._loaded_files.remove(filename)
 
     def build_default_tab(self) -> None:
         self._tab.addTab(self._editor, _DEFAULT_TAB_NAME)
@@ -60,7 +64,7 @@ class TabManager(QTabWidget):
         if self.get_tabs_count() > 1:
             self._tab.removeTab(index)
             return
-        self._tab.setTabText(index, _DEFAULT_TAB_NAME)
+        self._tab.setTabText(index, coreapp.translate("tab_manager", _DEFAULT_TAB_NAME))
         self._editor.clear()
 
     def change_current_tab_name(self, name: str) -> None:

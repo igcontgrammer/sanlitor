@@ -8,7 +8,8 @@ class HelpMenu(QMenu):
         self._help_menu = QMenu(SectionsNames.HELP)
         self._create_actions()
 
-    def get_menu(self) -> QMenu:
+    @property
+    def menu(self) -> QMenu:
         return self._help_menu
 
     def _create_actions(self) -> None:

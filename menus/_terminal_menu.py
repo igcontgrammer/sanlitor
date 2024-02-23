@@ -8,7 +8,8 @@ class TerminalMenu(QMenu):
         self._terminal_menu = QMenu(SectionsNames.TERMINAL)
         self._create_actions()
 
-    def get_menu(self) -> QMenu:
+    @property
+    def menu(self) -> QMenu:
         return self._terminal_menu
 
     def _create_actions(self) -> None:

@@ -10,7 +10,7 @@ class PluginsMenu(QMenu):
         self._create_actions()
 
     @property
-    def get_menu(self) -> QMenu:
+    def menu(self) -> QMenu:
         return self._plugin_menu
 
     def _create_actions(self) -> None:
