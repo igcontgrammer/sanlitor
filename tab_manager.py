@@ -69,7 +69,7 @@ class TabManager(QTabWidget):
         self._tab.widget(new_index).setPlainText(content)
         self._tab.tabCloseRequested.connect(self.on_close_tab)
 
-    # TODO: trabajar en los estados de guardado
+    # TODO: create the on save states
     def on_close_tab(self, index: int) -> None:
         if self.editor_has_changes:
             option = self.has_changes_selected_option()
