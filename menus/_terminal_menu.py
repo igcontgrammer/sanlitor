@@ -1,5 +1,6 @@
 from ._menus_constants import TerminalMenuActionsNames, TerminalMenuShortcuts
-from . import QMenu, QAction, Slot, ActionHelper, SectionsNames
+from . import QMenu, QAction, Slot, SectionsNames
+from common.config_action import config
 
 
 class TerminalMenu(QMenu):
@@ -18,7 +19,7 @@ class TerminalMenu(QMenu):
 
     def _add_new_terminal_action(self) -> None:
         new_terminal = QAction(TerminalMenuActionsNames.NEW_TERMINAL, self)
-        ActionHelper().config(
+        config(
             new_terminal,
             TerminalMenuShortcuts.NEW_TERMINAL,
             "",
@@ -28,7 +29,7 @@ class TerminalMenu(QMenu):
 
     def _split_terminal_action(self) -> None:
         split_terminal = QAction("Split Terminal", self)
-        ActionHelper().config(
+        config(
             split_terminal,
             TerminalMenuShortcuts.SPLIT_TERMINAL,
             "",

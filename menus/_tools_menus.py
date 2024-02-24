@@ -1,5 +1,6 @@
 from ._menus_constants import ToolsMenuActionsNames
-from . import QMenu, QAction, Slot, ActionHelper, SectionsNames
+from . import QMenu, QAction, Slot, SectionsNames
+from common.config_action import config
 
 
 class ToolsMenu(QMenu):
@@ -18,7 +19,7 @@ class ToolsMenu(QMenu):
 
     def _base_64_encode_action(self) -> None:
         base_64_encode = QAction(ToolsMenuActionsNames.BASE_64_ENCODE, self)
-        ActionHelper().config(
+        config(
             action=base_64_encode,
             shortcut="",
             status_tip="Base 64 Encode",
@@ -28,7 +29,7 @@ class ToolsMenu(QMenu):
 
     def _base_64_decode_action(self) -> None:
         base_64_decode = QAction(ToolsMenuActionsNames.BASE_64_DECODE, self)
-        ActionHelper().config(
+        config(
             action=base_64_decode,
             shortcut="",
             status_tip="Base 64 Decode",

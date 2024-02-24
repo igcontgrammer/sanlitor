@@ -1,3 +1,4 @@
+from enum import Enum, auto
 from typing import Final
 from menus.menu import MenuBar
 from toolbar import ToolBar
@@ -13,19 +14,30 @@ _MAIN_WINDOW_DEFAULT_HEIGHT: Final[int] = 600
 _MAIN_WINDOW_DEFAULT_WIDTH: Final[int] = 1000
 
 
+class ThemeMode(Enum):
+    LIGHT = auto
+    DARK = auto()
+
+
 class Home(QMainWindow):
 
     def __init__(self):
         super().__init__()
+        # for now is light by default
+        self._tab_manager = TabManager()
+        self._theme_mode = ThemeMode.LIGHT
         self.__set_main_window_default_config()
         self.__call_main_widgets()
-        self._tab_manager = TabManager()
         self._tab_manager.build_default_tab()
         self.setCentralWidget(self._tab_manager.tab)
 
     @property
     def tab_manager(self) -> TabManager:
         return self._tab_manager
+
+    @property
+    def theme_mode(self) -> ThemeMode:
+        return self._theme_mode
 
     def _set_menu(self) -> None:
         self.menu = MenuBar(home=self)

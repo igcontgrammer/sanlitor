@@ -1,5 +1,6 @@
 from ._menus_constants import SearchMenuActionsNames, SearchMenuShortcuts
-from . import QMenu, QAction, Slot, ActionHelper, SectionsNames
+from . import QMenu, QAction, Slot, SectionsNames
+from common.config_action import config
 
 
 class SearchMenu(QMenu):
@@ -21,7 +22,7 @@ class SearchMenu(QMenu):
 
     def _search_action(self) -> None:
         search_action = QAction(SearchMenuActionsNames.SEARCH, self)
-        ActionHelper().config(
+        config(
             action=search_action,
             shortcut=SearchMenuShortcuts.SEARCH,
             status_tip="Search",
@@ -31,7 +32,7 @@ class SearchMenu(QMenu):
 
     def _search_in_files_action(self) -> None:
         search_in_files_action = QAction(SearchMenuActionsNames.SEARCH_IN_FILES, self)
-        ActionHelper().config(
+        config(
             action=search_in_files_action,
             shortcut=SearchMenuShortcuts.SEARCH_IN_FILES,
             status_tip="Search in files",
@@ -41,7 +42,7 @@ class SearchMenu(QMenu):
 
     def _next_action(self) -> None:
         next_action = QAction(SearchMenuActionsNames.NEXT, self)
-        ActionHelper().config(
+        config(
             action=next_action,
             shortcut=SearchMenuShortcuts.NEXT,
             status_tip="Search Next",
@@ -51,7 +52,7 @@ class SearchMenu(QMenu):
 
     def _back_action(self) -> None:
         back_action = QAction(SearchMenuActionsNames.BACK, self)
-        ActionHelper().config(
+        config(
             action=back_action,
             shortcut=SearchMenuShortcuts.BACK,
             status_tip="Search Back",

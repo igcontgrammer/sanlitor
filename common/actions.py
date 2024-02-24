@@ -2,68 +2,65 @@ from PySide6.QtGui import QAction
 from PySide6.QtCore import Slot
 
 
-class CommonActions:
+def new_file() -> None:
+    pass
 
-    @staticmethod
-    def new_file() -> None:
-        pass
 
-    @staticmethod
-    def open_file() -> None:
-        pass
+def open_file() -> None:
+    pass
 
-    @staticmethod
-    def save_file() -> None:
-        pass
 
-    @staticmethod
-    def save_all() -> None:
-        pass
+def save_file() -> None:
+    pass
 
-    @staticmethod
-    def close() -> None:
-        pass
 
-    @staticmethod
-    def close_all() -> None:
-        pass
+def save_all() -> None:
+    pass
 
-    @staticmethod
-    def print() -> None:
-        pass
 
-    @staticmethod
-    def cut() -> None:
-        pass
+def close() -> None:
+    pass
 
-    @staticmethod
-    def copy() -> None:
-        pass
 
-    @staticmethod
-    def paste() -> None:
-        pass
+def close_all() -> None:
+    pass
 
-    @staticmethod
-    def undo() -> None:
-        pass
 
-    @staticmethod
-    def redo() -> None:
-        pass
+def print() -> None:
+    pass
 
-    @staticmethod
-    def find() -> None:
-        pass
 
-    @staticmethod
-    def replace() -> None:
-        pass
+def cut() -> None:
+    pass
 
-    @staticmethod
-    def zoom_in() -> None:
-        pass
 
-    @staticmethod
-    def zoom_out() -> None:
-        pass
+def copy() -> None:
+    pass
+
+
+def paste() -> None:
+    pass
+
+
+def undo() -> None:
+    pass
+
+
+def redo() -> None:
+    pass
+
+
+def find() -> None:
+    pass
+
+
+def replace() -> None:
+    pass
+
+
+def zoom_in() -> None:
+    pass
+
+
+def zoom_out() -> None:
+    pass

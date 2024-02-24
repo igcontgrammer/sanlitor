@@ -1,14 +1,14 @@
 import os
-from extensions import Extensions
 from ._menus_constants import FileMenuShortcuts, FileMenuActionsNames, OpenFileOptions
 from PySide6.QtWidgets import QFileDialog, QMessageBox
-from ._menus_constants import MessageTypes
-from ._components.messages import Messages
+from ._components.messages import Message
+from common.config_action import config
+from extensions import available_extensions
+
 from . import (
     QMenu,
     QAction,
     Slot,
-    ActionHelper,
     SectionsNames,
     QCoreApplication as coreapp,
 )
@@ -39,7 +39,7 @@ class FileMenu(QMenu):
 
     def _open_file_action(self) -> None:
         open_file_action = QAction(FileMenuActionsNames.OPEN, self)
-        ActionHelper().config(
+        config(
             action=open_file_action,
             status_tip=coreapp.translate("file_menu", "Open a file"),
             shortcut=FileMenuShortcuts.OPEN,
@@ -49,7 +49,7 @@ class FileMenu(QMenu):
 
     def _new_file_action(self) -> None:
         new_file_action = QAction(FileMenuActionsNames.NEW, self)
-        ActionHelper().config(
+        config(
             action=new_file_action,
             status_tip=coreapp.translate("file_menu", "Create a new file"),
             shortcut=FileMenuShortcuts.NEW,
@@ -59,7 +59,7 @@ class FileMenu(QMenu):
 
     def _save_file_action(self) -> None:
         save_file_action = QAction(FileMenuActionsNames.SAVE, self)
-        ActionHelper().config(
+        config(
             action=save_file_action,
             status_tip=coreapp.translate("file_menu", "Save a file"),
             shortcut=FileMenuShortcuts.SAVE,
@@ -69,7 +69,7 @@ class FileMenu(QMenu):
 
     def _save_as_action(self) -> None:
         save_as_action = QAction(FileMenuActionsNames.SAVE_AS, self)
-        ActionHelper().config(
+        config(
             action=save_as_action,
             status_tip=coreapp.translate("file_menu", "Save a file as..."),
             shortcut=FileMenuShortcuts.SAVE_AS,
@@ -79,7 +79,7 @@ class FileMenu(QMenu):
 
     def _save_all_files_action(self) -> None:
         save_all_files_action = QAction(FileMenuActionsNames.SAVE_ALL, self)
-        ActionHelper().config(
+        config(
             action=save_all_files_action,
             status_tip=coreapp.translate("file_menu", "Save all files"),
             shortcut=FileMenuShortcuts.SAVE_ALL,
@@ -89,7 +89,7 @@ class FileMenu(QMenu):
 
     def _close_file_action(self) -> None:
         close_file_action = QAction(FileMenuActionsNames.CLOSE, self)
-        ActionHelper().config(
+        config(
             action=close_file_action,
             status_tip=coreapp.translate("file_menu", "Close a file"),
             shortcut=FileMenuShortcuts.CLOSE,
@@ -99,7 +99,7 @@ class FileMenu(QMenu):
 
     def _close_all_files_action(self) -> None:
         close_all_files_action = QAction(FileMenuActionsNames.CLOSE_ALL, self)
-        ActionHelper().config(
+        config(
             action=close_all_files_action,
             status_tip=coreapp.translate("file_menu", "Close all files"),
             shortcut=FileMenuShortcuts.CLOSE_ALL,
@@ -109,7 +109,7 @@ class FileMenu(QMenu):
 
     def _print_action(self) -> None:
         print_action = QAction(FileMenuActionsNames.PRINT, self)
-        ActionHelper().config(
+        config(
             action=print_action,
             status_tip=coreapp.translate("file_menu", "Print a file"),
             shortcut="",
@@ -119,7 +119,7 @@ class FileMenu(QMenu):
 
     def _exit_action(self) -> None:
         exit_action = QAction(FileMenuActionsNames.EXIT, self)
-        ActionHelper().config(
+        config(
             action=exit_action,
             status_tip=coreapp.translate("file_menu", "Exit the application"),
             shortcut=FileMenuShortcuts.EXIT,
@@ -140,15 +140,8 @@ class FileMenu(QMenu):
             return None
         path = file[0]
         extension_detected = os.path.splitext(path)[1]
-        if extension_detected not in Extensions.available_extensions():
-            msg = Messages(
-                parent=self,
-                context="file_menu",
-                message="Extensión no permitida",
-                type=MessageTypes.CRITICAL,
-            )
-            msg.show()
-            return
+        if extension_detected not in available_extensions():
+            return None
         from home import Home
 
         self._home: Home
@@ -157,6 +150,26 @@ class FileMenu(QMenu):
         if tab_manager.file_was_opened(filename):
             tab_manager.move(filename)
             return
+        # if tab_manager.editor_has_changes:
+        #     mensaje = QMessageBox(self)
+        #     mensaje.setWindowTitle(coreapp.translate("file_menu", "Advertencia"))
+        #     mensaje.setText(
+        #         coreapp.translate(
+        #             "file_menu", "Este archivo contiene cambios. ¿Desea reemplazar?"
+        #         )
+        #     )
+        #     mensaje.setStandardButtons(QMessageBox.Cancel)
+        #     mensaje.addButton(
+        #         coreapp.translate("file_menu", "Reemplazar"), QMessageBox.AcceptRole
+        #     )
+        #     mensaje.button(QMessageBox.Cancel).setText(
+        #         coreapp.translate("file_menu", "Cancelar")
+        #     )
+        #     mensaje.setIcon(QMessageBox.Warning)
+        #     option_selected = mensaje.exec_()
+        #     print(
+        #         f"opcion seleccionada en caso de identificar cambios: {option_selected}"
+        #     )
         try:
             match self._get_open_file_option():
                 case OpenFileOptions.HERE:
@@ -172,7 +185,7 @@ class FileMenu(QMenu):
         except Exception as e:
             error_message = f"An error ocurred at: {e.__class__.__name__}: {e}"
             print(error_message)
-            Messages.system_error(parent=self)
+            Message.system_error(parent=self)
 
     def _get_open_file_option(self) -> OpenFileOptions:
         msg = QMessageBox(self)

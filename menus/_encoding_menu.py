@@ -1,5 +1,6 @@
 from ._menus_constants import EncodingMenuActionsNames
-from . import QMenu, QAction, Slot, ActionHelper, SectionsNames
+from . import QMenu, QAction, Slot, SectionsNames
+from common.config_action import config
 
 
 class EncodingMenu(QMenu):
@@ -22,7 +23,7 @@ class EncodingMenu(QMenu):
 
     def _set_ANSI_action(self) -> None:
         set_ansi_action = QAction(EncodingMenuActionsNames.ANSI, self)
-        ActionHelper().config(
+        config(
             action=set_ansi_action,
             status_tip="Set ANSI encoding",
             shortcut="",
@@ -32,7 +33,7 @@ class EncodingMenu(QMenu):
 
     def _set_UTF_8_action(self) -> None:
         set_UTF_8_action = QAction(EncodingMenuActionsNames.UTF_8, self)
-        ActionHelper().config(
+        config(
             action=set_UTF_8_action,
             status_tip="Set UTF-8 encoding",
             shortcut="",
@@ -42,7 +43,7 @@ class EncodingMenu(QMenu):
 
     def _convert_to_ANSI(self) -> None:
         convert_to_ANSI_action = QAction(EncodingMenuActionsNames.CONVERT_TO_ANSI, self)
-        ActionHelper().config(
+        config(
             action=convert_to_ANSI_action,
             status_tip="Convert to ANSI",
             shortcut="",
@@ -54,7 +55,7 @@ class EncodingMenu(QMenu):
         convert_to_UTF_8_action = QAction(
             EncodingMenuActionsNames.CONVERT_TO_UTF_8, self
         )
-        ActionHelper().config(
+        config(
             action=convert_to_UTF_8_action,
             status_tip="Convert to UTF-8",
             shortcut="",

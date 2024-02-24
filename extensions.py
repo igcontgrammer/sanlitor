@@ -2,6 +2,14 @@ from dataclasses import dataclass
 from typing import List
 
 
+def available_extensions() -> List[str]:
+    return [
+        getattr(Extensions, attr)
+        for attr in dir(Extensions)
+        if not attr.startswith("__") and not callable(getattr(Extensions, attr))
+    ]
+
+
 @dataclass(frozen=True)
 class Extensions:
     PLAIN_TEXT: str = ".txt"
@@ -33,11 +41,3 @@ class Extensions:
     TYPESCRIPT: str = ".ts"
     XML: str = ".xml"
     YAML: str = ".yaml"
-
-    @staticmethod
-    def available_extensions() -> List[str]:
-        return [
-            getattr(Extensions, attr)
-            for attr in dir(Extensions)
-            if not attr.startswith("__") and not callable(getattr(Extensions, attr))
-        ]

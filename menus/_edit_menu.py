@@ -1,9 +1,9 @@
 from ._menus_constants import EditMenuActionsNames, EditMenuShortcuts
-from . import QMenu, QAction, Slot, ActionHelper, SectionsNames
+from . import QMenu, QAction, Slot, SectionsNames
+from common.config_action import config
 
 
 class EditMenu(QMenu):
-    config_action = ActionHelper()
 
     def __init__(self):
         super().__init__()
@@ -24,7 +24,7 @@ class EditMenu(QMenu):
 
     def _undo_action(self) -> None:
         undo_action = QAction(EditMenuActionsNames.UNDO, self)
-        ActionHelper().config(
+        config(
             action=undo_action,
             shortcut=EditMenuShortcuts.UNDO,
             status_tip="Undo",
@@ -34,7 +34,7 @@ class EditMenu(QMenu):
 
     def _redo_action(self) -> None:
         redo_action = QAction(EditMenuActionsNames.REDO, self)
-        ActionHelper().config(
+        config(
             action=redo_action,
             shortcut=EditMenuShortcuts.REDO,
             status_tip="Redo",
@@ -44,7 +44,7 @@ class EditMenu(QMenu):
 
     def _cut_action(self) -> None:
         cut_action = QAction(EditMenuActionsNames.CUT, self)
-        ActionHelper().config(
+        config(
             action=cut_action,
             shortcut=EditMenuShortcuts.CUT,
             status_tip="Cut",
@@ -54,7 +54,7 @@ class EditMenu(QMenu):
 
     def _copy_action(self) -> None:
         copy_action = QAction(EditMenuActionsNames.COPY, self)
-        ActionHelper().config(
+        config(
             action=copy_action,
             shortcut=EditMenuShortcuts.COPY,
             status_tip="Copy",
@@ -64,7 +64,7 @@ class EditMenu(QMenu):
 
     def _paste_action(self) -> None:
         paste_action = QAction(EditMenuActionsNames.PASTE, self)
-        ActionHelper().config(
+        config(
             action=paste_action,
             shortcut=EditMenuShortcuts.PASTE,
             status_tip="Paste",
@@ -74,7 +74,7 @@ class EditMenu(QMenu):
 
     def _select_all_action(self) -> None:
         select_all_action = QAction(EditMenuActionsNames.SELECT_ALL, self)
-        ActionHelper().config(
+        config(
             action=select_all_action,
             shortcut=EditMenuShortcuts.SELECT_ALL,
             status_tip="Select All",

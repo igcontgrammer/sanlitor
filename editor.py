@@ -1,21 +1,52 @@
-from PySide6.QtWidgets import QTextEdit
+from PySide6.QtWidgets import QTextEdit, QScrollBar, QTabWidget, QStyle
+from PySide6.QtCore import Slot
 
 """
 TODO: aplicar los estados segun el usuario seleccione
 Apply Syntax Highlighting
 Fonts
 Colors
+Changes events
 """
 
 
-class Editor(QTextEdit):
+class EditorManager(QTextEdit):
     def __init__(self):
         super().__init__()
         self._editor = QTextEdit()
+        self._has_changes = False
+        self._scroll_bar = QScrollBar(self)
+        self._configurate()
+
+    # ************* GETTERS *************
 
     @property
     def editor(self) -> QTextEdit:
         return self._editor
 
+    @property
+    def has_changes(self) -> bool:
+        return self._has_changes
+
+    # ************* OTHERS *************
+
+    def _configurate(self) -> None:
+        self._editor.setUndoRedoEnabled(True)
+        self._editor.setAcceptRichText(True)
+        self._editor.setVerticalScrollBar(self._scroll_bar)
+        self._editor.textChanged.connect(self._on_change)
+
     def get_new_editor(self) -> QTextEdit:
         return QTextEdit()
+
+    @Slot()
+    def _on_change(self) -> None:
+        self._has_changes = True
+        tab = self._editor.parentWidget().parentWidget()
+        if isinstance(tab, QTabWidget):
+            # TODO: cambiar el color del icono a rojo. Si no hay cambios o se retrocede, vuelve al azul
+            # index = tab.currentIndex()
+            # save_icon = tab.style().standardIcon(QStyle.SP_FileDialogStart)
+            # tab.setTabIcon(index, save_icon)
+            # tab.setTabIcon(index, save_icon)
+            pass

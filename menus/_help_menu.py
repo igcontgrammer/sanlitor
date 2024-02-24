@@ -1,5 +1,6 @@
 from ._menus_constants import HelpMenuActionsNames, HelpMenuShortcuts
-from . import QMenu, QAction, Slot, ActionHelper, SectionsNames
+from . import QMenu, QAction, Slot, SectionsNames
+from common.config_action import config
 
 
 class HelpMenu(QMenu):
@@ -21,7 +22,7 @@ class HelpMenu(QMenu):
 
     def _show_all_commands_action(self) -> None:
         show_all_commands_action = QAction(HelpMenuActionsNames.SHOW_ALL_COMMANDS, self)
-        ActionHelper().config(
+        config(
             action=show_all_commands_action,
             status_tip="Show All Commands",
             shortcut=HelpMenuShortcuts.SHOW_ALL_COMMANDS,
@@ -31,7 +32,7 @@ class HelpMenu(QMenu):
 
     def _documentation_action(self) -> None:
         documentation_action = QAction(HelpMenuActionsNames.DOCUMENTATION, self)
-        ActionHelper().config(
+        config(
             action=documentation_action,
             status_tip="Documentation",
             shortcut="",
@@ -41,7 +42,7 @@ class HelpMenu(QMenu):
 
     def _tips_and_tricks_actions(self) -> None:
         tips_and_tricks_action = QAction(HelpMenuActionsNames.TIPS_AND_TRICKS, self)
-        ActionHelper().config(
+        config(
             action=tips_and_tricks_action,
             status_tip="Tips and tricks",
             shortcut="",
@@ -50,7 +51,7 @@ class HelpMenu(QMenu):
 
     def _report_issue_action(self) -> None:
         report_issue_action = QAction(HelpMenuActionsNames.REPORT_ISSUE, self)
-        ActionHelper().config(
+        config(
             action=report_issue_action,
             status_tip="Report an issue...",
             shortcut="",
@@ -59,7 +60,7 @@ class HelpMenu(QMenu):
 
     def _check_for_updates_action(self) -> None:
         check_for_update_action = QAction(HelpMenuActionsNames.CHECK_FOR_UPDATES, self)
-        ActionHelper().config(
+        config(
             action=check_for_update_action,
             status_tip="Check for updates...",
             shortcut="",

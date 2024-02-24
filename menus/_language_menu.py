@@ -1,6 +1,7 @@
 from typing import Final, Tuple, Dict
-from . import QMenu, QAction, Slot, ActionHelper, SectionsNames
+from . import QMenu, QAction, Slot, SectionsNames
 from common.languages import Languages
+from common.config_action import config
 from syntax import Syntax
 
 
@@ -79,7 +80,7 @@ class LanguageMenu(QMenu):
                 if action.text() == language_key:
                     for language in languages:
                         language_action = QAction(language, self)
-                        ActionHelper().config(
+                        config(
                             action=language_action,
                             shortcut="",
                             status_tip=f"Select {language} language",
@@ -89,7 +90,7 @@ class LanguageMenu(QMenu):
 
     def _get_xml_action(self) -> None:
         select_xml_action = QAction(Languages.XML, self)
-        ActionHelper().config(
+        config(
             action=select_xml_action,
             shortcut="",
             status_tip="Select XML language",
@@ -102,7 +103,7 @@ class LanguageMenu(QMenu):
 
     def _add_plain_text_action(self) -> None:
         select_plain_text_action = QAction(Languages.PLAIN_TEXT, self)
-        ActionHelper().config(
+        config(
             action=select_plain_text_action,
             shortcut="",
             status_tip="Select Plain Text language",
@@ -112,7 +113,7 @@ class LanguageMenu(QMenu):
 
     def _add_typescript_action(self) -> None:
         select_typescript_action = QAction(Languages.TYPESCRIPT, self)
-        ActionHelper().config(
+        config(
             action=select_typescript_action,
             shortcut="",
             status_tip="Select TypeScript language",
@@ -122,7 +123,7 @@ class LanguageMenu(QMenu):
 
     def _add_yaml_action(self) -> None:
         select_yaml_action = QAction(Languages.YAML, self)
-        ActionHelper().config(
+        config(
             action=select_yaml_action,
             shortcut="",
             status_tip="Select YAML language",
@@ -132,7 +133,7 @@ class LanguageMenu(QMenu):
 
     def _add_ocaml_action(self) -> None:
         select_ocaml_action = QAction(Languages.OCAML, self)
-        ActionHelper().config(
+        config(
             action=select_ocaml_action,
             shortcut="",
             status_tip="Select OCaml language",
@@ -145,7 +146,7 @@ class LanguageMenu(QMenu):
 
     def _get_assembly_action(self) -> QAction:
         set_assembly_action = QAction(Languages.ASSEMBLY, self)
-        ActionHelper().config(
+        config(
             action=set_assembly_action,
             shortcut="",
             status_tip="Select Assembly language",
@@ -155,7 +156,7 @@ class LanguageMenu(QMenu):
 
     def _get_c_action(self) -> QAction:
         set_c_action = QAction(Languages.C, self)
-        ActionHelper().config(
+        config(
             action=set_c_action,
             shortcut="",
             status_tip="Select C language",
@@ -165,7 +166,7 @@ class LanguageMenu(QMenu):
 
     def _get_c_plus_plus_action(self) -> QAction:
         set_c_plus_plus_action = QAction(Languages.C_PLUS_PLUS, self)
-        ActionHelper().config(
+        config(
             action=set_c_plus_plus_action,
             shortcut="",
             status_tip="Select C++ language",
@@ -175,7 +176,7 @@ class LanguageMenu(QMenu):
 
     def _get_c_sharp_action(self) -> QAction:
         set_c_sharp_action = QAction(Languages.C_SHARP, self)
-        ActionHelper().config(
+        config(
             action=set_c_sharp_action,
             shortcut="",
             status_tip="Select C# language",
@@ -185,7 +186,7 @@ class LanguageMenu(QMenu):
 
     def _get_css_action(self) -> QAction:
         set_css_action = QAction(Languages.CSS, self)
-        ActionHelper().config(
+        config(
             action=set_css_action,
             shortcut="",
             status_tip="Select CSS language",
@@ -195,7 +196,7 @@ class LanguageMenu(QMenu):
 
     def _get_java_action(self) -> QAction:
         set_java_action = QAction(Languages.JAVA, self)
-        ActionHelper().config(
+        config(
             action=set_java_action,
             shortcut="",
             status_tip="Select Java language",
@@ -205,7 +206,7 @@ class LanguageMenu(QMenu):
 
     def _get_js_action(self) -> QAction:
         set_js_action = QAction(Languages.JAVASCRIPT, self)
-        ActionHelper().config(
+        config(
             action=set_js_action,
             shortcut="",
             status_tip="Select JavaScript language",
@@ -215,7 +216,7 @@ class LanguageMenu(QMenu):
 
     def _get_json_action(self) -> QAction:
         set_json_action = QAction(Languages.JSON, self)
-        ActionHelper().config(
+        config(
             action=set_json_action,
             shortcut="",
             status_tip="Select JSON language",
@@ -225,7 +226,7 @@ class LanguageMenu(QMenu):
 
     def _get_lua_action(self) -> QAction:
         set_lua_action = QAction(Languages.LUA, self)
-        ActionHelper().config(
+        config(
             action=set_lua_action,
             shortcut="",
             status_tip="Select Lua language",
@@ -235,7 +236,7 @@ class LanguageMenu(QMenu):
 
     def _get_lisp_action(self) -> QAction:
         set_lisp_action = QAction(Languages.LISP, self)
-        ActionHelper().config(
+        config(
             action=set_lisp_action,
             shortcut="",
             status_tip="Select Lisp language",
@@ -245,7 +246,7 @@ class LanguageMenu(QMenu):
 
     def _get_elisp_action(self) -> QAction:
         set_elisp_action = QAction(Languages.EMACS_LISP, self)
-        ActionHelper().config(
+        config(
             action=set_elisp_action,
             shortcut="",
             status_tip="Select Emacs Lisp language",
@@ -255,7 +256,7 @@ class LanguageMenu(QMenu):
 
     def _add_html_action(self) -> None:
         set_html_action = QAction(Languages.HTML, self)
-        ActionHelper().config(
+        config(
             action=set_html_action,
             shortcut="",
             status_tip="Select HTML language",
@@ -265,7 +266,7 @@ class LanguageMenu(QMenu):
 
     def _get_markdown_action(self) -> QAction:
         set_markdown_action = QAction(Languages.MARKDOWN, self)
-        ActionHelper().config(
+        config(
             action=set_markdown_action,
             shortcut="",
             status_tip="Select Markdown language",
@@ -275,7 +276,7 @@ class LanguageMenu(QMenu):
 
     def _get_matlab_action(self) -> QAction:
         set_matlab_action = QAction(Languages.MATLAB, self)
-        ActionHelper().config(
+        config(
             action=set_matlab_action,
             shortcut="",
             status_tip="Select Matlab language",
@@ -285,7 +286,7 @@ class LanguageMenu(QMenu):
 
     def _get_php_action(self) -> QAction:
         set_php_action = QAction(Languages.PHP, self)
-        ActionHelper().config(
+        config(
             action=set_php_action,
             shortcut="",
             status_tip="Select PHP language",
@@ -295,7 +296,7 @@ class LanguageMenu(QMenu):
 
     def _get_python_action(self) -> QAction:
         set_python_action = QAction(Languages.PYTHON, self)
-        ActionHelper().config(
+        config(
             action=set_python_action,
             shortcut="",
             status_tip="Select Python language",
@@ -305,7 +306,7 @@ class LanguageMenu(QMenu):
 
     def _get_powershell_action(self) -> QAction:
         set_powershell_action = QAction(Languages.POWERSHELL, self)
-        ActionHelper().config(
+        config(
             action=set_powershell_action,
             shortcut="",
             status_tip="Select PowerShell language",
@@ -315,7 +316,7 @@ class LanguageMenu(QMenu):
 
     def _get_ruby_action(self) -> QAction:
         set_ruby_action = QAction(Languages.RUBY, self)
-        ActionHelper().config(
+        config(
             action=set_ruby_action,
             shortcut="",
             status_tip="Select Ruby language",
@@ -325,7 +326,7 @@ class LanguageMenu(QMenu):
 
     def _get_rust_action(self) -> QAction:
         set_rust_action = QAction(Languages.RUST, self)
-        ActionHelper().config(
+        config(
             action=set_rust_action,
             shortcut="",
             status_tip="Select Rust language",
@@ -335,7 +336,7 @@ class LanguageMenu(QMenu):
 
     def _get_r_action(self) -> QAction:
         set_r_action = QAction(Languages.R, self)
-        ActionHelper().config(
+        config(
             action=set_r_action,
             shortcut="",
             status_tip="Select R language",
@@ -345,7 +346,7 @@ class LanguageMenu(QMenu):
 
     def _get_sql_action(self) -> QAction:
         set_sql_action = QAction(Languages.SQL, self)
-        ActionHelper().config(
+        config(
             action=set_sql_action,
             shortcut="",
             status_tip="Select SQL language",
@@ -355,7 +356,7 @@ class LanguageMenu(QMenu):
 
     def _get_swift_action(self) -> QAction:
         set_swift_action = QAction(Languages.SWIFT, self)
-        ActionHelper().config(
+        config(
             action=set_swift_action,
             shortcut="",
             status_tip="Select Swift language",
@@ -365,7 +366,7 @@ class LanguageMenu(QMenu):
 
     def _get_shell_action(self) -> QAction:
         set_shell_action = QAction(Languages.SHELL, self)
-        ActionHelper().config(
+        config(
             action=set_shell_action,
             shortcut="",
             status_tip="Select Shell language",
@@ -375,7 +376,7 @@ class LanguageMenu(QMenu):
 
     def _get_scala_action(self) -> QAction:
         set_scala_action = QAction(Languages.SCALA, self)
-        ActionHelper().config(
+        config(
             action=set_scala_action,
             shortcut="",
             status_tip="Select Scala language",
@@ -385,7 +386,7 @@ class LanguageMenu(QMenu):
 
     def _get_typescript_action(self) -> QAction:
         set_typescript_action = QAction(Languages.TYPESCRIPT, self)
-        ActionHelper().config(
+        config(
             action=set_typescript_action,
             shortcut="",
             status_tip="Select TypeScript language",

@@ -1,14 +1,6 @@
 from dataclasses import dataclass
 from typing import Final
-from enum import Enum, auto
-
-# ************* MESSAGE TYPES *************
-
-
-class MessageTypes(Enum):
-    QUESTION = auto()
-    WARNING = auto()
-    CRITICAL = auto()
+from enum import Enum
 
 
 # ************* FILE MENU *************

@@ -1,5 +1,6 @@
 from ._menus_constants import ViewMenuActionsNames, ViewMenuShortcuts
-from . import QMenu, QAction, Slot, ActionHelper, SectionsNames
+from . import QMenu, QAction, Slot, SectionsNames
+from common.config_action import config
 
 
 class ViewMenu(QMenu):
@@ -28,7 +29,7 @@ class ViewMenu(QMenu):
 
     def _toggle_full_screen_action(self) -> None:
         toggle_action = QAction(ViewMenuActionsNames.TOGGLE_FULL_SCREEN, self)
-        ActionHelper().config(
+        config(
             action=toggle_action,
             shortcut=ViewMenuShortcuts.TOGGLE_FULL_SCREEN,
             status_tip="Toggle full screen",
@@ -40,7 +41,7 @@ class ViewMenu(QMenu):
         distraction_free_mode_action = QAction(
             ViewMenuActionsNames.DISTRACTION_FREE_MODE, self
         )
-        ActionHelper().config(
+        config(
             action=distraction_free_mode_action,
             shortcut="",
             status_tip="Distraction free mode",
@@ -52,13 +53,13 @@ class ViewMenu(QMenu):
         zoom_menu = QMenu(ViewMenuActionsNames.ZOOM)
         zoom_in_action = QAction(ViewMenuActionsNames.ZOOM_IN, self)
         zoom_out_action = QAction(ViewMenuActionsNames.ZOOM_OUT, self)
-        ActionHelper().config(
+        config(
             action=zoom_in_action,
             shortcut=ViewMenuShortcuts.ZOOM_IN,
             status_tip="Zoom in",
             method=self._zoom_in,
         )
-        ActionHelper().config(
+        config(
             action=zoom_out_action,
             shortcut=ViewMenuShortcuts.ZOOM_OUT,
             status_tip="Zoom out",
@@ -70,7 +71,7 @@ class ViewMenu(QMenu):
 
     def _move_clone_current_document_action(self) -> None:
         move_action = QAction(ViewMenuActionsNames.MOVE_CLONE_CURRENT_DOCUMENT, self)
-        ActionHelper().config(
+        config(
             action=move_action,
             shortcut="",
             status_tip="Move/clone current document",
@@ -80,14 +81,12 @@ class ViewMenu(QMenu):
 
     def _tab_action(self) -> None:
         tab_action = QAction(ViewMenuActionsNames.TAB, self)
-        ActionHelper().config(
-            action=tab_action, shortcut="", status_tip="Tab", method=self.tab
-        )
+        config(action=tab_action, shortcut="", status_tip="Tab", method=self.tab)
         self._view_menu.addAction(tab_action)
 
     def _summary_action(self) -> None:
         summary_action = QAction(ViewMenuActionsNames.SUMMARY, self)
-        ActionHelper().config(
+        config(
             action=summary_action,
             shortcut="",
             status_tip="Summary",
@@ -97,7 +96,7 @@ class ViewMenu(QMenu):
 
     def _project_panels_action(self) -> None:
         project_panels_action = QAction(ViewMenuActionsNames.PROJECT_PANELS, self)
-        ActionHelper().config(
+        config(
             action=project_panels_action,
             shortcut="",
             status_tip="Project panels",
@@ -109,7 +108,7 @@ class ViewMenu(QMenu):
         folder_as_workspace_action = QAction(
             ViewMenuActionsNames.FOLDER_AS_WORKSPACE, self
         )
-        ActionHelper().config(
+        config(
             action=folder_as_workspace_action,
             shortcut="",
             status_tip="Folder as workspace",
@@ -119,7 +118,7 @@ class ViewMenu(QMenu):
 
     def _document_map_action(self) -> None:
         document_map_action = QAction(ViewMenuActionsNames.DOCUMENT_MAP, self)
-        ActionHelper().config(
+        config(
             action=document_map_action,
             shortcut="",
             status_tip="Document map",
@@ -129,7 +128,7 @@ class ViewMenu(QMenu):
 
     def _document_list_action(self) -> None:
         document_list_action = QAction(ViewMenuActionsNames.DOCUMENT_LIST, self)
-        ActionHelper().config(
+        config(
             action=document_list_action,
             shortcut="",
             status_tip="Document list",
@@ -139,7 +138,7 @@ class ViewMenu(QMenu):
 
     def _function_list_action(self) -> None:
         function_list_action = QAction(ViewMenuActionsNames.FUNCTION_LIST, self)
-        ActionHelper().config(
+        config(
             action=function_list_action,
             shortcut="",
             status_tip="Function list",

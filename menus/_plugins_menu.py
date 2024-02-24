@@ -1,5 +1,6 @@
 from ._menus_constants import PluginsMenuActionsNames
-from . import QMenu, QAction, Slot, ActionHelper, SectionsNames
+from . import QMenu, QAction, Slot, SectionsNames
+from common.config_action import config
 
 
 class PluginsMenu(QMenu):
@@ -19,7 +20,7 @@ class PluginsMenu(QMenu):
 
     def _plugins_manager_action(self) -> None:
         plugins_manager_action = QAction(PluginsMenuActionsNames.PLUGIN_MANAGER, self)
-        ActionHelper().config(
+        config(
             action=plugins_manager_action,
             status_tip="Plugins Manager",
             shortcut="",
@@ -31,7 +32,7 @@ class PluginsMenu(QMenu):
         open_plugins_folder_action = QAction(
             PluginsMenuActionsNames.OPEN_PLUGINS_FOLDER, self
         )
-        ActionHelper().config(
+        config(
             action=open_plugins_folder_action,
             status_tip="Open Plugins Folder",
             shortcut="",

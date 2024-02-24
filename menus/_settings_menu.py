@@ -1,5 +1,6 @@
 from ._menus_constants import SettingsMenuActionsNames
-from . import QMenu, QAction, Slot, ActionHelper, SectionsNames
+from . import QMenu, QAction, Slot, SectionsNames
+from common.config_action import config
 
 
 class SettingsMenu(QMenu):
@@ -21,7 +22,7 @@ class SettingsMenu(QMenu):
 
     def _add_preferences_action(self) -> None:
         preferences = QAction(SettingsMenuActionsNames.PREFERENCES, self)
-        ActionHelper().config(
+        config(
             action=preferences,
             shortcut="",
             status_tip="Open Preferences",
@@ -31,7 +32,7 @@ class SettingsMenu(QMenu):
 
     def _open_style_configurator_action(self) -> None:
         style_configurator = QAction(SettingsMenuActionsNames.STYLE_CONFIGURATOR, self)
-        ActionHelper().config(
+        config(
             action=style_configurator,
             shortcut="",
             status_tip="Open Style Configurator",
@@ -41,7 +42,7 @@ class SettingsMenu(QMenu):
 
     def _open_shortcut_mapper_action(self) -> None:
         shortcut_mapper = QAction(SettingsMenuActionsNames.SHORTCUT_MANAGER, self)
-        ActionHelper().config(
+        config(
             action=shortcut_mapper,
             shortcut="",
             status_tip="Open Shortcut Mapper",
@@ -53,13 +54,13 @@ class SettingsMenu(QMenu):
         import_menu = QMenu(SettingsMenuActionsNames.IMPORT, self)
         plugin_action = QAction(SettingsMenuActionsNames.PLUGIN, self)
         style_action = QAction(SettingsMenuActionsNames.STYLE_THEME, self)
-        ActionHelper().config(
+        config(
             action=plugin_action,
             shortcut="",
             status_tip="Import Plugin",
             method=self._open_import_plugin_action,
         )
-        ActionHelper().config(
+        config(
             action=style_action,
             shortcut="",
             status_tip="Add Style Theme",
