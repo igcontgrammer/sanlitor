@@ -2,6 +2,8 @@ from typing import Final, List
 from editor import EditorManager
 from PySide6.QtWidgets import QTabWidget
 from PySide6.QtCore import QCoreApplication as coreapp
+from messages import Messages, MessageTypes
+from constants import OpenFileOptions
 
 _DEFAULT_TAB_NAME: Final[str] = "Untitled"
 
@@ -59,16 +61,21 @@ class TabManager(QTabWidget):
     def build_default_tab(self) -> None:
         self._tab.addTab(self._editor_manager.editor, _DEFAULT_TAB_NAME)
         self._tab.setTabsClosable(True)
-        self._tab.tabCloseRequested.connect(self.on_tab_close_requested)
+        self._tab.tabCloseRequested.connect(self.on_close_tab)
 
     def add_new_tab(self, tab_name: str, content: str) -> None:
         new_index = self._tab.addTab(EditorManager().get_new_editor(), tab_name)
         self._tab.setCurrentIndex(new_index)
         self._tab.widget(new_index).setPlainText(content)
-        self._tab.tabCloseRequested.connect(self.on_tab_close_requested)
+        self._tab.tabCloseRequested.connect(self.on_close_tab)
 
     # TODO: trabajar en los estados de guardado
-    def on_tab_close_requested(self, index: int) -> None:
+    def on_close_tab(self, index: int) -> None:
+        if self.editor_has_changes:
+            option = self.has_changes_selected_option()
+            if option == OpenFileOptions.OVERWRITE:
+                print("the user selected overwrite")
+                return
         filename = self._tab.tabText(index)
         if filename in self._loaded_files:
             self._loaded_files.remove(filename)
@@ -76,7 +83,16 @@ class TabManager(QTabWidget):
             self._tab.removeTab(index)
             return
         self._tab.setTabText(index, coreapp.translate("tab_manager", _DEFAULT_TAB_NAME))
-        self._editor_manager.editor.clear()
+
+    def has_changes_selected_option(self) -> int:
+        msg = Messages(
+            parent=self,
+            title="Advertencia",
+            content="Hay cambios presentes ¿desea sobreescribir?",
+            first_button_title="Sobreescribir",
+            type=MessageTypes.WARNING,
+        )
+        return msg.run()
 
     def change_current_tab_name(self, name: str) -> None:
         self._tab.setTabText(self.get_current_tab_index(), name)

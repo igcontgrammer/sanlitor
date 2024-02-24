@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from typing import Final
-from enum import Enum
 
 
 # ************* FILE MENU *************
@@ -35,11 +34,6 @@ class FileMenuShortcuts:
     CLOSE: Final[str] = "Ctrl+W"
     CLOSE_ALL: Final[str] = "Ctrl+Shift+W"
     EXIT: Final[str] = "Alt+F4"
-
-
-class OpenFileOptions(Enum):
-    HERE = 0
-    NEW_TAB = 1
 
 
 # ************* EDIT MENU *************

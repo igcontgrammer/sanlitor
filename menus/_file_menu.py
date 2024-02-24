@@ -1,9 +1,9 @@
 import os
-from ._menus_constants import FileMenuShortcuts, FileMenuActionsNames, OpenFileOptions
-from PySide6.QtWidgets import QFileDialog, QMessageBox
-from ._components.messages import Message
+from ._menus_constants import FileMenuShortcuts, FileMenuActionsNames
+from constants import OpenFileOptions
 from common.config_action import config
 from extensions import available_extensions
+from PySide6.QtWidgets import QFileDialog, QMessageBox
 
 from . import (
     QMenu,
@@ -185,7 +185,7 @@ class FileMenu(QMenu):
         except Exception as e:
             error_message = f"An error ocurred at: {e.__class__.__name__}: {e}"
             print(error_message)
-            Message.system_error(parent=self)
+            # Message.system_error(parent=self)
 
     def _get_open_file_option(self) -> OpenFileOptions:
         msg = QMessageBox(self)
