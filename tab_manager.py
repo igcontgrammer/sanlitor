@@ -3,7 +3,7 @@ from editor import EditorManager
 from PySide6.QtWidgets import QTabWidget
 from PySide6.QtCore import QCoreApplication as coreapp
 from messages import Messages, MessageTypes
-from constants import OpenFileOptions
+from constants import TabsActions
 
 _DEFAULT_TAB_NAME: Final[str] = "Untitled"
 
@@ -63,18 +63,29 @@ class TabManager(QTabWidget):
         self._tab.setTabsClosable(True)
         self._tab.tabCloseRequested.connect(self.on_close_tab)
 
-    def add_new_tab(self, tab_name: str, content: str) -> None:
-        new_index = self._tab.addTab(EditorManager().get_new_editor(), tab_name)
+    # TODO: aplicar la logica de los cambios al agregar un nuevo tab
+    def add_new_tab(self, name: str, content: str) -> None:
+        # * Para usar correctamente el @classmethod, en una linea se debe declarar
+        new_manager = EditorManager()
+        new_index = self._tab.addTab(new_manager.editor, name)
         self._tab.setCurrentIndex(new_index)
         self._tab.widget(new_index).setPlainText(content)
         self._tab.tabCloseRequested.connect(self.on_close_tab)
 
-    # TODO: create the on save states
+    # TODO: create the on save state
+    # TODO: esta cerrando aunque presione X en el mensaje
     def on_close_tab(self, index: int) -> None:
         if self.editor_has_changes:
             option = self.has_changes_selected_option()
-            if option == OpenFileOptions.OVERWRITE:
-                print("the user selected overwrite")
+            if option == TabsActions.CLOSE:
+                has_more_tabs = self.get_tabs_count() > 1
+                (
+                    self._tab.removeTab(index)
+                    if has_more_tabs
+                    else self._tab.setTabText(
+                        index, coreapp.translate("tab_manager", _DEFAULT_TAB_NAME)
+                    )
+                )
                 return
         filename = self._tab.tabText(index)
         if filename in self._loaded_files:
@@ -87,9 +98,8 @@ class TabManager(QTabWidget):
     def has_changes_selected_option(self) -> int:
         msg = Messages(
             parent=self,
-            title="Advertencia",
-            content="Hay cambios presentes ¿desea sobreescribir?",
-            first_button_title="Sobreescribir",
+            content="Hay cambios presentes ¿desea cerrar de todas formas?",
+            first_button_title="Cerrar",
             type=MessageTypes.WARNING,
         )
         return msg.run()

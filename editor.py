@@ -1,7 +1,7 @@
-from PySide6.QtWidgets import QTextEdit, QScrollBar, QTabWidget
-from PySide6.QtCore import Slot
 from theme import ThemeModes
 from utils import get_circle
+from PySide6.QtWidgets import QTextEdit, QScrollBar, QTabWidget
+from PySide6.QtCore import Slot
 
 """
 TODO: aplicar los estados segun el usuario seleccione
@@ -45,4 +45,3 @@ class EditorManager(QTextEdit):
         if isinstance(tab, QTabWidget):
             index = tab.currentIndex()
             tab.setTabIcon(index, get_circle(theme=ThemeModes.LIGHT))
-            pass

@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Final
+from typing import Final, Dict, Optional
 from enum import Enum, auto
 from PySide6.QtWidgets import QMessageBox, QWidget
 from PySide6.QtCore import QCoreApplication as coreapp
@@ -9,6 +9,9 @@ class MessageTypes(Enum):
     WARNING = auto()
     CRITICAL = auto()
     QUESTION = auto()
+
+
+_COMMON_MESSAGE_TITLES: Dict[int, str] = {1: "Advertencia", 2: "Error", 3: "Aviso"}
 
 
 @dataclass(frozen=True)
@@ -24,15 +27,20 @@ class Messages(QMessageBox):
     def __init__(
         self,
         parent: QWidget,
-        title: str,
         content: str,
         first_button_title: str,
         type: MessageTypes,
+        title: Optional[str] = "",
     ):
         super().__init__()
         self._parent = parent
         self._message = QMessageBox(self._parent)
-        self._message.setWindowTitle(title)
+        self._message.setWindowTitle(
+            coreapp.translate(
+                "messages",
+                _COMMON_MESSAGE_TITLES[type.value] if title is None else title,
+            )
+        )
         self._message.setStandardButtons(QMessageBox.Cancel)
         self._message.setText(content)
         self._message.addButton(
@@ -51,6 +59,11 @@ class Messages(QMessageBox):
 
     def run(self) -> int:
         return self._message.exec_()
+
+    def add_button(self, button_title: str) -> None:
+        self._message.addButton(
+            coreapp.translate("messages", button_title), QMessageBox.AcceptRole
+        )
 
 
 def system_error(parent: QWidget) -> None:

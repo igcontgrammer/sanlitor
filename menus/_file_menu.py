@@ -1,6 +1,7 @@
 import os
 from ._menus_constants import FileMenuShortcuts, FileMenuActionsNames
 from constants import OpenFileOptions
+from messages import Messages, MessageTypes
 from common.config_action import config
 from extensions import available_extensions
 from PySide6.QtWidgets import QFileDialog, QMessageBox
@@ -141,6 +142,7 @@ class FileMenu(QMenu):
         path = file[0]
         extension_detected = os.path.splitext(path)[1]
         if extension_detected not in available_extensions():
+            self.show_extension_not_allowed_message()
             return None
         from home import Home
 
@@ -150,58 +152,38 @@ class FileMenu(QMenu):
         if tab_manager.file_was_opened(filename):
             tab_manager.move(filename)
             return
-        # if tab_manager.editor_has_changes:
-        #     mensaje = QMessageBox(self)
-        #     mensaje.setWindowTitle(coreapp.translate("file_menu", "Advertencia"))
-        #     mensaje.setText(
-        #         coreapp.translate(
-        #             "file_menu", "Este archivo contiene cambios. ¿Desea reemplazar?"
-        #         )
-        #     )
-        #     mensaje.setStandardButtons(QMessageBox.Cancel)
-        #     mensaje.addButton(
-        #         coreapp.translate("file_menu", "Reemplazar"), QMessageBox.AcceptRole
-        #     )
-        #     mensaje.button(QMessageBox.Cancel).setText(
-        #         coreapp.translate("file_menu", "Cancelar")
-        #     )
-        #     mensaje.setIcon(QMessageBox.Warning)
-        #     option_selected = mensaje.exec_()
-        #     print(
-        #         f"opcion seleccionada en caso de identificar cambios: {option_selected}"
-        #     )
-        try:
-            match self._get_open_file_option():
-                case OpenFileOptions.HERE:
-                    # TODO: get to know if file has changes. If it's true, then show a message dialog
-                    tab_manager.change_current_tab_name(filename)
-                    tab_manager.set_content_to_current_tab(
-                        self._get_content_from_file(path)
-                    )
-                    tab_manager.add_to_loaded_files(filename)
-                case OpenFileOptions.NEW_TAB:
-                    tab_manager.add_new_tab(filename, self._get_content_from_file(path))
-                    tab_manager.add_to_loaded_files(filename)
-        except Exception as e:
-            error_message = f"An error ocurred at: {e.__class__.__name__}: {e}"
-            print(error_message)
-            # Message.system_error(parent=self)
+        match self._get_open_file_option():
+            case OpenFileOptions.HERE:
+                tab_manager.change_current_tab_name(filename)
+                tab_manager.set_content_to_current_tab(
+                    self._get_content_from_file(path)
+                )
+                tab_manager.add_to_loaded_files(filename)
+            case OpenFileOptions.NEW_TAB:
+                tab_manager.add_new_tab(filename, self._get_content_from_file(path))
+                tab_manager.add_to_loaded_files(filename)
+            case OpenFileOptions.CANCEL:
+                return
+            case _:
+                # TODO: qué hacer si por alguna razón esto falla?
+                error_message = (
+                    f"Error at {FileMenu.__name__} with the open file operation"
+                )
+                print(error_message)
+                return
 
     def _get_open_file_option(self) -> OpenFileOptions:
-        msg = QMessageBox(self)
-        msg.setWindowTitle(coreapp.translate("file_menu", "Abrir Archivo"))
-        msg.setText(coreapp.translate("file_menu", "¿Dónde desea abrir el archivo?"))
-        msg.setStandardButtons(QMessageBox.Cancel)
-        msg.addButton(coreapp.translate("file_menu", "Aquí"), QMessageBox.AcceptRole)
-        msg.addButton(
-            coreapp.translate("file_menu", "En una nueva pestaña"),
-            QMessageBox.AcceptRole,
+        msg = Messages(
+            parent=self,
+            title="Abrir Archivo",
+            content="¿Dónde desea abrir el archivo?",
+            first_button_title="Aquí",
+            type=MessageTypes.QUESTION,
         )
-        msg.button(QMessageBox.Cancel).setText(
-            coreapp.translate("file_menu", "Cancelar")
-        )
-        msg.setIcon(QMessageBox.Question)
-        option_selected = msg.exec_()
+        msg.add_button("En una nueva pestaña")
+        option_selected = msg.run()
+        if option_selected not in OpenFileOptions.ALLOWED_OPTIONS:
+            return OpenFileOptions.CANCEL
         return OpenFileOptions.HERE if option_selected == 0 else OpenFileOptions.NEW_TAB
 
     def _get_content_from_file(self, path: str) -> str:
@@ -212,6 +194,16 @@ class FileMenu(QMenu):
             error_message = f"Error found at: {e.__class__.__name__}. Message: {e}"
             print(error_message)
             return ""
+
+    # TODO: complete this
+    def show_extension_not_allowed_message(self) -> None:
+        msg = Messages(
+            parent=self,
+            content="La extensión de este archivo no es permitida.",
+            first_button_title="AceptarDe acuerdoDe acuerdo",
+            type=MessageTypes.CRITICAL,
+        )
+        msg.run()
 
     def _has_opened_a_file(self, filepath: str) -> bool:
         return len(filepath) > 0
