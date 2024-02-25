@@ -11,5 +11,5 @@ class OpenFileOptions:
 
 
 @dataclass(frozen=True)
-class TabsActions:
+class TabActions:
     CLOSE: Final[int] = 0

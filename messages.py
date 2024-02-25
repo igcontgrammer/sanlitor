@@ -60,9 +60,9 @@ class Messages(QMessageBox):
     def run(self) -> int:
         return self._message.exec_()
 
-    def add_button(self, button_title: str) -> None:
+    def add_button(self, description: str) -> None:
         self._message.addButton(
-            coreapp.translate("messages", button_title), QMessageBox.AcceptRole
+            coreapp.translate("messages", description), QMessageBox.AcceptRole
         )
 
 

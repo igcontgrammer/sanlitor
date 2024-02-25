@@ -4,8 +4,7 @@ from constants import OpenFileOptions
 from messages import Messages, MessageTypes
 from common.config_action import config
 from extensions import available_extensions
-from PySide6.QtWidgets import QFileDialog, QMessageBox
-
+from PySide6.QtWidgets import QFileDialog
 from . import (
     QMenu,
     QAction,
@@ -154,8 +153,9 @@ class FileMenu(QMenu):
             return
         match self._get_open_file_option():
             case OpenFileOptions.HERE:
-                tab_manager.change_current_tab_name(filename)
-                tab_manager.set_content_to_current_tab(
+                tab_manager.set_is_open_mode(True)
+                tab_manager.change_tab_name(filename)
+                tab_manager.add_content_to_current_tab(
                     self._get_content_from_file(path)
                 )
                 tab_manager.add_to_loaded_files(filename)
@@ -195,7 +195,6 @@ class FileMenu(QMenu):
             print(error_message)
             return ""
 
-    # TODO: complete this
     def show_extension_not_allowed_message(self) -> None:
         msg = Messages(
             parent=self,

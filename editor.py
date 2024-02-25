@@ -1,47 +1,52 @@
 from theme import ThemeModes
-from utils import get_circle
 from PySide6.QtWidgets import QTextEdit, QScrollBar, QTabWidget
 from PySide6.QtCore import Slot
-
-"""
-TODO: aplicar los estados segun el usuario seleccione
-Apply Syntax Highlighting
-Fonts
-Colors
-Changes events
-"""
+from utils import get_circle
 
 
-class EditorManager(QTextEdit):
-    def __init__(self):
-        super().__init__()
-        self._editor = QTextEdit()
+class Editor(QTextEdit):
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
         self._has_changes = False
+        self._is_open_mode = False
         self._scroll_bar = QScrollBar(self)
         self.__configurate()
 
-    # ************* GETTERS *************
+    # ************* GETTERS AND SETTERS *************
 
-    @property
-    def editor(self) -> QTextEdit:
-        return self._editor
+    def __repr__(self) -> str:
+        return super().__repr__()
 
     @property
     def has_changes(self) -> bool:
         return self._has_changes
 
-    # ************* OTHERS *************
+    @has_changes.setter
+    def has_changes(self, value: bool) -> None:
+        if not isinstance(value, bool):
+            raise ValueError("value must be boolean")
+        self._has_changes = value
 
-    def __configurate(self) -> None:
-        self._editor.setUndoRedoEnabled(True)
-        self._editor.setAcceptRichText(True)
-        self._editor.setVerticalScrollBar(self._scroll_bar)
-        self._editor.textChanged.connect(self._on_change)
+    @property
+    def is_open_mode(self) -> bool:
+        return self._is_open_mode
+
+    @is_open_mode.setter
+    def is_open_mode(self, value: bool) -> None:
+        self._is_open_mode = value
 
     @Slot()
-    def _on_change(self) -> None:
-        self._has_changes = True
-        tab = self._editor.parentWidget().parentWidget()
-        if isinstance(tab, QTabWidget):
-            index = tab.currentIndex()
-            tab.setTabIcon(index, get_circle(theme=ThemeModes.LIGHT))
+    def on_change(self) -> None:
+        self.has_changes = True
+        parent = self.parentWidget()
+        if parent is not None:
+            tab = parent.parentWidget()
+            if isinstance(tab, QTabWidget) and not self.is_open_mode:
+                tab.setTabIcon(tab.currentIndex(), get_circle(theme=ThemeModes.LIGHT))
+
+    def __configurate(self) -> None:
+        self.textChanged.connect(self.on_change)
+        self.setUndoRedoEnabled(True)
+        self.setAcceptRichText(True)
+        self.setVerticalScrollBar(self._scroll_bar)

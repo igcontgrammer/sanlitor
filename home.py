@@ -1,4 +1,4 @@
-from typing import Final
+from typing import Final, Self
 from menus.menu import MenuBar
 from toolbar import ToolBar
 from statusbar import StatusBar
@@ -15,6 +15,13 @@ _MAIN_WINDOW_DEFAULT_WIDTH: Final[int] = 1000
 
 
 class Home(QMainWindow):
+
+    _instance = None
+
+    def __new__(cls, *args, **kwargs) -> Self:
+        if not cls._instance:
+            cls._instance = super(Home, cls).__new__(cls, *args, **kwargs)
+        return cls._instance
 
     def __init__(self):
         super().__init__()
