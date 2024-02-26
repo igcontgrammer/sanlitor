@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import Dict, Final, Optional
+from typing import Dict, Optional
 
 from PySide6.QtCore import QCoreApplication as coreapp
 from PySide6.QtWidgets import QMessageBox, QWidget
@@ -17,11 +17,11 @@ _COMMON_MESSAGE_TITLES: Dict[int, str] = {1: "Advertencia", 2: "Error", 3: "Avis
 
 @dataclass(frozen=True)
 class MessageConstants:
-    SYSTEM_ERROR_TITLE: Final[str] = "Error"
-    SYSTEM_ERROR_MESSAGE: Final[
-        str
-    ] = "Ocurrió un error inesperado en el sistema. Por favor inténtelo de nuevo."
-    SYSTEM_WARNING_TITLE: Final[str] = "Advertencia"
+    SYSTEM_ERROR_TITLE: str = "Error"
+    SYSTEM_ERROR_MESSAGE: str = (
+        "Ocurrió un error inesperado en el sistema. Por favor inténtelo de nuevo."
+    )
+    SYSTEM_WARNING_TITLE: str = "Advertencia"
 
 
 class Messages(QMessageBox):

@@ -172,13 +172,14 @@ class FileMenu(QMenu):
 
     def _get_open_file_option(self) -> OpenFileOptions:
         msg = Messages(
-            parent=self,
+            parent=self._home,
             title="Abrir Archivo",
             content="¿Dónde desea abrir el archivo?",
             first_button_title="Aquí",
             type=MessageTypes.QUESTION,
         )
         msg.add_button("En una nueva pestaña")
+        msg.move(self._home.x, self._home.y)
         option_selected = msg.run()
         if option_selected not in OpenFileOptions.ALLOWED_OPTIONS:
             return OpenFileOptions.CANCEL
@@ -195,7 +196,7 @@ class FileMenu(QMenu):
 
     def show_extension_not_allowed_message(self) -> None:
         msg = Messages(
-            parent=self,
+            parent=self._home,
             content="La extensión de este archivo no es permitida.",
             first_button_title="AceptarDe acuerdoDe acuerdo",
             type=MessageTypes.CRITICAL,

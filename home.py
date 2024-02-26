@@ -1,4 +1,5 @@
-from typing import Final, Self
+from typing import Self
+from dataclasses import dataclass
 
 from PySide6.QtWidgets import QMainWindow
 
@@ -8,11 +9,13 @@ from tab_manager import Tab
 from theme import ThemeModes
 from toolbar import ToolBar
 
-_MAIN_WINDOW_TITLE: Final[str] = "Sanlitor"
-_MAIN_WINDOW_MIN_HEIGHT: Final[int] = 300
-_MAIN_WINDOW_MIN_WIDTH: Final[int] = 400
-_MAIN_WINDOW_DEFAULT_HEIGHT: Final[int] = 600
-_MAIN_WINDOW_DEFAULT_WIDTH: Final[int] = 1000
+
+@dataclass(frozen=True)
+class HomeDefaultDimensions:
+    MAIN_WINDOW_MIN_HEIGHT: int = 300
+    MAIN_WINDOW_MIN_WIDTH: int = 400
+    MAIN_WINDOW_DEFAULT_HEIGHT: int = 600
+    MAIN_WINDOW_DEFAULT_WIDTH: int = 1000
 
 
 class Home(QMainWindow):
@@ -28,6 +31,7 @@ class Home(QMainWindow):
         # for now is light by default
         self._tab = Tab()
         self._theme_mode = ThemeModes.LIGHT
+        self._geometry = self.geometry()
         self.__set_main_window_default_config()
         self.__call_main_widgets()
         self._tab.build_default_tab()
@@ -36,6 +40,14 @@ class Home(QMainWindow):
     @property
     def tab_manager(self) -> Tab:
         return self._tab
+
+    @property
+    def x(self) -> int:
+        return self._geometry.x() + (self._geometry.width() // 2)
+
+    @property
+    def y(self) -> int:
+        return self._geometry.y() + (self._geometry.height() // 2)
 
     @property
     def theme_mode(self) -> ThemeModes:
@@ -57,7 +69,7 @@ class Home(QMainWindow):
         self.setStatusBar(self.statusbar.get_status_bar())
 
     def __set_main_window_default_config(self) -> None:
-        self.setWindowTitle(_MAIN_WINDOW_TITLE)
+        self.setWindowTitle(HomeDefaultDimensions.MAIN_WINDOW_TITLE)
         self.__set_default_dimensions()
 
     def __call_main_widgets(self) -> None:
@@ -67,6 +79,9 @@ class Home(QMainWindow):
         self._add_status_bar()
 
     def __set_default_dimensions(self) -> None:
-        self.setMinimumHeight(_MAIN_WINDOW_MIN_HEIGHT)
-        self.setMinimumWidth(_MAIN_WINDOW_MIN_WIDTH)
-        self.resize(_MAIN_WINDOW_DEFAULT_WIDTH, _MAIN_WINDOW_DEFAULT_HEIGHT)
+        self.setMinimumHeight(HomeDefaultDimensions.MAIN_WINDOW_MIN_HEIGHT)
+        self.setMinimumWidth(HomeDefaultDimensions._MAIN_WINDOW_MIN_WIDTH)
+        self.resize(
+            HomeDefaultDimensions.MAIN_WINDOW_DEFAULT_WIDTH,
+            HomeDefaultDimensions.MAIN_WINDOW_DEFAULT_HEIGHT,
+        )

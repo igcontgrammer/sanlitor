@@ -83,17 +83,17 @@ class Tab(QTabWidget):
 
     # TODO: create the on save state
     def on_close(self, index: int) -> None:
-        child_editor = self.widget(index)
-        if not isinstance(child_editor, Editor):
+        editor = self.widget(index)
+        if not isinstance(editor, Editor):
             raise TypeError("editor is not an Editor object")
-        if child_editor.has_changes:
+        if editor.has_changes:
             option = self.has_changes_selected_option()
             if option != TabActions.CLOSE:
                 return
             if self.is_default:
                 self.setTabIcon(index, QIcon())
                 self.setTabText(index, _DEFAULT_TAB_NAME)
-                child_editor.clear()
+                editor.clear()
             else:
                 self.removeTab(index)
             return
@@ -104,7 +104,7 @@ class Tab(QTabWidget):
             self.removeTab(index)
             return
         self.setTabText(index, CoreApp.translate("tab_manager", _DEFAULT_TAB_NAME))
-        child_editor.clear()
+        editor.clear()
         self.setTabIcon(index, QIcon())
 
     def has_changes_selected_option(self) -> int:

@@ -2,7 +2,6 @@ from typing import Dict, Final, Tuple
 
 from common.config_action import config
 from common.languages import Languages
-from syntax import Syntax
 
 from . import QAction, QMenu, SectionsNames, Slot
 
