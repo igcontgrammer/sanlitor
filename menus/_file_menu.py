@@ -13,6 +13,36 @@ from . import QCoreApplication as CoreApp
 from ._menus_constants import FileMenuActionsNames, FileMenuShortcuts
 
 
+def get_content_from_file(path: str) -> str:
+    try:
+        with open(path, "r") as file:
+            return file.read()
+    except Exception as e:
+        error_message = f"Error found at: {e.__class__.__name__}. Message: {e}"
+        print(error_message)
+        return ""
+
+
+def when_opening(tab_manager: Tab, path: str, here: bool = False) -> None:
+    editor = tab_manager.editor
+    tab_manager.set_is_open_mode(True)
+    filename = os.path.basename(path)
+    if here:
+        tab_manager.change_tab_name(filename)
+        tab_manager.add_content_to_current_tab(
+            content=get_content_from_file(path)
+        )
+    else:
+        tab_manager.add_new_tab(filename, get_content_from_file(path))
+    editor.has_changes = False
+    tab_manager.set_is_open_mode(False)
+    tab_manager.add_to_loaded_files(filename)
+
+
+def has_opened_a_file(filepath: str) -> bool:
+    return len(filepath) > 0
+
+
 class FileMenu(QMenu):
     def __init__(self, home):
         super().__init__()
@@ -132,7 +162,7 @@ class FileMenu(QMenu):
             CoreApp.translate("file_menu", "Abrir archivo"),
             dir=os.path.expanduser("~"),
         )
-        if not self._has_opened_a_file(file[0]):
+        if not has_opened_a_file(file[0]):
             return None
         path = file[0]
         extension_detected = os.path.splitext(path)[1]
@@ -149,15 +179,15 @@ class FileMenu(QMenu):
             return
         match self._get_open_file_option():
             case OpenFileOptions.HERE:
-                self._when_opening(tab_manager, path, here=True)
+                when_opening(tab_manager, path, here=True)
             case OpenFileOptions.NEW_TAB:
-                self._when_opening(tab_manager, path)
+                when_opening(tab_manager, path)
             case OpenFileOptions.CANCEL:
                 return
             case _:
                 return
 
-    def _get_open_file_option(self) -> OpenFileOptions:
+    def _get_open_file_option(self) -> int:
         msg = Messages(
             parent=self._home,
             title="Abrir Archivo",
@@ -171,30 +201,6 @@ class FileMenu(QMenu):
             return OpenFileOptions.CANCEL
         return OpenFileOptions.HERE if option_selected == 0 else OpenFileOptions.NEW_TAB
 
-    def _when_opening(self, tab_manager: Tab, path: str, here: bool = False) -> None:
-        editor = tab_manager.editor
-        tab_manager.set_is_open_mode(True)
-        filename = os.path.basename(path)
-        if here:
-            tab_manager.change_tab_name(filename)
-            tab_manager.add_content_to_current_tab(
-                content=self._get_content_from_file(path)
-            )
-        else:
-            tab_manager.add_new_tab(filename, self._get_content_from_file(path))
-        editor.has_changes = False
-        tab_manager.set_is_open_mode(False)
-        tab_manager.add_to_loaded_files(filename)
-
-    def _get_content_from_file(self, path: str) -> str:
-        try:
-            with open(path, "r") as file:
-                return file.read()
-        except Exception as e:
-            error_message = f"Error found at: {e.__class__.__name__}. Message: {e}"
-            print(error_message)
-            return ""
-
     def show_extension_not_allowed_message(self) -> None:
         msg = Messages(
             parent=self._home,
@@ -203,9 +209,6 @@ class FileMenu(QMenu):
             type=MessageTypes.CRITICAL,
         )
         msg.run()
-
-    def _has_opened_a_file(self, filepath: str) -> bool:
-        return len(filepath) > 0
 
     @Slot()
     def _new_file(self) -> None:

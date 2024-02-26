@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Final, Self, Tuple
+from typing import Final
 
 from PySide6.QtWidgets import QMainWindow
 
@@ -23,7 +23,7 @@ class HomeDefaultDimensions:
 class Home(QMainWindow):
     _instance = None
 
-    def __new__(cls, *args, **kwargs) -> Self:
+    def __new__(cls, *args, **kwargs):
         if not cls._instance:
             cls._instance = super(Home, cls).__new__(cls, *args, **kwargs)
         return cls._instance
@@ -42,16 +42,6 @@ class Home(QMainWindow):
     @property
     def tab_manager(self) -> Tab:
         return self._tab
-
-    def x(self) -> int:
-        return self._geometry.x() + (self._geometry.width() // 2)
-
-    def y(self) -> int:
-        return self._geometry.y() + (self._geometry.height() // 2)
-
-    @property
-    def center_coordinates(self) -> Tuple[int]:
-        return (self.x(), self.y())
 
     @property
     def theme_mode(self) -> ThemeModes:

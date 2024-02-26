@@ -1,18 +1,9 @@
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import Dict, Optional
+from typing import Dict, Optional, Final
 
 from PySide6.QtCore import QCoreApplication as coreapp
 from PySide6.QtWidgets import QMessageBox, QWidget
-
-
-class MessageTypes(Enum):
-    WARNING = auto()
-    CRITICAL = auto()
-    QUESTION = auto()
-
-
-_COMMON_MESSAGE_TITLES: Dict[int, str] = {1: "Advertencia", 2: "Error", 3: "Aviso"}
 
 
 @dataclass(frozen=True)
@@ -22,6 +13,28 @@ class MessageConstants:
         "Ocurrió un error inesperado en el sistema. Por favor inténtelo de nuevo."
     )
     SYSTEM_WARNING_TITLE: str = "Advertencia"
+
+
+class MessageTypes(Enum):
+    WARNING = auto()
+    CRITICAL = auto()
+    QUESTION = auto()
+
+
+_COMMON_MESSAGE_TITLES: Final[Dict[int, str]] = {
+    1: "Advertencia",
+    2: "Error",
+    3: "Aviso",
+}
+
+
+def system_error(parent: QWidget) -> None:
+    QMessageBox.critical(
+        parent,
+        coreapp.translate("messages", MessageConstants.SYSTEM_ERROR_TITLE),
+        coreapp.translate("messages", MessageConstants.SYSTEM_ERROR_MESSAGE),
+    )
+    # TODO: enviar este error a un sistema de reportes?
 
 
 class Messages(QMessageBox):
@@ -65,12 +78,3 @@ class Messages(QMessageBox):
         self._message.addButton(
             coreapp.translate("messages", description), QMessageBox.AcceptRole
         )
-
-
-def system_error(parent: QWidget) -> None:
-    QMessageBox.critical(
-        parent,
-        coreapp.translate("messages", MessageConstants.SYSTEM_ERROR_TITLE),
-        coreapp.translate("messages", MessageConstants.SYSTEM_ERROR_MESSAGE),
-    )
-    # TODO: enviar este error a un sistema de reportes?

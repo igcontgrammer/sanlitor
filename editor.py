@@ -35,7 +35,6 @@ class Editor(QTextEdit):
     @Slot()
     def _on_change(self) -> None:
         # when open a file and placing content to the editor, doesn't count as change
-        print(f"is open mode: {self.is_open_mode}")
         if self.is_open_mode:
             return
         self.has_changes = True
