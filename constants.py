@@ -6,7 +6,7 @@ from typing import Tuple
 class OpenFileOptions:
     HERE: int = 0
     NEW_TAB: int = 1
-    ALLOWED_OPTIONS: Tuple[int, int] = (HERE, NEW_TAB)
+    ALLOWED_OPTIONS: Tuple[int] = (HERE, NEW_TAB)
     CANCEL: int = 2
 
 

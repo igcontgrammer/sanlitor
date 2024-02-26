@@ -6,6 +6,7 @@ from common.config_action import config
 from constants import OpenFileOptions
 from extensions import available_extensions
 from messages import Messages, MessageTypes
+from tab_manager import Tab
 
 from . import QAction, QMenu, SectionsNames, Slot
 from . import QCoreApplication as CoreApp
@@ -124,8 +125,6 @@ class FileMenu(QMenu):
         )
         self._menu.addAction(exit_action)
 
-    # ************* SLOTS *************
-
     @Slot()
     def _open_file(self) -> None:
         file = QFileDialog.getOpenFileName(
@@ -145,29 +144,17 @@ class FileMenu(QMenu):
         self._home: Home
         tab_manager = self._home.tab_manager
         filename = os.path.basename(path)
-        if tab_manager.file_was_opened(filename):
+        if tab_manager.already_opened(filename):
             tab_manager.move(filename)
             return
         match self._get_open_file_option():
             case OpenFileOptions.HERE:
-                tab_manager.set_is_open_mode(True)
-                tab_manager.change_tab_name(filename)
-                tab_manager.add_content_to_current_tab(
-                    self._get_content_from_file(path)
-                )
-                tab_manager.add_to_loaded_files(filename)
+                self._when_opening(tab_manager, path, here=True)
             case OpenFileOptions.NEW_TAB:
-                tab_manager.set_is_open_mode(True)
-                tab_manager.add_new_tab(filename, self._get_content_from_file(path))
-                tab_manager.add_to_loaded_files(filename)
+                self._when_opening(tab_manager, path)
             case OpenFileOptions.CANCEL:
                 return
             case _:
-                # TODO: qué hacer si por alguna razón esto falla?
-                error_message = (
-                    f"Error at {FileMenu.__name__} with the open file operation"
-                )
-                print(error_message)
                 return
 
     def _get_open_file_option(self) -> OpenFileOptions:
@@ -179,11 +166,25 @@ class FileMenu(QMenu):
             type=MessageTypes.QUESTION,
         )
         msg.add_button("En una nueva pestaña")
-        msg.move(self._home.x, self._home.y)
         option_selected = msg.run()
         if option_selected not in OpenFileOptions.ALLOWED_OPTIONS:
             return OpenFileOptions.CANCEL
         return OpenFileOptions.HERE if option_selected == 0 else OpenFileOptions.NEW_TAB
+
+    def _when_opening(self, tab_manager: Tab, path: str, here: bool = False) -> None:
+        editor = tab_manager.editor
+        tab_manager.set_is_open_mode(True)
+        filename = os.path.basename(path)
+        if here:
+            tab_manager.change_tab_name(filename)
+            tab_manager.add_content_to_current_tab(
+                content=self._get_content_from_file(path)
+            )
+        else:
+            tab_manager.add_new_tab(filename, self._get_content_from_file(path))
+        editor.has_changes = False
+        tab_manager.set_is_open_mode(False)
+        tab_manager.add_to_loaded_files(filename)
 
     def _get_content_from_file(self, path: str) -> str:
         try:

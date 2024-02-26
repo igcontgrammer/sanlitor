@@ -18,12 +18,16 @@ class Tab(QTabWidget):
         self._loaded_files: List[str] = []
 
     @property
-    def editor_manager(self) -> Editor:
+    def editor(self) -> Editor:
         return self._editor
 
     @property
     def editor_has_changes(self) -> bool:
         return self._editor.has_changes
+
+    @editor_has_changes.setter
+    def editor_has_changes(self, value: bool) -> None:
+        self._editor.has_changes = value
 
     @property
     def loaded_files(self) -> List[str]:
@@ -41,7 +45,7 @@ class Tab(QTabWidget):
     def is_default(self) -> bool:
         return self.tabs_count == 1
 
-    def file_was_opened(self, filename: str) -> bool:
+    def already_opened(self, filename: str) -> bool:
         return filename in self.loaded_files
 
     def add_content_to_current_tab(self, content: str) -> None:
@@ -83,6 +87,7 @@ class Tab(QTabWidget):
 
     # TODO: create the on save state
     def on_close(self, index: int) -> None:
+        filename = self.tabText(index)
         editor = self.widget(index)
         if not isinstance(editor, Editor):
             raise TypeError("editor is not an Editor object")
@@ -91,13 +96,18 @@ class Tab(QTabWidget):
             if option != TabActions.CLOSE:
                 return
             if self.is_default:
+                editor.clear()
                 self.setTabIcon(index, QIcon())
                 self.setTabText(index, _DEFAULT_TAB_NAME)
-                editor.clear()
+                editor.has_changes = False
+                if filename in self._loaded_files:
+                    self._loaded_files.remove(filename)
+                return
             else:
                 self.removeTab(index)
-            return
-        filename = self.tabText(index)
+                editor.has_changes = False
+                self._loaded_files.remove(filename)
+                return
         if filename in self._loaded_files:
             self._loaded_files.remove(filename)
         if self.tabs_count > 1:

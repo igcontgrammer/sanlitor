@@ -1,5 +1,5 @@
-from typing import Self
 from dataclasses import dataclass
+from typing import Final, Self, Tuple
 
 from PySide6.QtWidgets import QMainWindow
 
@@ -8,6 +8,8 @@ from statusbar import StatusBar
 from tab_manager import Tab
 from theme import ThemeModes
 from toolbar import ToolBar
+
+_MAIN_WINDOW_TITLE: Final[str] = "Sanlitor"
 
 
 @dataclass(frozen=True)
@@ -41,13 +43,15 @@ class Home(QMainWindow):
     def tab_manager(self) -> Tab:
         return self._tab
 
-    @property
     def x(self) -> int:
         return self._geometry.x() + (self._geometry.width() // 2)
 
-    @property
     def y(self) -> int:
         return self._geometry.y() + (self._geometry.height() // 2)
+
+    @property
+    def center_coordinates(self) -> Tuple[int]:
+        return (self.x(), self.y())
 
     @property
     def theme_mode(self) -> ThemeModes:
@@ -69,7 +73,7 @@ class Home(QMainWindow):
         self.setStatusBar(self.statusbar.get_status_bar())
 
     def __set_main_window_default_config(self) -> None:
-        self.setWindowTitle(HomeDefaultDimensions.MAIN_WINDOW_TITLE)
+        self.setWindowTitle(_MAIN_WINDOW_TITLE)
         self.__set_default_dimensions()
 
     def __call_main_widgets(self) -> None:
@@ -80,7 +84,7 @@ class Home(QMainWindow):
 
     def __set_default_dimensions(self) -> None:
         self.setMinimumHeight(HomeDefaultDimensions.MAIN_WINDOW_MIN_HEIGHT)
-        self.setMinimumWidth(HomeDefaultDimensions._MAIN_WINDOW_MIN_WIDTH)
+        self.setMinimumWidth(HomeDefaultDimensions.MAIN_WINDOW_MIN_WIDTH)
         self.resize(
             HomeDefaultDimensions.MAIN_WINDOW_DEFAULT_WIDTH,
             HomeDefaultDimensions.MAIN_WINDOW_DEFAULT_HEIGHT,
