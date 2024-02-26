@@ -1,5 +1,5 @@
-from PySide6.QtGui import QAction
 from PySide6.QtCore import Slot
+from PySide6.QtGui import QAction
 
 
 def new_file() -> None:

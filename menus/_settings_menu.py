@@ -1,10 +1,10 @@
-from ._menus_constants import SettingsMenuActionsNames
-from . import QMenu, QAction, Slot, SectionsNames
 from common.config_action import config
+
+from . import QAction, QMenu, SectionsNames, Slot
+from ._menus_constants import SettingsMenuActionsNames
 
 
 class SettingsMenu(QMenu):
-
     def __init__(self):
         super().__init__()
         self._settings_menu = QMenu(SectionsNames.SETTINGS)
@@ -72,25 +72,25 @@ class SettingsMenu(QMenu):
 
     @Slot()
     def _open_preferences(self) -> None:
-        print(f"opening preferences...")
+        print("opening preferences...")
         pass
 
     @Slot()
     def _open_style_configurator_action(self) -> None:
-        print(f"opening style configurator...")
+        print("opening style configurator...")
         pass
 
     @Slot()
     def _open_shortcut_mapper_action(self) -> None:
-        print(f"opening shortcut mapper...")
+        print("opening shortcut mapper...")
         pass
 
     @Slot()
     def _open_import_plugin_action(self) -> None:
-        print(f"opening import plugin...")
+        print("opening import plugin...")
         pass
 
     @Slot()
     def _open_style_theme_action(self) -> None:
-        print(f"opening style theme...")
+        print("opening style theme...")
         pass

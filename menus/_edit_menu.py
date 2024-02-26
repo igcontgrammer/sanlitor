@@ -1,10 +1,10 @@
-from ._menus_constants import EditMenuActionsNames, EditMenuShortcuts
-from . import QMenu, QAction, Slot, SectionsNames
 from common.config_action import config
+
+from . import QAction, QMenu, SectionsNames, Slot
+from ._menus_constants import EditMenuActionsNames, EditMenuShortcuts
 
 
 class EditMenu(QMenu):
-
     def __init__(self):
         super().__init__()
         self._edit_menu = QMenu(SectionsNames.EDIT)

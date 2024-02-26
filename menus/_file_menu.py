@@ -1,21 +1,18 @@
 import os
-from ._menus_constants import FileMenuShortcuts, FileMenuActionsNames
-from constants import OpenFileOptions
-from messages import Messages, MessageTypes
-from common.config_action import config
-from extensions import available_extensions
+
 from PySide6.QtWidgets import QFileDialog
-from . import (
-    QMenu,
-    QAction,
-    Slot,
-    SectionsNames,
-    QCoreApplication as coreapp,
-)
+
+from common.config_action import config
+from constants import OpenFileOptions
+from extensions import available_extensions
+from messages import Messages, MessageTypes
+
+from . import QAction, QMenu, SectionsNames, Slot
+from . import QCoreApplication as CoreApp
+from ._menus_constants import FileMenuActionsNames, FileMenuShortcuts
 
 
 class FileMenu(QMenu):
-
     def __init__(self, home):
         super().__init__()
         self._menu = QMenu(SectionsNames.FILE)
@@ -41,7 +38,7 @@ class FileMenu(QMenu):
         open_file_action = QAction(FileMenuActionsNames.OPEN, self)
         config(
             action=open_file_action,
-            status_tip=coreapp.translate("file_menu", "Open a file"),
+            status_tip=CoreApp.translate("file_menu", "Open a file"),
             shortcut=FileMenuShortcuts.OPEN,
             method=self._open_file,
         )
@@ -51,7 +48,7 @@ class FileMenu(QMenu):
         new_file_action = QAction(FileMenuActionsNames.NEW, self)
         config(
             action=new_file_action,
-            status_tip=coreapp.translate("file_menu", "Create a new file"),
+            status_tip=CoreApp.translate("file_menu", "Create a new file"),
             shortcut=FileMenuShortcuts.NEW,
             method=self._new_file,
         )
@@ -61,7 +58,7 @@ class FileMenu(QMenu):
         save_file_action = QAction(FileMenuActionsNames.SAVE, self)
         config(
             action=save_file_action,
-            status_tip=coreapp.translate("file_menu", "Save a file"),
+            status_tip=CoreApp.translate("file_menu", "Save a file"),
             shortcut=FileMenuShortcuts.SAVE,
             method=self._save_file,
         )
@@ -71,7 +68,7 @@ class FileMenu(QMenu):
         save_as_action = QAction(FileMenuActionsNames.SAVE_AS, self)
         config(
             action=save_as_action,
-            status_tip=coreapp.translate("file_menu", "Save a file as..."),
+            status_tip=CoreApp.translate("file_menu", "Save a file as..."),
             shortcut=FileMenuShortcuts.SAVE_AS,
             method=self._save_file,
         )
@@ -81,7 +78,7 @@ class FileMenu(QMenu):
         save_all_files_action = QAction(FileMenuActionsNames.SAVE_ALL, self)
         config(
             action=save_all_files_action,
-            status_tip=coreapp.translate("file_menu", "Save all files"),
+            status_tip=CoreApp.translate("file_menu", "Save all files"),
             shortcut=FileMenuShortcuts.SAVE_ALL,
             method=self._save_all_files,
         )
@@ -91,7 +88,7 @@ class FileMenu(QMenu):
         close_file_action = QAction(FileMenuActionsNames.CLOSE, self)
         config(
             action=close_file_action,
-            status_tip=coreapp.translate("file_menu", "Close a file"),
+            status_tip=CoreApp.translate("file_menu", "Close a file"),
             shortcut=FileMenuShortcuts.CLOSE,
             method=self._edit_file,
         )
@@ -101,7 +98,7 @@ class FileMenu(QMenu):
         close_all_files_action = QAction(FileMenuActionsNames.CLOSE_ALL, self)
         config(
             action=close_all_files_action,
-            status_tip=coreapp.translate("file_menu", "Close all files"),
+            status_tip=CoreApp.translate("file_menu", "Close all files"),
             shortcut=FileMenuShortcuts.CLOSE_ALL,
             method=self._edit_file,
         )
@@ -111,7 +108,7 @@ class FileMenu(QMenu):
         print_action = QAction(FileMenuActionsNames.PRINT, self)
         config(
             action=print_action,
-            status_tip=coreapp.translate("file_menu", "Print a file"),
+            status_tip=CoreApp.translate("file_menu", "Print a file"),
             shortcut="",
             method=self._print_file,
         )
@@ -121,7 +118,7 @@ class FileMenu(QMenu):
         exit_action = QAction(FileMenuActionsNames.EXIT, self)
         config(
             action=exit_action,
-            status_tip=coreapp.translate("file_menu", "Exit the application"),
+            status_tip=CoreApp.translate("file_menu", "Exit the application"),
             shortcut=FileMenuShortcuts.EXIT,
             method=self._exit_application,
         )
@@ -133,7 +130,7 @@ class FileMenu(QMenu):
     def _open_file(self) -> None:
         file = QFileDialog.getOpenFileName(
             self,
-            coreapp.translate("file_menu", "Abrir archivo"),
+            CoreApp.translate("file_menu", "Abrir archivo"),
             dir=os.path.expanduser("~"),
         )
         if not self._has_opened_a_file(file[0]):
@@ -160,6 +157,7 @@ class FileMenu(QMenu):
                 )
                 tab_manager.add_to_loaded_files(filename)
             case OpenFileOptions.NEW_TAB:
+                tab_manager.set_is_open_mode(True)
                 tab_manager.add_new_tab(filename, self._get_content_from_file(path))
                 tab_manager.add_to_loaded_files(filename)
             case OpenFileOptions.CANCEL:

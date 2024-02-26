@@ -1,11 +1,12 @@
 from typing import Final, Self
-from menus.menu import MenuBar
-from toolbar import ToolBar
-from statusbar import StatusBar
-from tab_manager import TabManager
-from theme import ThemeModes
+
 from PySide6.QtWidgets import QMainWindow
 
+from menus.menu import MenuBar
+from statusbar import StatusBar
+from tab_manager import Tab
+from theme import ThemeModes
+from toolbar import ToolBar
 
 _MAIN_WINDOW_TITLE: Final[str] = "Sanlitor"
 _MAIN_WINDOW_MIN_HEIGHT: Final[int] = 300
@@ -15,7 +16,6 @@ _MAIN_WINDOW_DEFAULT_WIDTH: Final[int] = 1000
 
 
 class Home(QMainWindow):
-
     _instance = None
 
     def __new__(cls, *args, **kwargs) -> Self:
@@ -26,33 +26,33 @@ class Home(QMainWindow):
     def __init__(self):
         super().__init__()
         # for now is light by default
-        self._tab_manager = TabManager()
+        self._tab = Tab()
         self._theme_mode = ThemeModes.LIGHT
         self.__set_main_window_default_config()
         self.__call_main_widgets()
-        self._tab_manager.build_default_tab()
-        self.setCentralWidget(self._tab_manager.tab)
+        self._tab.build_default_tab()
+        self.setCentralWidget(self._tab)
 
     @property
-    def tab_manager(self) -> TabManager:
-        return self._tab_manager
+    def tab_manager(self) -> Tab:
+        return self._tab
 
     @property
     def theme_mode(self) -> ThemeModes:
         return self._theme_mode
 
-    def _set_menu(self) -> None:
+    def _add_menu(self) -> None:
         self.menu = MenuBar(home=self)
 
     # TODO: buscar en la memoria, los ultimos tabs que haya abierto el usuario
-    def _get_last_opened_tab(self) -> TabManager:
+    def _get_last_opened_tab(self) -> Tab:
         pass
 
-    def _set_toolbar(self) -> None:
+    def _add_toolbar(self) -> None:
         self.toolbar = ToolBar()
         self.addToolBar(self.toolbar.get_toolbar())
 
-    def _set_status_bar(self) -> None:
+    def _add_status_bar(self) -> None:
         self.statusbar = StatusBar()
         self.setStatusBar(self.statusbar.get_status_bar())
 
@@ -62,9 +62,9 @@ class Home(QMainWindow):
 
     def __call_main_widgets(self) -> None:
         self.__set_main_window_default_config()
-        self._set_menu()
-        self._set_toolbar()
-        self._set_status_bar()
+        self._add_menu()
+        self._add_toolbar()
+        self._add_status_bar()
 
     def __set_default_dimensions(self) -> None:
         self.setMinimumHeight(_MAIN_WINDOW_MIN_HEIGHT)

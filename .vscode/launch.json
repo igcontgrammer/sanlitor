@@ -1,0 +1,15 @@
+{
+  // Usa IntelliSense para obtener información sobre los atributos existentes.
+  // Coloca el cursor sobre los atributos para ver descripciones detalladas.
+  // Para más información, visita: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: Ejecutar Archivo Específico",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/main.py",
+      "console": "integratedTerminal"
+    }
+  ]
+}

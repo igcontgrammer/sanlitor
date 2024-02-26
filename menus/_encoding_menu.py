@@ -1,10 +1,10 @@
-from ._menus_constants import EncodingMenuActionsNames
-from . import QMenu, QAction, Slot, SectionsNames
 from common.config_action import config
+
+from . import QAction, QMenu, SectionsNames, Slot
+from ._menus_constants import EncodingMenuActionsNames
 
 
 class EncodingMenu(QMenu):
-
     def __init__(self):
         super().__init__()
         self._encoding_menu = QMenu(SectionsNames.ENCODING)

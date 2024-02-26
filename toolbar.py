@@ -1,7 +1,6 @@
-from PySide6.QtWidgets import QToolBar, QFileIconProvider
-from PySide6.QtGui import QAction
 from PySide6.QtCore import Slot
-
+from PySide6.QtGui import QAction
+from PySide6.QtWidgets import QFileIconProvider, QToolBar
 
 """
     Toolbar actions:
@@ -17,7 +16,6 @@ from PySide6.QtCore import Slot
 
 
 class ToolBar(QToolBar):
-
     def __init__(self):
         super().__init__()
         self._toolbar = QToolBar("Toolbar")

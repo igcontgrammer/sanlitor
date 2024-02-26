@@ -2,9 +2,6 @@ from dataclasses import dataclass
 from typing import Final
 
 
-# ************* FILE MENU *************
-
-
 @dataclass(frozen=True)
 class FileMenuActionsNames:
     NEW: Final[str] = "New"

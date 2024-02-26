@@ -16,5 +16,3 @@ class Shortcuts:
     CLOSE: Final[str] = "Ctrl+W"
     CLOSE_ALL: Final[str] = "Ctrl+Shift+W"
     EXIT: Final[str] = "Alt+F4"
-    
-

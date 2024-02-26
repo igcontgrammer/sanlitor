@@ -1,6 +1,7 @@
-from ._menus_constants import ToolsMenuActionsNames
-from . import QMenu, QAction, Slot, SectionsNames
 from common.config_action import config
+
+from . import QAction, QMenu, SectionsNames, Slot
+from ._menus_constants import ToolsMenuActionsNames
 
 
 class ToolsMenu(QMenu):

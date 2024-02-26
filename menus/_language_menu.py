@@ -1,12 +1,13 @@
-from typing import Final, Tuple, Dict
-from . import QMenu, QAction, Slot, SectionsNames
-from common.languages import Languages
+from typing import Dict, Final, Tuple
+
 from common.config_action import config
+from common.languages import Languages
 from syntax import Syntax
+
+from . import QAction, QMenu, SectionsNames, Slot
 
 
 class LanguageMenu(QMenu):
-
     def __init__(self):
         super().__init__()
         self._language_menu = QMenu(SectionsNames.LANGUAGE)

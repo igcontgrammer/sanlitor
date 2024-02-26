@@ -1,10 +1,10 @@
-from ._menus_constants import PluginsMenuActionsNames
-from . import QMenu, QAction, Slot, SectionsNames
 from common.config_action import config
+
+from . import QAction, QMenu, SectionsNames, Slot
+from ._menus_constants import PluginsMenuActionsNames
 
 
 class PluginsMenu(QMenu):
-
     def __init__(self):
         super().__init__()
         self._plugin_menu = QMenu(SectionsNames.PLUGINS)

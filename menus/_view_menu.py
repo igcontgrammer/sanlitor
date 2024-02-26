@@ -1,10 +1,10 @@
-from ._menus_constants import ViewMenuActionsNames, ViewMenuShortcuts
-from . import QMenu, QAction, Slot, SectionsNames
 from common.config_action import config
+
+from . import QAction, QMenu, SectionsNames, Slot
+from ._menus_constants import ViewMenuActionsNames, ViewMenuShortcuts
 
 
 class ViewMenu(QMenu):
-
     def __init__(self):
         super().__init__()
         self._view_menu = QMenu(SectionsNames.VIEW)

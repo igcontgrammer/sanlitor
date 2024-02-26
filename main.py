@@ -1,12 +1,13 @@
 import sys
-from home import Home
 from typing import Self
+
+from PySide6.QtCore import QLibraryInfo, QLocale, QTranslator
 from PySide6.QtWidgets import QApplication
-from PySide6.QtCore import QTranslator, QLocale, QLibraryInfo
+
+from home import Home
 
 
 class Main(QApplication):
-
     _instance = None
 
     def __new__(cls, *args, **kwargs) -> Self:

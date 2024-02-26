@@ -1,22 +1,18 @@
-from theme import ThemeModes
-from PySide6.QtWidgets import QTextEdit, QScrollBar, QTabWidget
 from PySide6.QtCore import Slot
+from PySide6.QtWidgets import QScrollBar, QTabWidget, QTextEdit
+
+from theme import ThemeModes
 from utils import get_circle
 
 
 class Editor(QTextEdit):
-
     def __init__(self, parent=None):
-        super().__init__(parent)
+        super().__init__()
+        self._parent = parent
         self._has_changes = False
         self._is_open_mode = False
         self._scroll_bar = QScrollBar(self)
         self.__configurate()
-
-    # ************* GETTERS AND SETTERS *************
-
-    def __repr__(self) -> str:
-        return super().__repr__()
 
     @property
     def has_changes(self) -> bool:
@@ -37,16 +33,24 @@ class Editor(QTextEdit):
         self._is_open_mode = value
 
     @Slot()
-    def on_change(self) -> None:
+    def _on_change(self) -> None:
+        # when open a file and placing content to the editor, doesn't count as change
+        if self.is_open_mode:
+            return
         self.has_changes = True
         parent = self.parentWidget()
         if parent is not None:
-            tab = parent.parentWidget()
-            if isinstance(tab, QTabWidget) and not self.is_open_mode:
-                tab.setTabIcon(tab.currentIndex(), get_circle(theme=ThemeModes.LIGHT))
+            related_tab = parent.parentWidget()
+            if isinstance(related_tab, QTabWidget):
+                related_tab.setTabIcon(
+                    related_tab.currentIndex(), get_circle(theme=ThemeModes.LIGHT)
+                )
+            else:
+                raise TypeError("tab is not a QTabWidget")
+        print(f"has changes: {self.has_changes}")
 
     def __configurate(self) -> None:
-        self.textChanged.connect(self.on_change)
+        self.textChanged.connect(self._on_change)
         self.setUndoRedoEnabled(True)
         self.setAcceptRichText(True)
         self.setVerticalScrollBar(self._scroll_bar)

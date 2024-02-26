@@ -1,10 +1,10 @@
-from ._menus_constants import SearchMenuActionsNames, SearchMenuShortcuts
-from . import QMenu, QAction, Slot, SectionsNames
 from common.config_action import config
+
+from . import QAction, QMenu, SectionsNames, Slot
+from ._menus_constants import SearchMenuActionsNames, SearchMenuShortcuts
 
 
 class SearchMenu(QMenu):
-
     def __init__(self):
         super().__init__()
         self._search_menu = QMenu(SectionsNames.SEARCH)

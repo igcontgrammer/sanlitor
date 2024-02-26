@@ -1,19 +1,19 @@
 from PySide6.QtWidgets import QMainWindow
-from menus._file_menu import FileMenu
+
 from menus._edit_menu import EditMenu
-from menus._search_menu import SearchMenu
-from menus._view_menu import ViewMenu
 from menus._encoding_menu import EncodingMenu
-from menus._language_menu import LanguageMenu
-from menus._settings_menu import SettingsMenu
-from menus._plugins_menu import PluginsMenu
-from menus._terminal_menu import TerminalMenu
+from menus._file_menu import FileMenu
 from menus._help_menu import HelpMenu
+from menus._language_menu import LanguageMenu
+from menus._plugins_menu import PluginsMenu
+from menus._search_menu import SearchMenu
+from menus._settings_menu import SettingsMenu
+from menus._terminal_menu import TerminalMenu
 from menus._tools_menus import ToolsMenu
+from menus._view_menu import ViewMenu
 
 
 class MenuBar(QMainWindow):
-
     def __init__(self, home: QMainWindow):
         super().__init__()
         self._menu = home.menuBar()
