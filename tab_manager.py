@@ -8,7 +8,7 @@ from constants import TabActions
 from editor import Editor
 from messages import Messages, MessageTypes
 
-_DEFAULT_TAB_NAME: Final[str] = "Untitled"
+_DEFAULT_TAB_NAME: Final[str] = "Untitled.txt"
 
 
 class Tab(QTabWidget):

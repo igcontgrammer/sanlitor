@@ -1,5 +1,7 @@
+import os
 from dataclasses import dataclass
-from typing import Final
+from typing import Final, List
+from PySide6.QtGui import QCloseEvent
 
 from PySide6.QtWidgets import QMainWindow
 
@@ -8,8 +10,10 @@ from statusbar import StatusBar
 from tab_manager import Tab
 from theme import ThemeModes
 from toolbar import ToolBar
+from editor import Editor
 
 _MAIN_WINDOW_TITLE: Final[str] = "Sanlitor"
+_TEMP_FILES_PATH = os.path.dirname(__file__) + "/temp_files/"
 
 
 @dataclass(frozen=True)
@@ -30,7 +34,6 @@ class Home(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        # for now is light by default
         self._tab = Tab()
         self._theme_mode = ThemeModes.LIGHT
         self._geometry = self.geometry()
@@ -46,6 +49,26 @@ class Home(QMainWindow):
     @property
     def theme_mode(self) -> ThemeModes:
         return self._theme_mode
+
+    @property
+    def loaded_files(self) -> List[str]:
+        return self.tab_manager.loaded_files
+
+    def closeEvent(self, event: QCloseEvent) -> None:
+        try:
+            for i in range(self.tab_manager.tabs_count):
+                editor = self.tab_manager.widget(i)
+                if not isinstance(editor, Editor):
+                    raise TypeError("editor is not an Editor object")
+                filename = self.tab_manager.tabText(i)
+                content = editor.toPlainText()
+                with open(_TEMP_FILES_PATH + filename, "w") as file:
+                    file.write(content)
+        except IOError:
+            print(f"Error al guardar el archivo: {file}")
+        except TypeError as te:
+            print(f"Error: {te}")
+        return super().closeEvent(event)
 
     def _add_menu(self) -> None:
         self.menu = MenuBar(home=self)

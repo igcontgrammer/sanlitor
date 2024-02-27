@@ -6,8 +6,7 @@ from theme import ThemeModes
 
 def filename_is_valid(filename: str) -> bool:
     for char in filename:
-        is_number = char.isdigit()
-        if char in ["/", "\\", ":", "*", "?", '"', "<", ">", "|"] or is_number:
+        if char in ["/", "\\", ":", "*", "?", '"', "<", ">", "|"]:
             return False
     return True
 

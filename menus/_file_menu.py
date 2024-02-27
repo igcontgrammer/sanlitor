@@ -9,6 +9,7 @@ from constants import OpenFileOptions
 from editor import Editor
 from extensions import available_extensions, get_extensions_list
 from messages import Messages, MessageTypes
+from storage_manager import is_registered, save_from_already_exists, save_from_path
 from tab_manager import Tab
 from utils import filename_is_valid
 
@@ -193,23 +194,43 @@ class FileMenu(QMenu):
 
     @Slot()
     def _save_file(self) -> None:
-        # TODO: obtener el current tab
         from home import Home
 
         self._home: Home
         tab_manager = self._home.tab_manager
         current_index = tab_manager.current_index
+        filename = tab_manager.tabText(current_index)
         editor = tab_manager.widget(current_index)
         if not isinstance(editor, Editor):
             raise TypeError("editor is not an Editor object")
         content = editor.toPlainText()
+        if is_registered(filename):
+            if save_from_already_exists(filename, content):
+                editor.has_changes = False
+                tab_manager.setTabIcon(current_index, QIcon())
+                return
+            else:
+                msg = Messages(
+                    parent=self._home,
+                    content="No se pudo guardar el archivo. Intente de nuevo.",
+                    first_button_title="Aceptar",
+                    type=MessageTypes.CRITICAL,
+                )
+                msg.run()
+                editor.has_changes = False
+                tab_manager.setTabIcon(current_index, QIcon())
+                return
         file = QFileDialog.getSaveFileName(
             self,
             CoreApp.translate("file_menu", "Guardar archivo"),
             filter=get_extensions_list(),
             dir=os.path.expanduser("~"),
         )
-        filename = os.path.basename(file[0])
+        path = file[0]
+        has_saved = len(path) > 0
+        if not has_saved:
+            return None
+        filename = os.path.basename(path)
         if not filename_is_valid(filename):
             msg = Messages(
                 parent=self._home,
@@ -218,11 +239,21 @@ class FileMenu(QMenu):
                 type=MessageTypes.CRITICAL,
             )
             msg.run()
-        with open(file[0], "w") as file:
+        with open(path, "w") as file:
             file.write(content)
-        tab_manager.setTabText(current_index, filename)
-        editor.has_changes = False
-        tab_manager.setTabIcon(current_index, QIcon())
+        if save_from_path(path):
+            tab_manager.setTabText(current_index, filename)
+            editor.has_changes = False
+            tab_manager.setTabIcon(current_index, QIcon())
+        else:
+            # si no se pudo guardar el archivo, se debe mostrar un mensaje de error
+            msg = Messages(
+                parent=self._home,
+                content="No se pudo guardar el archivo. Intente de nuevo.",
+                first_button_title="Aceptar",
+                type=MessageTypes.CRITICAL,
+            )
+            msg.run()
 
     @Slot()
     def _save_all_files(self) -> None:
