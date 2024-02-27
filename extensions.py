@@ -1,5 +1,37 @@
 from dataclasses import dataclass
-from typing import List
+from typing import Dict, Final, List
+
+EXTENSIONS_LIST: Final[Dict[str, str]] = {
+    "Text Plain": "(*.txt)",
+    "Assembly": "(*.asm)",
+    "C": "(*.c)",
+    "C++": "(*.cpp)",
+    "C#": "(*.cs)",
+    "CSS": "(*.css)",
+    "HTML": "(*.html)",
+    "Java": "(*.java)",
+    "JavaScript": "(*.js)",
+    "JSON": "(*.json)",
+    "Lua": "(*.lua)",
+    "Lisp": "(*.lisp)",
+    "Emacs Lisp": "(*.el)",
+    "Matlab": "(*.m)",
+    "Markdown": "(*.md)",
+    "OCaml": "(*.ml)",
+    "PHP": "(*.php)",
+    "Python": "(*.py)",
+    "PowerShell": "(*.ps1)",
+    "Ruby": "(*.rb)",
+    "Rust": "(*.rs)",
+    "R": "(*.r)",
+    "SQL": "(*.sql)",
+    "Swift": "(*.swift)",
+    "Shell": "(*.sh)",
+    "Scala": "(*.scala)",
+    "TypeScript": "(*.ts)",
+    "XML": "(*.xml)",
+    "YAML": "(*.yaml)",
+}
 
 
 def available_extensions() -> List[str]:
@@ -8,6 +40,16 @@ def available_extensions() -> List[str]:
         for attr in dir(Extensions)
         if not attr.startswith("__") and not callable(getattr(Extensions, attr))
     ]
+
+
+def get_extensions_list() -> str:
+    extensions = ""
+    for key, value in EXTENSIONS_LIST.items():
+        if key == "YAML":
+            extensions += f"{key} {value}"
+            break
+        extensions += f"{key} {value};;"
+    return extensions
 
 
 @dataclass(frozen=True)

@@ -1,4 +1,4 @@
-from typing import Final, List
+from typing import Final, List, Optional
 
 from PySide6.QtCore import QCoreApplication as CoreApp
 from PySide6.QtGui import QIcon
@@ -78,12 +78,13 @@ class Tab(QTabWidget):
         self.setTabsClosable(True)
         self.tabCloseRequested.connect(self.on_close)
 
-    def add_new_tab(self, name: str, content: str) -> None:
+    def new(self, filename: str, content: Optional[str] = None) -> None:
         new_editor = Editor()
-        new_editor.setPlainText(content)
+        new_editor.setPlainText("" if content is None else content)
         new_editor.has_changes = False
-        new_index = self.addTab(new_editor, name)
+        new_index = self.addTab(new_editor, filename)
         self.setCurrentIndex(new_index)
+        self._loaded_files.append(filename)
 
     # TODO: create the on save state
     def on_close(self, index: int) -> None:

@@ -3,6 +3,14 @@ from PySide6.QtGui import QPixmap, QIcon, QColor
 from PySide6.QtCore import Qt
 
 
+def filename_is_valid(filename: str) -> bool:
+    for char in filename:
+        is_number = char.isdigit()
+        if char in ["/", "\\", ":", "*", "?", '"', "<", ">", "|"] or is_number:
+            return False
+    return True
+
+
 def get_circle(theme: ThemeModes) -> QIcon:
     """A function that returns a white or black circle icon, according to the selected theme
 

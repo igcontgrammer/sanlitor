@@ -1,16 +1,20 @@
 import os
+from typing import Final
 
+from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QFileDialog
 
 from common.config_action import config
 from constants import OpenFileOptions
-from extensions import available_extensions
+from editor import Editor
+from extensions import available_extensions, get_extensions_list
 from messages import Messages, MessageTypes
 from tab_manager import Tab
 
 from . import QAction, QMenu, SectionsNames, Slot
 from . import QCoreApplication as CoreApp
 from ._menus_constants import FileMenuActionsNames, FileMenuShortcuts
+from utils import filename_is_valid
 
 
 def get_content_from_file(path: str) -> str:
@@ -23,24 +27,12 @@ def get_content_from_file(path: str) -> str:
         return ""
 
 
-def when_opening(tab_manager: Tab, path: str, here: bool = False) -> None:
-    editor = tab_manager.editor
-    tab_manager.set_is_open_mode(True)
-    filename = os.path.basename(path)
-    if here:
-        tab_manager.change_tab_name(filename)
-        tab_manager.add_content_to_current_tab(
-            content=get_content_from_file(path)
-        )
-    else:
-        tab_manager.add_new_tab(filename, get_content_from_file(path))
-    editor.has_changes = False
-    tab_manager.set_is_open_mode(False)
-    tab_manager.add_to_loaded_files(filename)
-
-
-def has_opened_a_file(filepath: str) -> bool:
+def has_opened_file(filepath: str) -> bool:
     return len(filepath) > 0
+
+
+_DEFAULT_NEW_FILENAME: Final[str] = "new.txt"
+_STARTING_NEW_FILE_COUNTER: Final[int] = 1
 
 
 class FileMenu(QMenu):
@@ -64,6 +56,8 @@ class FileMenu(QMenu):
         self._close_all_files_action()
         self._print_action()
         self._exit_action()
+
+    # ************* ACTIONS *************
 
     def _open_file_action(self) -> None:
         open_file_action = QAction(FileMenuActionsNames.OPEN, self)
@@ -121,7 +115,7 @@ class FileMenu(QMenu):
             action=close_file_action,
             status_tip=CoreApp.translate("file_menu", "Close a file"),
             shortcut=FileMenuShortcuts.CLOSE,
-            method=self._edit_file,
+            method=None,
         )
         self._menu.addAction(close_file_action)
 
@@ -131,7 +125,7 @@ class FileMenu(QMenu):
             action=close_all_files_action,
             status_tip=CoreApp.translate("file_menu", "Close all files"),
             shortcut=FileMenuShortcuts.CLOSE_ALL,
-            method=self._edit_file,
+            method=None,
         )
         self._menu.addAction(close_all_files_action)
 
@@ -162,7 +156,7 @@ class FileMenu(QMenu):
             CoreApp.translate("file_menu", "Abrir archivo"),
             dir=os.path.expanduser("~"),
         )
-        if not has_opened_a_file(file[0]):
+        if not has_opened_file(filepath=file[0]):
             return None
         path = file[0]
         extension_detected = os.path.splitext(path)[1]
@@ -179,51 +173,56 @@ class FileMenu(QMenu):
             return
         match self._get_open_file_option():
             case OpenFileOptions.HERE:
-                when_opening(tab_manager, path, here=True)
+                self._when_opening(tab_manager, path, here=True)
             case OpenFileOptions.NEW_TAB:
-                when_opening(tab_manager, path)
+                self._when_opening(tab_manager, path)
             case OpenFileOptions.CANCEL:
                 return
             case _:
                 return
 
-    def _get_open_file_option(self) -> int:
-        msg = Messages(
-            parent=self._home,
-            title="Abrir Archivo",
-            content="¿Dónde desea abrir el archivo?",
-            first_button_title="Aquí",
-            type=MessageTypes.QUESTION,
-        )
-        msg.add_button("En una nueva pestaña")
-        option_selected = msg.run()
-        if option_selected not in OpenFileOptions.ALLOWED_OPTIONS:
-            return OpenFileOptions.CANCEL
-        return OpenFileOptions.HERE if option_selected == 0 else OpenFileOptions.NEW_TAB
-
-    def show_extension_not_allowed_message(self) -> None:
-        msg = Messages(
-            parent=self._home,
-            content="La extensión de este archivo no es permitida.",
-            first_button_title="AceptarDe acuerdoDe acuerdo",
-            type=MessageTypes.CRITICAL,
-        )
-        msg.run()
+    # ************* SLOTS *************
 
     @Slot()
     def _new_file(self) -> None:
-        print("Creating a new file...")
-        pass
+        from home import Home
 
-    @Slot()
-    def _edit_file(self) -> None:
-        print("Editing a file...")
-        pass
+        self._home: Home
+        tab = self._home.tab_manager
+        tab.new(self.get_new_filename(tab))
 
     @Slot()
     def _save_file(self) -> None:
-        print("Saving a file...")
-        pass
+        # TODO: obtener el current tab
+        from home import Home
+
+        self._home: Home
+        tab_manager = self._home.tab_manager
+        current_index = tab_manager.current_index
+        editor = tab_manager.widget(current_index)
+        if not isinstance(editor, Editor):
+            raise TypeError("editor is not an Editor object")
+        content = editor.toPlainText()
+        file = QFileDialog.getSaveFileName(
+            self,
+            CoreApp.translate("file_menu", "Guardar archivo"),
+            filter=get_extensions_list(),
+            dir=os.path.expanduser("~"),
+        )
+        filename = os.path.basename(file[0])
+        if not filename_is_valid(filename):
+            msg = Messages(
+                parent=self._home,
+                content='El nombre del archivo no puede contener los siguientes caracteres: /, \\, :, *, ?, ", <, >, |',
+                first_button_title="Aceptar",
+                type=MessageTypes.CRITICAL,
+            )
+            msg.run()
+        with open(file[0], "w") as file:
+            file.write(content)
+        tab_manager.setTabText(current_index, filename)
+        editor.has_changes = False
+        tab_manager.setTabIcon(current_index, QIcon())
 
     @Slot()
     def _save_all_files(self) -> None:
@@ -239,3 +238,59 @@ class FileMenu(QMenu):
     def _exit_application(self) -> None:
         print("Exiting the application...")
         pass
+
+    # ************* SLOTS FUNCTIONS *************
+
+    def show_extension_not_allowed_message(self) -> None:
+        msg = Messages(
+            parent=self._home,
+            content="La extensión de este archivo no es permitida.",
+            first_button_title="AceptarDe acuerdoDe acuerdo",
+            type=MessageTypes.CRITICAL,
+        )
+        msg.run()
+
+    def get_new_filename(self, tab: Tab) -> str:
+        if _DEFAULT_NEW_FILENAME in tab.loaded_files:
+            for i in range(_STARTING_NEW_FILE_COUNTER, tab.tabs_count):
+                name = f"new({i}).txt"
+                if name in tab.loaded_files:
+                    continue
+                return name
+        return _DEFAULT_NEW_FILENAME
+
+    def _when_opening(self, tab_manager: Tab, path: str, here: bool = False) -> None:
+        editor = tab_manager.editor
+        if editor.has_changes:
+            msg = Messages(
+                parent=self._home,
+                content="Se detectaron cambios en este archivo ¿desea abrir de todas formas?",
+                first_button_title="Abrir",
+                type=MessageTypes.WARNING,
+            )
+            if msg.run() != OpenFileOptions.OPEN_ANYWAY:
+                return
+        tab_manager.set_is_open_mode(True)
+        filename = os.path.basename(path)
+        if here:
+            tab_manager.change_tab_name(filename)
+            tab_manager.add_content_to_current_tab(content=get_content_from_file(path))
+        else:
+            tab_manager.new(filename, get_content_from_file(path))
+        editor.has_changes = False
+        tab_manager.set_is_open_mode(False)
+        tab_manager.add_to_loaded_files(filename)
+
+    def _get_open_file_option(self) -> int:
+        msg = Messages(
+            parent=self._home,
+            title="Abrir Archivo",
+            content="¿Dónde desea abrir el archivo?",
+            first_button_title="Aquí",
+            type=MessageTypes.QUESTION,
+        )
+        msg.add_button("En una nueva pestaña")
+        option_selected = msg.run()
+        if option_selected not in OpenFileOptions.ALLOWED_OPTIONS:
+            return OpenFileOptions.CANCEL
+        return OpenFileOptions.HERE if option_selected == 0 else OpenFileOptions.NEW_TAB
