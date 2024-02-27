@@ -10,11 +10,11 @@ from editor import Editor
 from extensions import available_extensions, get_extensions_list
 from messages import Messages, MessageTypes
 from tab_manager import Tab
+from utils import filename_is_valid
 
 from . import QAction, QMenu, SectionsNames, Slot
 from . import QCoreApplication as CoreApp
 from ._menus_constants import FileMenuActionsNames, FileMenuShortcuts
-from utils import filename_is_valid
 
 
 def get_content_from_file(path: str) -> str:
