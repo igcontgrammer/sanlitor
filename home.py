@@ -8,7 +8,7 @@ from PySide6.QtWidgets import QMainWindow
 from editor import Editor
 from menus.menu import MenuBar
 from statusbar import StatusBar
-from storage_manager import has_opened_tabs, save_opened_file, get_opened_files
+from storage_manager import get_opened_files, has_opened_tabs, save_opened_file
 from tab_manager import Tab
 from theme import ThemeModes
 from toolbar import ToolBar
