@@ -71,7 +71,7 @@ def save_opened_file(filename: str) -> None:
         print(f"exception: {ex}")
 
 
-def save_from_already_exists(filename: str, lala: str) -> bool:
+def save_from_already_exists(filename: str, value: str) -> bool:
     try:
         with open(_STORAGE_ROUTE, "r") as file:
             content = json.load(file)
@@ -79,7 +79,7 @@ def save_from_already_exists(filename: str, lala: str) -> bool:
             for path in paths:
                 if os.path.basename(path) == filename:
                     with open(path, "w") as file:
-                        file.write(lala)
+                        file.write(value)
                         return True
         return False
     except Exception as e:
