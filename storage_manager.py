@@ -2,9 +2,6 @@ import json
 import os
 from typing import List
 
-script_dir = os.path.dirname(__file__)
-file_path = os.path.join(script_dir, "storage/files.json")
-
 
 _DIR = os.path.dirname(__file__)
 _STORAGE_ROUTE = _DIR + "/storage/files.json"
@@ -38,7 +35,7 @@ def has_opened_tabs() -> bool:
         return len(opened_files) > 0
 
 
-def get_opened_files() -> List[str]:
+def get_opened_tabs() -> List[str]:
     with open(_STORAGE_ROUTE, "r") as file:
         content = json.load(file)
         opened_files = content["openedFiles"]
