@@ -1,9 +1,15 @@
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import Dict, Optional, Final
+from typing import Dict, Final, Optional
 
 from PySide6.QtCore import QCoreApplication as coreapp
 from PySide6.QtWidgets import QMessageBox, QWidget
+
+_COMMON_MESSAGE_TITLES: Final[Dict[int, str]] = {
+    1: "Advertencia",
+    2: "Error",
+    3: "Aviso",
+}
 
 
 @dataclass(frozen=True)
@@ -19,13 +25,6 @@ class MessageTypes(Enum):
     WARNING = auto()
     CRITICAL = auto()
     QUESTION = auto()
-
-
-_COMMON_MESSAGE_TITLES: Final[Dict[int, str]] = {
-    1: "Advertencia",
-    2: "Error",
-    3: "Aviso",
-}
 
 
 def system_error(parent: QWidget) -> None:

@@ -18,18 +18,31 @@ _STORAGE_ROUTE = _DIR + "/storage/files.json"
 
 
 def is_registered(filename: str) -> bool:
-    if filename is not None:
-        try:
-            with open(_STORAGE_ROUTE, "r") as file:
-                content = json.load(file)
-                paths = content["registeredFiles"]
-                for path in paths:
-                    if os.path.basename(path) == filename:
-                        return True
-                return False
-        except FileNotFoundError as e:
-            print(f"File not found: {e}")
+    try:
+        with open(_STORAGE_ROUTE, "r") as file:
+            content = json.load(file)
+            paths = content["registeredFiles"]
+            for path in paths:
+                if os.path.basename(path) == filename:
+                    return True
             return False
+    except FileNotFoundError as e:
+        print(f"File not found: {e}")
+        return False
+
+
+def has_opened_tabs() -> bool:
+    with open(_STORAGE_ROUTE, "r") as file:
+        content = json.load(file)
+        opened_files = content["openedFiles"]
+        return len(opened_files) > 0
+
+
+def get_opened_files() -> List[str]:
+    with open(_STORAGE_ROUTE, "r") as file:
+        content = json.load(file)
+        opened_files = content["openedFiles"]
+        return opened_files
 
 
 def save_from_path(path: str) -> bool:
@@ -47,8 +60,18 @@ def save_from_path(path: str) -> bool:
         return False
 
 
-def save_files_worked_on(filenames: List[str]) -> bool:
-    return False
+def save_opened_file(filename: str) -> None:
+    opened_files: List[str]
+    try:
+        with open(_STORAGE_ROUTE, "r") as file:
+            content = json.load(file)
+            opened_files = content["openedFiles"]
+            with open(_STORAGE_ROUTE, "w") as file:
+                opened_files.append(filename)
+                content["openedFiles"] = opened_files
+                json.dump(content, file, indent=4)
+    except Exception as ex:
+        print(f"exception: {ex}")
 
 
 def save_from_already_exists(filename: str, lala: str) -> bool:

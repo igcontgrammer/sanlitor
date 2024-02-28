@@ -1,16 +1,17 @@
 import os
 from dataclasses import dataclass
 from typing import Final, List
-from PySide6.QtGui import QCloseEvent
 
+from PySide6.QtGui import QCloseEvent
 from PySide6.QtWidgets import QMainWindow
 
+from editor import Editor
 from menus.menu import MenuBar
 from statusbar import StatusBar
+from storage_manager import has_opened_tabs, save_opened_file, get_opened_files
 from tab_manager import Tab
 from theme import ThemeModes
 from toolbar import ToolBar
-from editor import Editor
 
 _MAIN_WINDOW_TITLE: Final[str] = "Sanlitor"
 _TEMP_FILES_PATH = os.path.dirname(__file__) + "/temp_files/"
@@ -39,8 +40,7 @@ class Home(QMainWindow):
         self._geometry = self.geometry()
         self.__set_main_window_default_config()
         self.__call_main_widgets()
-        self._tab.build_default_tab()
-        self.setCentralWidget(self._tab)
+        self._build_tabs_on_startup()
 
     @property
     def tab_manager(self) -> Tab:
@@ -54,8 +54,23 @@ class Home(QMainWindow):
     def loaded_files(self) -> List[str]:
         return self.tab_manager.loaded_files
 
+    def _build_tabs_on_startup(self) -> None:
+        if has_opened_tabs():
+            opened_files = get_opened_files()
+            for filename in opened_files:
+                with open(_TEMP_FILES_PATH + filename, "r") as file:
+                    content = file.read()
+                    editor = Editor()
+                    editor.setPlainText(content)
+                    editor.has_changes = False
+                    self._tab.addTab(editor, filename)
+        else:
+            self._tab.build_default_tab()
+        self.setCentralWidget(self._tab)
+
     def closeEvent(self, event: QCloseEvent) -> None:
         try:
+            opened_files = get_opened_files()
             for i in range(self.tab_manager.tabs_count):
                 editor = self.tab_manager.widget(i)
                 if not isinstance(editor, Editor):
@@ -64,18 +79,19 @@ class Home(QMainWindow):
                 content = editor.toPlainText()
                 with open(_TEMP_FILES_PATH + filename, "w") as file:
                     file.write(content)
+                if filename not in opened_files:
+                    self.save_last_opened_files(filename)
         except IOError:
             print(f"Error al guardar el archivo: {file}")
         except TypeError as te:
             print(f"Error: {te}")
         return super().closeEvent(event)
 
+    def save_last_opened_files(self, filename: str) -> None:
+        save_opened_file(filename)
+
     def _add_menu(self) -> None:
         self.menu = MenuBar(home=self)
-
-    # TODO: buscar en la memoria, los ultimos tabs que haya abierto el usuario
-    def _get_last_opened_tab(self) -> Tab:
-        pass
 
     def _add_toolbar(self) -> None:
         self.toolbar = ToolBar()
