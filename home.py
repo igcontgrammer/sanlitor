@@ -37,7 +37,6 @@ class Home(QMainWindow):
         super().__init__()
         self._tab = Tab()
         self._theme_mode = ThemeModes.LIGHT
-        self._geometry = self.geometry()
         self.__set_main_window_default_config()
         self.__call_main_widgets()
         self._build_tabs_on_startup()
