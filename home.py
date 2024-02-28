@@ -8,7 +8,7 @@ from PySide6.QtWidgets import QMainWindow
 from editor import Editor
 from menus.menu import MenuBar
 from statusbar import StatusBar
-from storage_manager import get_opened_files, has_opened_tabs, save_opened_file
+from storage_manager import get_opened_tabs, has_opened_tabs, save_opened_file
 from tab_manager import Tab
 from theme import ThemeModes
 from toolbar import ToolBar
@@ -55,8 +55,7 @@ class Home(QMainWindow):
 
     def _build_tabs_on_startup(self) -> None:
         if has_opened_tabs():
-            opened_files = get_opened_files()
-            for filename in opened_files:
+            for filename in get_opened_tabs():
                 with open(_TEMP_FILES_PATH + filename, "r") as file:
                     content = file.read()
                     editor = Editor()
@@ -69,7 +68,7 @@ class Home(QMainWindow):
 
     def closeEvent(self, event: QCloseEvent) -> None:
         try:
-            opened_files = get_opened_files()
+            opened_files = get_opened_tabs()
             for i in range(self.tab_manager.tabs_count):
                 editor = self.tab_manager.widget(i)
                 if not isinstance(editor, Editor):
