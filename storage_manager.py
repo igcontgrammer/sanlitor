@@ -32,10 +32,9 @@ class StorageManager:
         return self._last_tab_worked_index
 
     def is_registered(self, file_name: str) -> bool:
-        return file_name in self._files_worked
+        return file_name in self._files_saved
 
     def update_last_tab_worked_index(self, index: int) -> None:
-        print(f"ULTIMO INDICE DESDE EL JSON: {self._last_tab_worked_index}")
         with open(_STORAGE_ROUTE, "w") as file:
             self._content["lastTabWorkedIndex"] = index
             json.dump(self._content, file, indent=4)
@@ -47,6 +46,10 @@ class StorageManager:
             self._content["filesWorkedOn"] = self._files_worked
             self._content["lastTabWorkedIndex"] = index
             json.dump(self._content, file, indent=4)
+
+    def delete_temp_files(self, files: List[str]) -> None:
+        # si el usuario elimina el tab o guarda el archivo en otra parte, se elimina de temp files
+        pass
 
     def get_last_files_worked(self) -> List[str]:
         """Get the last tabs that were opened by the user"""
@@ -67,7 +70,7 @@ class StorageManager:
         try:
             if path is not None:
                 self._files_saved.append(path)
-                content["registeredFiles"] = self._files_saved
+                content["savedFiles"] = self._files_saved
                 with open(_STORAGE_ROUTE, "w") as write_file:
                     json.dump(content, write_file, indent=4)
                     return True
@@ -79,6 +82,12 @@ class StorageManager:
                             return True
             else:
                 raise ValueError("filename and value or path must be provided")
+        except ValueError as ve:
+            print(f"exception at save_changes: {ve}")
+            return False
         except (FileNotFoundError, json.JSONDecodeError) as e:
+            print(f"exception at save_changes: {e}")
+            return False
+        except Exception as e:
             print(f"exception at save_changes: {e}")
             return False

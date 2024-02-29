@@ -33,7 +33,6 @@ def system_error(parent: QWidget) -> None:
         coreapp.translate("messages", MessageConstants.SYSTEM_ERROR_TITLE),
         coreapp.translate("messages", MessageConstants.SYSTEM_ERROR_MESSAGE),
     )
-    # TODO: enviar este error a un sistema de reportes?
 
 
 class Messages(QMessageBox):

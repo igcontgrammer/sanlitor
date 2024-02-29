@@ -38,6 +38,7 @@ def has_opened_file(filepath: str) -> bool:
 
 def get_new_filename(h, tab: Tab) -> str:
     from home import Home
+
     h: Home
     files_worked_on = h.storage_manager.get_last_files_worked()
     if _DEFAULT_NEW_FILENAME not in files_worked_on:
@@ -209,27 +210,23 @@ class FileMenu(QMenu):
         self._home: Home
         tab_manager = self._home.tab_manager
         current_index = tab_manager.current_index
-        filename = tab_manager.tabText(current_index)
         editor = tab_manager.widget(current_index)
         if not isinstance(editor, Editor):
-            raise TypeError("editor is not an Editor object")
-        content = editor.toPlainText()
-        if editor.has_changes and StorageManager.is_registered(filename):
-            if StorageManager.save_changes(filename=filename, value=content):
-                editor.has_changes = False
-                tab_manager.setTabIcon(current_index, QIcon())
+            print("editor is not an Editor object")
+            return None
+        file_name = tab_manager.tabText(current_index)
+        if editor.has_changes and self._home.is_registered(file_name):
+            content = editor.toPlainText()
+            # TODO: si ya está en los registros de la app, se guarda automáticamente
+            saved_successfully = self._home.storage_manager.save_changes(
+                file_name=file_name, value=content
+            )
+            if not saved_successfully:
+                Messages.system_error(self._home)
                 return
-            else:
-                msg = Messages(
-                    parent=self._home,
-                    content="No se pudo guardar el archivo. Intente de nuevo.",
-                    first_button_title="Aceptar",
-                    type=MessageTypes.CRITICAL,
-                )
-                msg.run()
-                editor.has_changes = False
-                tab_manager.setTabIcon(current_index, QIcon())
-                return
+            editor.has_changes = False
+            tab_manager.setTabIcon(current_index, QIcon())
+            return
         file = QFileDialog.getSaveFileName(
             self,
             CoreApp.translate("file_menu", "Guardar archivo"),
@@ -249,9 +246,10 @@ class FileMenu(QMenu):
                 type=MessageTypes.CRITICAL,
             )
             msg.run()
+        content = editor.toPlainText()
         with open(path, "w") as file:
             file.write(content)
-        if StorageManager.save_changes(path=path):
+        if self._home.storage_manager.save_changes(path=path):
             tab_manager.setTabText(current_index, filename)
             editor.has_changes = False
             tab_manager.setTabIcon(current_index, QIcon())
@@ -264,6 +262,64 @@ class FileMenu(QMenu):
                 type=MessageTypes.CRITICAL,
             )
             msg.run()
+        # content = editor.toPlainText()
+        # if not isinstance(editor, Editor):
+        #     raise TypeError("editor is not an Editor object")
+        # content = editor.toPlainText()
+        # if editor.has_changes and not self._home.storage_manager.is_registered(
+        #     filename
+        # ):
+        #     if self._home.storage_manager.save_changes(
+        #         file_name=filename, value=content
+        #     ):
+        #         editor.has_changes = False
+        #         tab_manager.setTabIcon(current_index, QIcon())
+        #         return
+        #     else:
+        #         msg = Messages(
+        #             parent=self._home,
+        #             content="No se pudo guardar el archivo. Intente de nuevo.",
+        #             first_button_title="Aceptar",
+        #             type=MessageTypes.CRITICAL,
+        #         )
+        #         msg.run()
+        #         editor.has_changes = False
+        #         tab_manager.setTabIcon(current_index, QIcon())
+        #         return
+        # file = QFileDialog.getSaveFileName(
+        #     self,
+        #     CoreApp.translate("file_menu", "Guardar archivo"),
+        #     filter=get_extensions_list(),
+        #     dir=os.path.expanduser("~"),
+        # )
+        # path = file[0]
+        # has_saved = len(path) > 0
+        # if not has_saved:
+        #     return None
+        # filename = os.path.basename(path)
+        # if not filename_is_valid(filename):
+        #     msg = Messages(
+        #         parent=self._home,
+        #         content='El nombre del archivo no puede contener los siguientes caracteres: /, \\, :, *, ?, ", <, >, |',
+        #         first_button_title="Aceptar",
+        #         type=MessageTypes.CRITICAL,
+        #     )
+        #     msg.run()
+        # with open(path, "w") as file:
+        #     file.write(content)
+        # if StorageManager.save_changes(path=path):
+        #     tab_manager.setTabText(current_index, filename)
+        #     editor.has_changes = False
+        #     tab_manager.setTabIcon(current_index, QIcon())
+        # else:
+        #     # si no se pudo guardar el archivo, se debe mostrar un mensaje de error
+        #     msg = Messages(
+        #         parent=self._home,
+        #         content="No se pudo guardar el archivo. Intente de nuevo.",
+        #         first_button_title="Aceptar",
+        #         type=MessageTypes.CRITICAL,
+        #     )
+        #     msg.run()
 
     @Slot()
     def _save_all_files(self) -> None:

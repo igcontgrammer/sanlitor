@@ -29,8 +29,6 @@ class ToolBar(QToolBar):
         self._toolbar.setMovable(False)
         self._toolbar.setFloatable(False)
 
-    # TODO: en lugar del texto, debe ir un icono
-
     def _set_actions(self) -> None:
         self._new_action()
         self._open_action()

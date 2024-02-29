@@ -18,6 +18,7 @@ class Tab(QTabWidget):
         self._has_on_close = None
         self._editor = Editor()
         self._loaded_files: List[str] = []
+        self._build_tabs_on_startup()
 
     @property
     def editor(self) -> Editor:
@@ -54,6 +55,20 @@ class Tab(QTabWidget):
     @property
     def home(self):
         return self._home
+
+    def _build_tabs_on_startup(self) -> None:
+        from home import Home
+
+        self._home: Home
+        storage_manager = self._home.storage_manager
+        if not storage_manager.has_opened_tabs:
+            self.build_default_tab()
+        else:
+            for file_name in storage_manager.opened_files:
+                with open(self._home._TEMP_FILES_PATH + file_name, "r") as file:
+                    content = file.read()
+                    self.new(file_name, True, content)
+            self.setCurrentIndex(storage_manager.last_tab_worked_index)
 
     def already_opened(self, filename: str) -> bool:
         return filename in self.loaded_files
