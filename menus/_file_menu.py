@@ -9,13 +9,17 @@ from constants import OpenFileOptions
 from editor import Editor
 from extensions import available_extensions, get_extensions_list
 from messages import Messages, MessageTypes
-from storage_manager import is_registered, save_from_already_exists, save_from_path
+from storage_manager import StorageManager
 from tab_manager import Tab
 from utils import filename_is_valid
 
-from . import QAction, QMenu, SectionsNames, Slot
+from . import QAction
 from . import QCoreApplication as CoreApp
+from . import QMenu, SectionsNames, Slot
 from ._menus_constants import FileMenuActionsNames, FileMenuShortcuts
+
+_DEFAULT_NEW_FILENAME: Final[str] = "new.txt"
+_STARTING_NEW_FILE_COUNTER: Final[int] = 1
 
 
 def get_content_from_file(path: str) -> str:
@@ -32,8 +36,17 @@ def has_opened_file(filepath: str) -> bool:
     return len(filepath) > 0
 
 
-_DEFAULT_NEW_FILENAME: Final[str] = "new.txt"
-_STARTING_NEW_FILE_COUNTER: Final[int] = 1
+def get_new_filename(h, tab: Tab) -> str:
+    from home import Home
+    h: Home
+    files_worked_on = h.storage_manager.get_last_files_worked()
+    if _DEFAULT_NEW_FILENAME not in files_worked_on:
+        return _DEFAULT_NEW_FILENAME
+    for i in range(_STARTING_NEW_FILE_COUNTER, tab.tabs_count):
+        name = f"new({i}).txt"
+        if name in tab.loaded_files or name in files_worked_on:
+            continue
+        return name
 
 
 class FileMenu(QMenu):
@@ -186,11 +199,8 @@ class FileMenu(QMenu):
 
     @Slot()
     def _new_file(self) -> None:
-        from home import Home
-
-        self._home: Home
         tab = self._home.tab_manager
-        tab.new(self.get_new_filename(tab))
+        tab.new(get_new_filename(h=self._home, tab=tab), False)
 
     @Slot()
     def _save_file(self) -> None:
@@ -204,8 +214,8 @@ class FileMenu(QMenu):
         if not isinstance(editor, Editor):
             raise TypeError("editor is not an Editor object")
         content = editor.toPlainText()
-        if is_registered(filename):
-            if save_from_already_exists(filename, content):
+        if editor.has_changes and StorageManager.is_registered(filename):
+            if StorageManager.save_changes(filename=filename, value=content):
                 editor.has_changes = False
                 tab_manager.setTabIcon(current_index, QIcon())
                 return
@@ -241,7 +251,7 @@ class FileMenu(QMenu):
             msg.run()
         with open(path, "w") as file:
             file.write(content)
-        if save_from_path(path):
+        if StorageManager.save_changes(path=path):
             tab_manager.setTabText(current_index, filename)
             editor.has_changes = False
             tab_manager.setTabIcon(current_index, QIcon())
@@ -281,15 +291,6 @@ class FileMenu(QMenu):
         )
         msg.run()
 
-    def get_new_filename(self, tab: Tab) -> str:
-        if _DEFAULT_NEW_FILENAME in tab.loaded_files:
-            for i in range(_STARTING_NEW_FILE_COUNTER, tab.tabs_count):
-                name = f"new({i}).txt"
-                if name in tab.loaded_files:
-                    continue
-                return name
-        return _DEFAULT_NEW_FILENAME
-
     def _when_opening(self, tab_manager: Tab, path: str, here: bool = False) -> None:
         editor = tab_manager.editor
         if editor.has_changes:
@@ -307,7 +308,7 @@ class FileMenu(QMenu):
             tab_manager.change_tab_name(filename)
             tab_manager.add_content_to_current_tab(content=get_content_from_file(path))
         else:
-            tab_manager.new(filename, get_content_from_file(path))
+            tab_manager.new(filename, False, get_content_from_file(path))
         editor.has_changes = False
         tab_manager.set_is_open_mode(False)
         tab_manager.add_to_loaded_files(filename)

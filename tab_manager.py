@@ -12,8 +12,10 @@ _DEFAULT_TAB_NAME: Final[str] = "Untitled.txt"
 
 
 class Tab(QTabWidget):
-    def __init__(self):
+    def __init__(self, home):
         super().__init__()
+        self._home = home
+        self._has_on_close = None
         self._editor = Editor()
         self._loaded_files: List[str] = []
 
@@ -33,6 +35,10 @@ class Tab(QTabWidget):
     def loaded_files(self) -> List[str]:
         return list(set(self._loaded_files))
 
+    @loaded_files.setter
+    def loaded_files(self, value: List[str]):
+        self._loaded_files = value
+
     @property
     def current_index(self) -> int:
         return self.currentIndex()
@@ -44,6 +50,10 @@ class Tab(QTabWidget):
     @property
     def is_default(self) -> bool:
         return self.tabs_count == 1
+
+    @property
+    def home(self):
+        return self._home
 
     def already_opened(self, filename: str) -> bool:
         return filename in self.loaded_files
@@ -78,20 +88,33 @@ class Tab(QTabWidget):
         self.setTabsClosable(True)
         self.tabCloseRequested.connect(self.on_close)
 
-    def new(self, filename: str, content: Optional[str] = None) -> None:
+    def new(
+        self, filename: str, is_from_opened: bool, content: Optional[str] = None
+    ) -> None:
         new_editor = Editor()
         new_editor.setPlainText("" if content is None else content)
         new_editor.has_changes = False
         new_index = self.addTab(new_editor, filename)
-        self.setCurrentIndex(new_index)
-        self._loaded_files.append(filename)
+        if not is_from_opened:
+            self.setCurrentIndex(new_index)
+            self._loaded_files.append(filename)
+        if self._has_on_close is None:
+            self.tabCloseRequested.connect(self.on_close)
+            self._has_on_close = True
+        self.setTabsClosable(True)
 
-    # TODO: create the on save state
     def on_close(self, index: int) -> None:
-        filename = self.tabText(index)
         editor = self.widget(index)
         if not isinstance(editor, Editor):
-            raise TypeError("editor is not an Editor object")
+            msg = Messages(
+                parent=self,
+                content="Ocurrió un error para cerrar el tab.",
+                first_button_title="De acuerdo",
+                type=MessageTypes.CRITICAL,
+            )
+            msg.run()
+            return None
+        filename = self.tabText(index)
         if editor.has_changes:
             option = self.has_changes_selected_option()
             if option != TabActions.CLOSE:

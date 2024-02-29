@@ -1,9 +1,14 @@
 {
-    "openedFiles": [
+    "filesWorkedOn": [
         "Untitled.txt",
-        "new.txt"
+        "new(1).txt",
+        "new(2).txt",
+        "new.txt",
+        "nuevo dos.txt",
+        "new(3).txt"
     ],
-    "registeredFiles": [
+    "savedFiles": [
         "C:/Users/ignac/pruebacatorce.txt"
-    ]
+    ],
+    "lastTabWorkedIndex": 5
 }

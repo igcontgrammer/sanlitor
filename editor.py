@@ -33,7 +33,7 @@ class Editor(QTextEdit):
         self._is_open_mode = value
 
     @Slot()
-    def _on_change(self) -> None:
+    def on_change(self) -> None:
         # when open a file and placing content to the editor, doesn't count as change
         if self.is_open_mode:
             return
@@ -49,7 +49,7 @@ class Editor(QTextEdit):
                 raise TypeError("tab is not a QTabWidget")
 
     def __configurate(self) -> None:
-        self.textChanged.connect(self._on_change)
+        self.textChanged.connect(self.on_change)
         self.setUndoRedoEnabled(True)
         self.setAcceptRichText(True)
         self.setVerticalScrollBar(self._scroll_bar)

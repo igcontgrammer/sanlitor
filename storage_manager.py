@@ -1,87 +1,84 @@
 import json
 import os
-from typing import List
-
+from typing import Dict, List, Optional, Union
 
 _DIR = os.path.dirname(__file__)
 _STORAGE_ROUTE = _DIR + "/storage/files.json"
 
-"""
-- File Exists
-- File is Saved
-- Save
-- Save All
-"""
+
+def _content() -> Dict[str, Union[List[str], int]]:
+    with open(_STORAGE_ROUTE, "r") as file:
+        return json.load(file)
 
 
-def is_registered(filename: str) -> bool:
-    try:
-        with open(_STORAGE_ROUTE, "r") as file:
-            content = json.load(file)
-            paths = content["registeredFiles"]
-            for path in paths:
-                if os.path.basename(path) == filename:
+class StorageManager:
+    def __init__(self) -> None:
+        self._content = _content()
+        self._files_worked: List[str] = self._content.get("filesWorkedOn")
+        self._files_saved: List[str] = self._content.get("savedFiles")
+        self._has_opened_tabs: bool = len(self._files_worked) > 0
+        self._last_tab_worked_index: int = self._content.get("lastTabWorkedIndex")
+
+    @property
+    def opened_files(self) -> List[str]:
+        return self._files_worked
+
+    @property
+    def has_opened_tabs(self) -> bool:
+        return self._has_opened_tabs
+
+    @property
+    def last_tab_worked_index(self) -> int:
+        return self._last_tab_worked_index
+
+    def is_registered(self, file_name: str) -> bool:
+        return file_name in self._files_worked
+
+    def update_last_tab_worked_index(self, index: int) -> None:
+        print(f"ULTIMO INDICE DESDE EL JSON: {self._last_tab_worked_index}")
+        with open(_STORAGE_ROUTE, "w") as file:
+            self._content["lastTabWorkedIndex"] = index
+            json.dump(self._content, file, indent=4)
+
+    def add_new_opened_files(self, new_files: List[str], index: int) -> None:
+        for new_file in new_files:
+            self._files_worked.append(new_file)
+        with open(_STORAGE_ROUTE, "w") as file:
+            self._content["filesWorkedOn"] = self._files_worked
+            self._content["lastTabWorkedIndex"] = index
+            json.dump(self._content, file, indent=4)
+
+    def get_last_files_worked(self) -> List[str]:
+        """Get the last tabs that were opened by the user"""
+        return self._files_worked
+
+    def get_saved_files(self) -> List[str]:
+        """Get the last tabs that were opened by the user"""
+        return self._files_saved
+
+    def save_changes(
+        self,
+        *,
+        file_name: Optional[str] = None,
+        value: Optional[str] = None,
+        path: Optional[str] = None,
+    ) -> bool:
+        content: Dict[str, List[str]] = {}
+        try:
+            if path is not None:
+                self._files_saved.append(path)
+                content["registeredFiles"] = self._files_saved
+                with open(_STORAGE_ROUTE, "w") as write_file:
+                    json.dump(content, write_file, indent=4)
                     return True
+            elif file_name is not None and value is not None:
+                for file in self._files_saved:
+                    if os.path.basename(file) == file_name:
+                        with open(file, "w") as write_file:
+                            write_file.write(value)
+                            return True
+            else:
+                raise ValueError("filename and value or path must be provided")
+        except (FileNotFoundError, json.JSONDecodeError) as e:
+            print(f"exception at save_changes: {e}")
             return False
-    except FileNotFoundError as e:
-        print(f"File not found: {e}")
-        return False
-
-
-def has_opened_tabs() -> bool:
-    with open(_STORAGE_ROUTE, "r") as file:
-        content = json.load(file)
-        opened_files = content["openedFiles"]
-        return len(opened_files) > 0
-
-
-def get_opened_tabs() -> List[str]:
-    with open(_STORAGE_ROUTE, "r") as file:
-        content = json.load(file)
-        opened_files = content["openedFiles"]
-        return opened_files
-
-
-def save_from_path(path: str) -> bool:
-    try:
-        with open(_STORAGE_ROUTE, "r") as file:
-            content = json.load(file)
-            saved_files = content["registeredFiles"]
-            saved_files.append(path)
-            content["registered_files"] = saved_files
-            with open(_STORAGE_ROUTE, "w") as file:
-                json.dump(content, file, indent=4)
-        return True
-    except Exception as e:
-        print(f"Error: {e}")
-        return False
-
-
-def save_opened_file(filename: str) -> None:
-    opened_files: List[str]
-    try:
-        with open(_STORAGE_ROUTE, "r") as file:
-            content = json.load(file)
-            opened_files = content["openedFiles"]
-            with open(_STORAGE_ROUTE, "w") as file:
-                opened_files.append(filename)
-                content["openedFiles"] = opened_files
-                json.dump(content, file, indent=4)
-    except Exception as ex:
-        print(f"exception: {ex}")
-
-
-def save_from_already_exists(filename: str, value: str) -> bool:
-    try:
-        with open(_STORAGE_ROUTE, "r") as file:
-            content = json.load(file)
-            paths = content["registeredFiles"]
-            for path in paths:
-                if os.path.basename(path) == filename:
-                    with open(path, "w") as file:
-                        file.write(value)
-                        return True
-        return False
-    except Exception as e:
-        print(f"error: {e}")
-        return False
