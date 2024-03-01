@@ -1,4 +1,3 @@
-import os
 from dataclasses import dataclass
 from typing import Final
 
@@ -7,7 +6,8 @@ from PySide6.QtWidgets import QMainWindow
 
 from editor import Editor
 from menus.menu import MenuBar
-from messages import MessageTypes, Messages
+from messages import Messages, MessageTypes
+from paths import Paths
 from statusbar import StatusBar
 from storage_manager import StorageManager
 from tab_manager import Tab
@@ -27,8 +27,6 @@ class HomeDefaultDimensions:
 
 class Home(QMainWindow):
     _instance = None
-
-    _TEMP_FILES_PATH = os.path.dirname(__file__) + "/temp_files/"
 
     def __new__(cls, *args, **kwargs):
         if not cls._instance:
@@ -61,7 +59,6 @@ class Home(QMainWindow):
 
     def closeEvent(self, event: QCloseEvent) -> None:
         has_new_opened_files = len(self._tab.loaded_files) > 0
-        print(f"has_new_opened_files: {has_new_opened_files}")
         if not has_new_opened_files:
             any_changes = False
             for i in range(self._tab.tabs_count):
@@ -75,7 +72,7 @@ class Home(QMainWindow):
                 content = editor.toPlainText()
                 # todo: esto cambiarlo despues a storage manager, aqui solo se prueba que funcione
                 try:
-                    with open(self._TEMP_FILES_PATH + file_name, "w") as file:
+                    with open(Paths.TEMP_FILES + file_name, "w") as file:
                         file.write(content)
                 except Exception as e:
                     print(f"exception: {e}")
@@ -106,8 +103,10 @@ class Home(QMainWindow):
                         if not isinstance(editor, Editor):
                             raise TypeError("editor is not an Editor object")
                         content = editor.toPlainText()
-                        with open(self._TEMP_FILES_PATH + file_name, "w") as file:
+                        with open(Paths.TEMP_FILES + file_name, "w") as file:
                             file.write(content)
+        if len(self._tab.closed_files) > 0:
+            self.storage_manager.delete_files(self._tab.closed_files)
         return super().closeEvent(event)
 
     def _add_menu(self) -> None:

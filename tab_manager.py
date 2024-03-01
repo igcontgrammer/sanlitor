@@ -7,6 +7,7 @@ from PySide6.QtWidgets import QTabWidget
 from constants import TabActions
 from editor import Editor
 from messages import Messages, MessageTypes
+from paths import Paths
 
 _DEFAULT_TAB_NAME: Final[str] = "Untitled.txt"
 
@@ -18,6 +19,7 @@ class Tab(QTabWidget):
         self._has_on_close = None
         self._editor = Editor()
         self._loaded_files: List[str] = []
+        self._closed_files: List[str] = []
         self._build_tabs_on_startup()
 
     @property
@@ -39,6 +41,10 @@ class Tab(QTabWidget):
     @loaded_files.setter
     def loaded_files(self, value: List[str]):
         self._loaded_files = value
+
+    @property
+    def closed_files(self) -> List[str]:
+        return list(set(self._closed_files))
 
     @property
     def current_index(self) -> int:
@@ -65,13 +71,13 @@ class Tab(QTabWidget):
             self.build_default_tab()
         else:
             for file_name in storage_manager.opened_files:
-                with open(self._home._TEMP_FILES_PATH + file_name, "r") as file:
+                with open(Paths.TEMP_FILES + file_name, "r") as file:
                     content = file.read()
                     self.new(file_name, True, content)
             self.setCurrentIndex(storage_manager.last_tab_worked_index)
 
-    def already_opened(self, filename: str) -> bool:
-        return filename in self.loaded_files
+    def already_opened(self, file_name: str) -> bool:
+        return file_name in self.loaded_files
 
     def add_content_to_current_tab(self, content: str) -> None:
         editor = self.widget(self.current_index)
@@ -85,18 +91,17 @@ class Tab(QTabWidget):
     def set_is_open_mode(self, value: bool) -> None:
         self._editor.is_open_mode = value
 
-    def move(self, filename: str):
+    def move(self, file_name: str):
         for i in range(self.tabs_count):
-            tab_name = self.tabText(i)
-            if tab_name == filename:
+            if self.tabText(i) == file_name:
                 self.setCurrentIndex(i)
                 break
 
-    def add_to_loaded_files(self, filename: str) -> None:
-        self._loaded_files.append(filename)
+    def add_to_loaded_files(self, file_name: str) -> None:
+        self._loaded_files.append(file_name)
 
-    def remove_from_loaded_files(self, filename: str) -> None:
-        self._loaded_files.remove(filename)
+    def remove_from_loaded_files(self, file_name: str) -> None:
+        self._loaded_files.remove(file_name)
 
     def build_default_tab(self) -> None:
         self.addTab(self._editor, _DEFAULT_TAB_NAME)
@@ -104,15 +109,15 @@ class Tab(QTabWidget):
         self.tabCloseRequested.connect(self.on_close)
 
     def new(
-        self, filename: str, is_from_opened: bool, content: Optional[str] = None
+        self, file_name: str, is_from_opened: bool, content: Optional[str] = None
     ) -> None:
-        new_editor = Editor()
-        new_editor.setPlainText("" if content is None else content)
-        new_editor.has_changes = False
-        new_index = self.addTab(new_editor, filename)
+        editor = Editor()
+        editor.setPlainText("" if content is None else content)
+        editor.has_changes = False
+        index = self.addTab(editor, file_name)
         if not is_from_opened:
-            self.setCurrentIndex(new_index)
-            self._loaded_files.append(filename)
+            self.setCurrentIndex(index)
+            self._loaded_files.append(file_name)
         if self._has_on_close is None:
             self.tabCloseRequested.connect(self.on_close)
             self._has_on_close = True
@@ -129,32 +134,39 @@ class Tab(QTabWidget):
             )
             msg.run()
             return None
-        filename = self.tabText(index)
+        file_name = self.tabText(index)
         if editor.has_changes:
-            option = self.has_changes_selected_option()
-            if option != TabActions.CLOSE:
-                return
-            if self.is_default:
-                editor.clear()
-                self.setTabIcon(index, QIcon())
-                self.setTabText(index, _DEFAULT_TAB_NAME)
-                editor.has_changes = False
-                if filename in self._loaded_files:
-                    self._loaded_files.remove(filename)
-                return
-            else:
-                self.removeTab(index)
-                editor.has_changes = False
-                self._loaded_files.remove(filename)
-                return
-        if filename in self._loaded_files:
-            self._loaded_files.remove(filename)
+            self.close_on_has_changes(editor, index, file_name)
+        if file_name in self._loaded_files:
+            self._loaded_files.remove(file_name)
+            self._closed_files.append(file_name)
         if self.tabs_count > 1:
             self.removeTab(index)
+            self._closed_files.append(file_name)
             return
         self.setTabText(index, CoreApp.translate("tab_manager", _DEFAULT_TAB_NAME))
         editor.clear()
         self.setTabIcon(index, QIcon())
+
+    def close_on_has_changes(self, editor: Editor, index: int, file_name: str) -> None:
+        option = self.has_changes_selected_option()
+        if option != TabActions.CLOSE:
+            return
+        if self.is_default:
+            editor.clear()
+            self.setTabIcon(index, QIcon())
+            self.setTabText(index, _DEFAULT_TAB_NAME)
+            editor.has_changes = False
+            if file_name in self._loaded_files:
+                self._loaded_files.remove(file_name)
+                self._closed_files.append(file_name)
+            return
+        else:
+            self.removeTab(index)
+            editor.has_changes = False
+            self._loaded_files.remove(file_name)
+            self._closed_files.append(file_name)
+            return
 
     def has_changes_selected_option(self) -> int:
         msg = Messages(
