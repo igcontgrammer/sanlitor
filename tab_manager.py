@@ -72,21 +72,20 @@ class Tab(QTabWidget):
             self.build_default_tab()
         else:
             # TODO: hacer una validacion de existencia de archivo antes de arrancar esto
-            for file_name in storage_manager.opened_files:
-                is_temp = not any(
-                    os.path.basename(file_name) in file
-                    for file in storage_manager.saved_files
-                )
+            opened_files = storage_manager.opened_files
+            saved_files = storage_manager.saved_files
+            for opened_file in opened_files:
+                is_temp = not any(opened_file in file for file in saved_files)
                 if is_temp:
-                    with open(Paths.TEMP_FILES + file_name, "r") as file:
+                    with open(Paths.TEMP_FILES + opened_file, "r") as file:
                         content = file.read()
-                        self.new(file_name, True, content)
+                        self.new(opened_file, True, content)
                 else:
-                    for path_saved in storage_manager.saved_files:
-                        if file_name == os.path.basename(path_saved):
+                    for path_saved in saved_files:
+                        if opened_file == os.path.basename(path_saved):
                             with open(path_saved, "r") as file:
                                 content = file.read()
-                                self.new(file_name, True, content)
+                                self.new(opened_file, True, content)
             self.setCurrentIndex(storage_manager.last_tab_worked_index)
 
     def already_opened(self, file_name: str) -> bool:
