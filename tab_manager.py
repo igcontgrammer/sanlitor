@@ -1,3 +1,4 @@
+import os
 from typing import Final, List, Optional
 
 from PySide6.QtCore import QCoreApplication as CoreApp
@@ -6,7 +7,7 @@ from PySide6.QtWidgets import QTabWidget
 
 from constants import TabActions
 from editor import Editor
-from messages import Messages, MessageTypes
+from messages import Messages, MessageTypes, show_system_error_message
 from paths import Paths
 
 _DEFAULT_TAB_NAME: Final[str] = "Untitled.txt"
@@ -43,20 +44,20 @@ class Tab(QTabWidget):
         self._loaded_files = value
 
     @property
+    def has_loaded_files(self) -> bool:
+        return len(self._loaded_files) > 0
+
+    @property
     def closed_files(self) -> List[str]:
         return list(set(self._closed_files))
 
     @property
-    def current_index(self) -> int:
-        return self.currentIndex()
-
-    @property
-    def tabs_count(self) -> int:
-        return self.count()
+    def has_closed_files(self) -> bool:
+        return len(self._closed_files) > 0
 
     @property
     def is_default(self) -> bool:
-        return self.tabs_count == 1
+        return self.count() == 1
 
     @property
     def home(self):
@@ -70,17 +71,29 @@ class Tab(QTabWidget):
         if not storage_manager.has_opened_tabs:
             self.build_default_tab()
         else:
+            # TODO: hacer una validacion de existencia de archivo antes de arrancar esto
             for file_name in storage_manager.opened_files:
-                with open(Paths.TEMP_FILES + file_name, "r") as file:
-                    content = file.read()
-                    self.new(file_name, True, content)
+                is_temp = not any(
+                    os.path.basename(file_name) in file
+                    for file in storage_manager.saved_files
+                )
+                if is_temp:
+                    with open(Paths.TEMP_FILES + file_name, "r") as file:
+                        content = file.read()
+                        self.new(file_name, True, content)
+                else:
+                    for path_saved in storage_manager.saved_files:
+                        if file_name == os.path.basename(path_saved):
+                            with open(path_saved, "r") as file:
+                                content = file.read()
+                                self.new(file_name, True, content)
             self.setCurrentIndex(storage_manager.last_tab_worked_index)
 
     def already_opened(self, file_name: str) -> bool:
         return file_name in self.loaded_files
 
     def add_content_to_current_tab(self, content: str) -> None:
-        editor = self.widget(self.current_index)
+        editor = self.widget(self.currentIndex())
         if not isinstance(editor, Editor):
             raise TypeError("editor is not an Editor object")
         editor.setPlainText(content)
@@ -92,7 +105,7 @@ class Tab(QTabWidget):
         self._editor.is_open_mode = value
 
     def move(self, file_name: str):
-        for i in range(self.tabs_count):
+        for i in range(self.count()):
             if self.tabText(i) == file_name:
                 self.setCurrentIndex(i)
                 break
@@ -130,7 +143,7 @@ class Tab(QTabWidget):
                 parent=self,
                 content="Ocurrió un error para cerrar el tab.",
                 first_button_title="De acuerdo",
-                type=MessageTypes.CRITICAL,
+                message_type=MessageTypes.CRITICAL,
             )
             msg.run()
             return None
@@ -140,7 +153,7 @@ class Tab(QTabWidget):
         if file_name in self._loaded_files:
             self._loaded_files.remove(file_name)
             self._closed_files.append(file_name)
-        if self.tabs_count > 1:
+        if self.count() > 1:
             self.removeTab(index)
             self._closed_files.append(file_name)
             return
@@ -173,9 +186,9 @@ class Tab(QTabWidget):
             parent=self,
             content="Hay cambios presentes ¿desea cerrar de todas formas?",
             first_button_title="Cerrar",
-            type=MessageTypes.WARNING,
+            message_type=MessageTypes.WARNING,
         )
         return msg.run()
 
     def change_tab_name(self, name: str) -> None:
-        self.setTabText(self.current_index, name)
+        self.setTabText(self.currentIndex(), name)

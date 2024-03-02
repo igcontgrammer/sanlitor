@@ -58,10 +58,10 @@ class Home(QMainWindow):
         return self.storage_manager.is_registered(file_name)
 
     def closeEvent(self, event: QCloseEvent) -> None:
-        has_new_opened_files = len(self._tab.loaded_files) > 0
+        has_new_opened_files = self._tab.has_loaded_files
         if not has_new_opened_files:
             any_changes = False
-            for i in range(self._tab.tabs_count):
+            for i in range(self._tab.count()):
                 editor = self._tab.widget(i)
                 if not isinstance(editor, Editor):
                     raise TypeError("editor is not an Editor object")
@@ -80,24 +80,23 @@ class Home(QMainWindow):
                         parent=self,
                         content=f"Tuvimos problemas para guardar el estado del archivo {file_name}. Revise si está abierto en otra aplicación o si lo cambió de sitio.",
                         first_button_title="De acuerdo",
-                        type=MessageTypes.CRITICAL,
+                        message_type=MessageTypes.CRITICAL,
                     )
                     msg.run()
                     break
             if any_changes is False:
                 self.storage_manager.update_last_tab_worked_index(
-                    self._tab.current_index
+                    self._tab.currentIndex()
                 )
         else:
             opened_files = self.storage_manager.opened_files
             if any(file in opened_files for file in self._tab.loaded_files):
-                # si ya existe este archivo en los tabs abiertos, no se hace nada
                 return
             self.storage_manager.add_new_opened_files(
-                self._tab.loaded_files, self._tab.current_index
+                self._tab.loaded_files, self._tab.currentIndex()
             )
             for file_name in self._tab.loaded_files:
-                for i in range(self._tab.tabs_count):
+                for i in range(self._tab.count()):
                     if self._tab.tabText(i) == file_name:
                         editor = self._tab.widget(i)
                         if not isinstance(editor, Editor):
@@ -105,7 +104,7 @@ class Home(QMainWindow):
                         content = editor.toPlainText()
                         with open(Paths.TEMP_FILES + file_name, "w") as file:
                             file.write(content)
-        if len(self._tab.closed_files) > 0:
+        if self._tab.has_closed_files:
             self.storage_manager.delete_files(self._tab.closed_files)
         return super().closeEvent(event)
 

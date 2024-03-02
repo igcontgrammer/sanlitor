@@ -1,24 +1,16 @@
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import Dict, Final, Optional
+from typing import Optional
 
-from PySide6.QtCore import QCoreApplication as coreapp
+from PySide6.QtCore import QCoreApplication as CoreApp
 from PySide6.QtWidgets import QMessageBox, QWidget
-
-_COMMON_MESSAGE_TITLES: Final[Dict[int, str]] = {
-    1: "Advertencia",
-    2: "Error",
-    3: "Aviso",
-}
 
 
 @dataclass(frozen=True)
-class MessageConstants:
-    SYSTEM_ERROR_TITLE: str = "Error"
-    SYSTEM_ERROR_MESSAGE: str = (
-        "Ocurrió un error inesperado en el sistema. Por favor inténtelo de nuevo."
-    )
-    SYSTEM_WARNING_TITLE: str = "Advertencia"
+class CommonMessageTitles:
+    WARNING = "Advertencia"
+    ERROR = "Error"
+    QUESTION = "Aviso"
 
 
 class MessageTypes(Enum):
@@ -27,12 +19,27 @@ class MessageTypes(Enum):
     QUESTION = auto()
 
 
-def system_error(parent: QWidget) -> None:
-    QMessageBox.critical(
-        parent,
-        coreapp.translate("messages", MessageConstants.SYSTEM_ERROR_TITLE),
-        coreapp.translate("messages", MessageConstants.SYSTEM_ERROR_MESSAGE),
+def show_system_error_message(parent: QWidget, content: Optional[str] = None) -> None:
+    msg = Messages(
+        parent=parent,
+        content=content if content is not None else "",
+        first_button_title=CoreApp.translate("messages", "De acuerdo"),
+        message_type=MessageTypes.CRITICAL,
     )
+    msg.setWindowTitle(CommonMessageTitles.ERROR)
+    msg.setStandardButtons(QMessageBox.Cancel)
+    msg.button(QMessageBox.Cancel).setText(CoreApp.translate("messages", "Cancelar"))
+    msg.run()
+
+
+def get_title(message_type: MessageTypes):
+    match message_type:
+        case MessageTypes.CRITICAL:
+            return CommonMessageTitles.ERROR
+        case MessageTypes.WARNING:
+            return CommonMessageTitles.WARNING
+        case MessageTypes.QUESTION:
+            return CommonMessageTitles.QUESTION
 
 
 class Messages(QMessageBox):
@@ -41,27 +48,27 @@ class Messages(QMessageBox):
         parent: QWidget,
         content: str,
         first_button_title: str,
-        type: MessageTypes,
+        message_type: MessageTypes,
         title: Optional[str] = "",
     ):
         super().__init__()
         self._parent = parent
+        self._content = content
         self._message = QMessageBox(self._parent)
         self._message.setWindowTitle(
-            coreapp.translate(
-                "messages",
-                _COMMON_MESSAGE_TITLES[type.value] if title is None else title,
+            CoreApp.translate(
+                "messages", get_title(message_type) if title is None else title
             )
         )
         self._message.setStandardButtons(QMessageBox.Cancel)
-        self._message.setText(content)
+        self._message.setText(self._content)
         self._message.addButton(
-            coreapp.translate("messages", first_button_title), QMessageBox.AcceptRole
+            CoreApp.translate("messages", first_button_title), QMessageBox.AcceptRole
         )
         self._message.button(QMessageBox.Cancel).setText(
-            coreapp.translate("messages", "Cancelar")
+            CoreApp.translate("messages", "Cancelar")
         )
-        match type:
+        match message_type:
             case MessageTypes.CRITICAL:
                 self._message.setIcon(QMessageBox.Critical)
             case MessageTypes.WARNING:
@@ -69,10 +76,18 @@ class Messages(QMessageBox):
             case MessageTypes.QUESTION:
                 self._message.setIcon(QMessageBox.Question)
 
+    @property
+    def content(self):
+        return self._content
+
+    @content.setter
+    def content(self, value: str):
+        self._content = value
+
     def run(self) -> int:
         return self._message.exec_()
 
     def add_button(self, description: str) -> None:
         self._message.addButton(
-            coreapp.translate("messages", description), QMessageBox.AcceptRole
+            CoreApp.translate("messages", description), QMessageBox.AcceptRole
         )
