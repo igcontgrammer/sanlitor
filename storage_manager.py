@@ -14,7 +14,7 @@ class StorageManager:
     def __init__(self) -> None:
         self._content = _content()
         self._files_worked: List[str] = self._content.get("filesWorkedOn")
-        self._files_saved: List[str] = self._content.get("savedFiles")
+        self._paths_saved: List[str] = self._content.get("savedPaths")
         self._has_opened_tabs: bool = len(self._files_worked) > 0
         self._last_tab_worked_index: int = self._content.get("lastTabWorkedIndex")
 
@@ -31,11 +31,11 @@ class StorageManager:
         return self._last_tab_worked_index
 
     @property
-    def saved_files(self) -> List[str]:
-        return self._files_saved
+    def paths_saved(self) -> List[str]:
+        return self._paths_saved
 
     def is_registered(self, file_name: str) -> bool:
-        return file_name in self._files_saved
+        return any(file_name in path for path in self._paths_saved)
 
     def update_last_tab_worked_index(self, index: int) -> None:
         try:
@@ -64,6 +64,20 @@ class StorageManager:
             print(f"exception at add_new_opened_files: {e}")
             return
 
+    def add_new_temp_file(self, file_name: str, content: str) -> None:
+        if file_name in self._files_worked:
+            return
+        self._files_worked.append(file_name)
+        try:
+            with open(Paths.TEMP_FILES + file_name, "w") as file:
+                file.write(content)
+        except (FileNotFoundError, json.JSONDecodeError) as fe:
+            print(f"exception at add_new_temp_file: {fe}")
+            return
+        except Exception as e:
+            print(f"exception at add_new_temp_file: {e}")
+            return
+
     def delete_files(self, files: List[str]) -> None:
         for file in files:
             if file in self._files_worked:
@@ -85,7 +99,7 @@ class StorageManager:
 
     def get_saved_files(self) -> List[str]:
         """Get the last tabs that were opened by the user"""
-        return self._files_saved
+        return self._paths_saved
 
     def get_content_from_file(self, path: str) -> Optional[str]:
         try:
@@ -108,34 +122,24 @@ class StorageManager:
     ) -> Tuple[bool, Optional[str]]:
         try:
             if path is not None and old_file_name is not None:
-                if old_file_name in self._files_saved:
-                    index_old_saved_file = self._files_saved.index(old_file_name)
-                    self._files_saved[index_old_saved_file] = path
+                if old_file_name in self._paths_saved:
+                    index_old_saved_file = self._paths_saved.index(old_file_name)
+                    self._paths_saved[index_old_saved_file] = path
                 else:
-                    self._files_saved.append(path)
+                    self._paths_saved.append(path)
                 if old_file_name in self._files_worked:
                     index_old_opened_files = self._files_worked.index(old_file_name)
                     self._files_worked[index_old_opened_files] = os.path.basename(path)
                 else:
                     self._files_worked.append(os.path.basename(path))
-                # TODO: el problema es, que cuando el usuario selecciona otra ubicacion, no se escribe el archivo en temp files
                 os.rename(Paths.TEMP_FILES + old_file_name, path)
                 with open(Paths.STORAGE, "w") as write_file:
-                    self._content["savedFiles"] = self._files_saved
+                    self._content["savedFiles"] = self._paths_saved
                     self._content["filesWorkedOn"] = self._files_worked
                     json.dump(self._content, write_file, indent=4)
-                # index_old_opened_files = self._files_worked.index(old_file_name)
-                # self._files_saved[index_old_saved_file] = path
-                # self._files_saved[index_old_saved_file] = path
-                # self._files_worked[index_old_opened_files] = os.path.basename(path)
-                # os.rename(Paths.TEMP_FILES + old_file_name, path)
-                # with open(Paths.STORAGE, "w") as write_file:
-                #     self._content["savedFiles"] = self._files_saved
-                #     self._content["filesWorkedOn"] = self._files_worked
-                #     json.dump(self._content, write_file, indent=4)
                 return True, None
             elif file_name is not None and value is not None:
-                for file in self._files_saved:
+                for file in self._paths_saved:
                     if os.path.basename(file) == file_name:
                         with open(file, "w") as write_file:
                             write_file.write(value)

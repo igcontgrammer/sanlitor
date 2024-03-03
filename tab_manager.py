@@ -7,7 +7,7 @@ from PySide6.QtWidgets import QTabWidget
 
 from constants import TabActions
 from editor import Editor
-from messages import Messages, MessageTypes, show_system_error_message
+from messages import Messages, MessageTypes
 from paths import Paths
 
 _DEFAULT_TAB_NAME: Final[str] = "Untitled.txt"
@@ -71,17 +71,16 @@ class Tab(QTabWidget):
         if not storage_manager.has_opened_tabs:
             self.build_default_tab()
         else:
-            # TODO: hacer una validacion de existencia de archivo antes de arrancar esto
             opened_files = storage_manager.opened_files
-            saved_files = storage_manager.saved_files
+            saved_paths = storage_manager.paths_saved
             for opened_file in opened_files:
-                is_temp = not any(opened_file in file for file in saved_files)
+                is_temp = not any(opened_file in path for path in saved_paths)
                 if is_temp:
                     with open(Paths.TEMP_FILES + opened_file, "r") as file:
                         content = file.read()
                         self.new(opened_file, True, content)
                 else:
-                    for path_saved in saved_files:
+                    for path_saved in saved_paths:
                         if opened_file == os.path.basename(path_saved):
                             with open(path_saved, "r") as file:
                                 content = file.read()

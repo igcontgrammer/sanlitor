@@ -1,6 +1,6 @@
 import os
-from functools import partial
 from enum import Enum, auto
+from functools import partial
 from typing import Final
 
 from PySide6.QtGui import QIcon
@@ -124,15 +124,13 @@ class FileMenu(QMenu):
         self._menu.addAction(save_file_action)
 
     def _save_as_action(self) -> None:
-        nombre_anterior = self._home.tab_manager.tabText(
-            self._home.tab_manager.currentIndex()
-        )
+        old_name = self._home.tab_manager.tabText(self._home.tab_manager.currentIndex())
         save_as_action = QAction(FileMenuActionsNames.SAVE_AS, self)
         config(
             action=save_as_action,
             status_tip=CoreApp.translate("file_menu", "Save a file as..."),
             shortcut=FileMenuShortcuts.SAVE_AS,
-            method=partial(self._save_as, nombre_anterior),
+            method=partial(self._save_as, old_name),
         )
         self._menu.addAction(save_as_action)
 
@@ -245,14 +243,12 @@ class FileMenu(QMenu):
             )
             if save_status[0] is False:
                 show_system_error_message(self._home, save_status[1])
-                return
+                return None
             editor.has_changes = False
             tab_manager.setTabIcon(index, QIcon())
-            return
-        # the absolute path of the saved file
+            return None
         path = self._get_path_from_save_dialog(SaveOptions.SAVE)
         if not len(path) > 0:
-            # no seleccionó la ubicación del archivo para guardar, se cancela la operación
             return
         file_name_from_path = os.path.basename(path)
         if not filename_is_valid(os.path.basename(file_name_from_path)):
@@ -261,7 +257,7 @@ class FileMenu(QMenu):
                 ">, |"
             )
             show_system_error_message(self._home, error_message)
-            return
+            return None
         file_name = os.path.basename(path)
         content = editor.toPlainText()
         with open(path, "w") as file:
@@ -271,7 +267,7 @@ class FileMenu(QMenu):
             show_system_error_message(
                 self._home, "No se pudo guardar el archivo. Inténtelo de nuevo"
             )
-            return
+            return None
         tab_manager.setTabText(index, file_name)
         editor.has_changes = False
         tab_manager.setTabIcon(index, QIcon())
@@ -286,12 +282,11 @@ class FileMenu(QMenu):
         index = tab_manager.currentIndex()
         editor = tab_manager.widget(index)
         if not isinstance(editor, Editor):
-            # TODO: mostrar mensaje de error
             show_system_error_message(self._home)
             return None
         file = QFileDialog.getSaveFileName(
             self,
-            CoreApp.translate("file_menu", "Guardar Archivo"),
+            CoreApp.translate("file_menu", "Guardar Archivo Como..."),
             filter=get_extensions_list(),
             dir=os.path.expanduser("~"),
         )
@@ -333,6 +328,8 @@ class FileMenu(QMenu):
     # ************* SLOTS FUNCTIONS *************
 
     def _when_opening(self, tab_manager: Tab, path: str, here: bool = False) -> None:
+        extension = os.path.splitext(path)[1]
+        # TODO: implementar el manejo de extensiones y su sintaxis
         editor = tab_manager.editor
         if editor.has_changes:
             msg = Messages(

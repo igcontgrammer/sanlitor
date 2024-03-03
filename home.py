@@ -97,13 +97,13 @@ class Home(QMainWindow):
             )
             for file_name in self._tab.loaded_files:
                 for i in range(self._tab.count()):
-                    if self._tab.tabText(i) == file_name:
-                        editor = self._tab.widget(i)
-                        if not isinstance(editor, Editor):
-                            raise TypeError("editor is not an Editor object")
-                        content = editor.toPlainText()
-                        with open(Paths.TEMP_FILES + file_name, "w") as file:
-                            file.write(content)
+                    if self._tab.tabText(i) != file_name:
+                        continue
+                    editor = self._tab.widget(i)
+                    if not isinstance(editor, Editor):
+                        raise TypeError("editor is not an Editor object")
+                    content = editor.toPlainText()
+                    self.storage_manager.add_new_temp_file(file_name, content)
         if self._tab.has_closed_files:
             self.storage_manager.delete_files(self._tab.closed_files)
         return super().closeEvent(event)
