@@ -1,8 +1,5 @@
 from dataclasses import dataclass
-from enum import Enum, auto
 from typing import Dict, Final, List
-
-# la lista de extensiones disponibles al momento de guardar un archivo
 
 
 def available_extensions() -> List[str]:
@@ -56,38 +53,6 @@ EXTENSIONS_LIST: Final[Dict[str, str]] = {
 }
 
 
-class LanguageSelected(Enum):
-    TEXT_PLAIN = auto()
-    ASSEMBLY = auto()
-    C = auto()
-    CPP = auto()
-    CSHARP = auto()
-    CSS = auto()
-    HTML = auto()
-    JAVA = auto()
-    JAVASCRIPT = auto()
-    JSON = auto()
-    LUA = auto()
-    LISP = auto()
-    EMACS_LISP = auto()
-    MATLAB = auto()
-    MARKDOWN = auto()
-    OCAML = auto()
-    PHP = auto()
-    PYTHON = auto()
-    POWERSHELL = auto()
-    RUBY = auto()
-    RUST = auto()
-    R = auto()
-    SQL = auto()
-    SWIFT = auto()
-    SHELL = auto()
-    SCALA = auto()
-    TYPESCRIPT = auto()
-    XML = auto()
-    YAML = auto()
-
-
 @dataclass(frozen=True)
 class Extensions:
     PLAIN_TEXT: str = ".txt"
@@ -119,37 +84,3 @@ class Extensions:
     TYPESCRIPT: str = ".ts"
     XML: str = ".xml"
     YAML: str = ".yaml"
-
-
-# Esto sirve para hacer mas dinamica la seleccion y posterior match de sintaxis del lenguaje seleccionado
-EXTENSION_SELECTED: Final[Dict[str, LanguageSelected]] = {
-    Extensions.PLAIN_TEXT: LanguageSelected.TEXT_PLAIN,
-    Extensions.ASSEMBLY: LanguageSelected.ASSEMBLY,
-    Extensions.C: LanguageSelected.C,
-    Extensions.C_PLUS_PLUS: LanguageSelected.CPP,
-    Extensions.C_SHARP: LanguageSelected.CSHARP,
-    Extensions.CSS: LanguageSelected.CSS,
-    Extensions.HTML: LanguageSelected.HTML,
-    Extensions.JAVA: LanguageSelected.JAVA,
-    Extensions.JAVASCRIPT: LanguageSelected.JAVASCRIPT,
-    Extensions.JSON: LanguageSelected.JSON,
-    Extensions.LUA: LanguageSelected.LUA,
-    Extensions.LISP: LanguageSelected.LISP,
-    Extensions.EMACS_LISP: LanguageSelected.EMACS_LISP,
-    Extensions.MATLAB: LanguageSelected.MATLAB,
-    Extensions.MARKDOWN: LanguageSelected.MARKDOWN,
-    Extensions.OCAML: LanguageSelected.OCAML,
-    Extensions.PHP: LanguageSelected.PHP,
-    Extensions.PYTHON: LanguageSelected.PYTHON,
-    Extensions.POWERSHELL: LanguageSelected.POWERSHELL,
-    Extensions.RUBY: LanguageSelected.RUBY,
-    Extensions.RUST: LanguageSelected.RUST,
-    Extensions.R: LanguageSelected.R,
-    Extensions.SQL: LanguageSelected.SQL,
-    Extensions.SWIFT: LanguageSelected.SWIFT,
-    Extensions.SHELL: LanguageSelected.SHELL,
-    Extensions.SCALA: LanguageSelected.SCALA,
-    Extensions.TYPESCRIPT: LanguageSelected.TYPESCRIPT,
-    Extensions.XML: LanguageSelected.XML,
-    Extensions.YAML: LanguageSelected.YAML,
-}

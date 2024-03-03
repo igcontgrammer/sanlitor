@@ -70,22 +70,29 @@ class Tab(QTabWidget):
         storage_manager = self._home.storage_manager
         if not storage_manager.has_opened_tabs:
             self.build_default_tab()
-        else:
-            opened_files = storage_manager.opened_files
-            saved_paths = storage_manager.paths_saved
-            for opened_file in opened_files:
-                is_temp = not any(opened_file in path for path in saved_paths)
-                if is_temp:
-                    with open(Paths.TEMP_FILES + opened_file, "r") as file:
+            return
+        opened_files = storage_manager.opened_files
+        paths_saved = storage_manager.paths_saved
+        for opened_file in opened_files:
+            is_temp = not any(opened_file in path for path in paths_saved)
+            if is_temp:
+                with open(Paths.TEMP_FILES + opened_file, "r") as file:
+                    content = file.read()
+                    self.new(opened_file, True, content)
+            else:
+                for path_saved in paths_saved:
+                    if opened_file != os.path.basename(path_saved):
+                        continue
+                    with open(path_saved, "r") as file:
                         content = file.read()
                         self.new(opened_file, True, content)
-                else:
-                    for path_saved in saved_paths:
-                        if opened_file == os.path.basename(path_saved):
-                            with open(path_saved, "r") as file:
-                                content = file.read()
-                                self.new(opened_file, True, content)
-            self.setCurrentIndex(storage_manager.last_tab_worked_index)
+        self.setCurrentIndex(storage_manager.last_tab_worked_index)
+        for i in range(self.count()):
+            editor = self.widget(i)
+            if not isinstance(editor, Editor):
+                raise TypeError("editor is not an Editor object")
+            extension = os.path.splitext(self.tabText(i))[1]
+            editor.set_syntax(extension)
 
     def already_opened(self, file_name: str) -> bool:
         return file_name in self.loaded_files
