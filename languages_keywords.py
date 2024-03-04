@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 
 @dataclass
-class PythonKeywords:
+class Python:
     keywords = [
         "and",
         "as",

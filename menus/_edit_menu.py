@@ -7,12 +7,12 @@ from ._menus_constants import EditMenuActionsNames, EditMenuShortcuts
 class EditMenu(QMenu):
     def __init__(self):
         super().__init__()
-        self._edit_menu = QMenu(SectionsNames.EDIT)
+        self.setTitle(SectionsNames.EDIT)
         self._create_actions()
 
     @property
     def menu(self) -> QMenu:
-        return self._edit_menu
+        return self
 
     def _create_actions(self) -> None:
         self._undo_action()
@@ -30,7 +30,7 @@ class EditMenu(QMenu):
             status_tip="Undo",
             method=self._undo,
         )
-        self._edit_menu.addAction(undo_action)
+        self.addAction(undo_action)
 
     def _redo_action(self) -> None:
         redo_action = QAction(EditMenuActionsNames.REDO, self)
@@ -40,7 +40,7 @@ class EditMenu(QMenu):
             status_tip="Redo",
             method=self._redo,
         )
-        self._edit_menu.addAction(redo_action)
+        self.addAction(redo_action)
 
     def _cut_action(self) -> None:
         cut_action = QAction(EditMenuActionsNames.CUT, self)
@@ -50,7 +50,7 @@ class EditMenu(QMenu):
             status_tip="Cut",
             method=self._cut,
         )
-        self._edit_menu.addAction(cut_action)
+        self.addAction(cut_action)
 
     def _copy_action(self) -> None:
         copy_action = QAction(EditMenuActionsNames.COPY, self)
@@ -60,7 +60,7 @@ class EditMenu(QMenu):
             status_tip="Copy",
             method=self._copy,
         )
-        self._edit_menu.addAction(copy_action)
+        self.addAction(copy_action)
 
     def _paste_action(self) -> None:
         paste_action = QAction(EditMenuActionsNames.PASTE, self)
@@ -70,7 +70,7 @@ class EditMenu(QMenu):
             status_tip="Paste",
             method=self._paste,
         )
-        self._edit_menu.addAction(paste_action)
+        self.addAction(paste_action)
 
     def _select_all_action(self) -> None:
         select_all_action = QAction(EditMenuActionsNames.SELECT_ALL, self)
@@ -80,7 +80,7 @@ class EditMenu(QMenu):
             status_tip="Select All",
             method=self._select_all,
         )
-        self._edit_menu.addAction(select_all_action)
+        self.addAction(select_all_action)
 
     @Slot()
     def _undo(self) -> None:

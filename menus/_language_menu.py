@@ -9,14 +9,14 @@ from . import QAction, QMenu, SectionsNames, Slot
 class LanguageMenu(QMenu):
     def __init__(self):
         super().__init__()
-        self._language_menu = QMenu(SectionsNames.LANGUAGE)
+        self.setTitle(SectionsNames.LANGUAGE)
         self._languages_actions = self._get_languages_actions()
         self.__create_languages_menus()
         self.__create_languages_actions()
 
     @property
     def menu(self) -> QMenu:
-        return self._language_menu
+        return self
 
     _LANGUAGES_OPTIONS: Final[Dict[str, Tuple[str]]] = {
         "C": (Languages.C, Languages.C_PLUS_PLUS, Languages.C_SHARP, Languages.CSS),
@@ -72,11 +72,11 @@ class LanguageMenu(QMenu):
     def _add_languages_options_actions(self) -> None:
         for name in self._LANGUAGES_OPTIONS.keys():
             menu = QMenu(name)
-            self._language_menu.addMenu(menu)
+            self.addMenu(menu)
 
     def __create_languages_actions(self) -> None:
         for language_key, languages in self._LANGUAGES_OPTIONS.items():
-            for action in self._language_menu.actions():
+            for action in self.actions():
                 if action.text() == language_key:
                     for language in languages:
                         language_action = QAction(language, self)
@@ -99,7 +99,7 @@ class LanguageMenu(QMenu):
         return select_xml_action
 
     def _add_xml_action(self) -> None:
-        self._language_menu.addAction(self._get_xml_action())
+        self.addAction(self._get_xml_action())
 
     def _add_plain_text_action(self) -> None:
         select_plain_text_action = QAction(Languages.PLAIN_TEXT, self)
@@ -109,7 +109,7 @@ class LanguageMenu(QMenu):
             status_tip="Select Plain Text language",
             method=self._set_plain_text,
         )
-        self._language_menu.addAction(select_plain_text_action)
+        self.addAction(select_plain_text_action)
 
     def _add_typescript_action(self) -> None:
         select_typescript_action = QAction(Languages.TYPESCRIPT, self)
@@ -119,7 +119,7 @@ class LanguageMenu(QMenu):
             status_tip="Select TypeScript language",
             method=self._set_typescript,
         )
-        self._language_menu.addAction(select_typescript_action)
+        self.addAction(select_typescript_action)
 
     def _add_yaml_action(self) -> None:
         select_yaml_action = QAction(Languages.YAML, self)
@@ -129,7 +129,7 @@ class LanguageMenu(QMenu):
             status_tip="Select YAML language",
             method=self._set_YAML,
         )
-        self._language_menu.addAction(select_yaml_action)
+        self.addAction(select_yaml_action)
 
     def _add_ocaml_action(self) -> None:
         select_ocaml_action = QAction(Languages.OCAML, self)
@@ -139,10 +139,10 @@ class LanguageMenu(QMenu):
             status_tip="Select OCaml language",
             method=self._set_ocaml,
         )
-        self._language_menu.addAction(select_ocaml_action)
+        self.addAction(select_ocaml_action)
 
     def _add_assembly_action(self) -> None:
-        self._language_menu.addAction(self._get_assembly_action())
+        self.addAction(self._get_assembly_action())
 
     def _get_assembly_action(self) -> QAction:
         set_assembly_action = QAction(Languages.ASSEMBLY, self)
@@ -262,7 +262,7 @@ class LanguageMenu(QMenu):
             status_tip="Select HTML language",
             method=self._set_html,
         )
-        self._language_menu.addAction(set_html_action)
+        self.addAction(set_html_action)
 
     def _get_markdown_action(self) -> QAction:
         set_markdown_action = QAction(Languages.MARKDOWN, self)

@@ -7,12 +7,12 @@ from ._menus_constants import ToolsMenuActionsNames
 class ToolsMenu(QMenu):
     def __init__(self):
         super().__init__()
-        self._tools_menu = QMenu(SectionsNames.TOOLS)
+        self.setTitle(SectionsNames.TOOLS)
         self._create_actions()
 
     @property
     def menu(self) -> QMenu:
-        return self._tools_menu
+        return self
 
     def _create_actions(self) -> None:
         self._base_64_encode_action()
@@ -26,7 +26,7 @@ class ToolsMenu(QMenu):
             status_tip="Base 64 Encode",
             method=self._base_64_encode,
         )
-        self._tools_menu.addAction(base_64_encode)
+        self.addAction(base_64_encode)
 
     def _base_64_decode_action(self) -> None:
         base_64_decode = QAction(ToolsMenuActionsNames.BASE_64_DECODE, self)
@@ -36,7 +36,7 @@ class ToolsMenu(QMenu):
             status_tip="Base 64 Decode",
             method=self._base_64_decode,
         )
-        self._tools_menu.addAction(base_64_decode)
+        self.addAction(base_64_decode)
 
     @Slot()
     def _base_64_encode(self) -> None:

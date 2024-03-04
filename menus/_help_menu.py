@@ -7,12 +7,12 @@ from ._menus_constants import HelpMenuActionsNames, HelpMenuShortcuts
 class HelpMenu(QMenu):
     def __init__(self):
         super().__init__()
-        self._help_menu = QMenu(SectionsNames.HELP)
+        self.setTitle(SectionsNames.HELP)
         self._create_actions()
 
     @property
     def menu(self) -> QMenu:
-        return self._help_menu
+        return self
 
     def _create_actions(self) -> None:
         self._show_all_commands_action()
@@ -29,7 +29,7 @@ class HelpMenu(QMenu):
             shortcut=HelpMenuShortcuts.SHOW_ALL_COMMANDS,
             method=self._show_all_commands,
         )
-        self._help_menu.addAction(show_all_commands_action)
+        self.addAction(show_all_commands_action)
 
     def _documentation_action(self) -> None:
         documentation_action = QAction(HelpMenuActionsNames.DOCUMENTATION, self)
@@ -39,7 +39,7 @@ class HelpMenu(QMenu):
             shortcut="",
             method=self._documentation,
         )
-        self._help_menu.addAction(documentation_action)
+        self.addAction(documentation_action)
 
     def _tips_and_tricks_actions(self) -> None:
         tips_and_tricks_action = QAction(HelpMenuActionsNames.TIPS_AND_TRICKS, self)

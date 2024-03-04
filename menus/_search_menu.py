@@ -7,12 +7,12 @@ from ._menus_constants import SearchMenuActionsNames, SearchMenuShortcuts
 class SearchMenu(QMenu):
     def __init__(self):
         super().__init__()
-        self._search_menu = QMenu(SectionsNames.SEARCH)
+        self.setTitle(SectionsNames.SEARCH)
         self._create_actions()
 
     @property
     def menu(self) -> QMenu:
-        return self._search_menu
+        return self
 
     def _create_actions(self) -> None:
         self._search_action()
@@ -28,7 +28,7 @@ class SearchMenu(QMenu):
             status_tip="Search",
             method=self.search,
         )
-        self._search_menu.addAction(search_action)
+        self.addAction(search_action)
 
     def _search_in_files_action(self) -> None:
         search_in_files_action = QAction(SearchMenuActionsNames.SEARCH_IN_FILES, self)
@@ -38,7 +38,7 @@ class SearchMenu(QMenu):
             status_tip="Search in files",
             method=self.search_in_files,
         )
-        self._search_menu.addAction(search_in_files_action)
+        self.addAction(search_in_files_action)
 
     def _next_action(self) -> None:
         next_action = QAction(SearchMenuActionsNames.NEXT, self)
@@ -48,7 +48,7 @@ class SearchMenu(QMenu):
             status_tip="Search Next",
             method=self.search_next,
         )
-        self._search_menu.addAction(next_action)
+        self.addAction(next_action)
 
     def _back_action(self) -> None:
         back_action = QAction(SearchMenuActionsNames.BACK, self)
@@ -58,7 +58,7 @@ class SearchMenu(QMenu):
             status_tip="Search Back",
             method=self.search_back,
         )
-        self._search_menu.addAction(back_action)
+        self.addAction(back_action)
 
     @Slot()
     def search(self) -> None:

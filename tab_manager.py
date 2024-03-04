@@ -16,7 +16,9 @@ _DEFAULT_TAB_NAME: Final[str] = "Untitled.txt"
 class Tab(QTabWidget):
     def __init__(self, home):
         super().__init__()
-        self._home = home
+        from home import Home
+
+        self._home: Home = home
         self._has_on_close = None
         self._editor = Editor()
         self._loaded_files: List[str] = []
@@ -64,9 +66,6 @@ class Tab(QTabWidget):
         return self._home
 
     def _build_tabs_on_startup(self) -> None:
-        from home import Home
-
-        self._home: Home
         storage_manager = self._home.storage_manager
         if not storage_manager.has_opened_tabs:
             self.build_default_tab()

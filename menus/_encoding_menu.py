@@ -7,17 +7,17 @@ from ._menus_constants import EncodingMenuActionsNames
 class EncodingMenu(QMenu):
     def __init__(self):
         super().__init__()
-        self._encoding_menu = QMenu(SectionsNames.ENCODING)
+        self.setTitle(SectionsNames.ENCODING)
         self._create_actions()
 
     @property
     def menu(self) -> QMenu:
-        return self._encoding_menu
+        return self
 
     def _create_actions(self) -> None:
         self._set_ANSI_action()
         self._set_UTF_8_action()
-        self._encoding_menu.addSeparator()
+        self.addSeparator()
         self._convert_to_ANSI()
         self._convert_to_UTF_8()
 
@@ -29,7 +29,7 @@ class EncodingMenu(QMenu):
             shortcut="",
             method=self.set_ANSI,
         )
-        self._encoding_menu.addAction(set_ansi_action)
+        self.addAction(set_ansi_action)
 
     def _set_UTF_8_action(self) -> None:
         set_UTF_8_action = QAction(EncodingMenuActionsNames.UTF_8, self)
@@ -39,7 +39,7 @@ class EncodingMenu(QMenu):
             shortcut="",
             method=self.set_UTF_8,
         )
-        self._encoding_menu.addAction(set_UTF_8_action)
+        self.addAction(set_UTF_8_action)
 
     def _convert_to_ANSI(self) -> None:
         convert_to_ANSI_action = QAction(EncodingMenuActionsNames.CONVERT_TO_ANSI, self)
@@ -49,7 +49,7 @@ class EncodingMenu(QMenu):
             shortcut="",
             method=self.convert_to_ANSI,
         )
-        self._encoding_menu.addAction(convert_to_ANSI_action)
+        self.addAction(convert_to_ANSI_action)
 
     def _convert_to_UTF_8(self) -> None:
         convert_to_UTF_8_action = QAction(
@@ -61,7 +61,7 @@ class EncodingMenu(QMenu):
             shortcut="",
             method=self.convert_to_UTF_8,
         )
-        self._encoding_menu.addAction(convert_to_UTF_8_action)
+        self.addAction(convert_to_UTF_8_action)
 
     @Slot()
     def set_ANSI(self) -> None:

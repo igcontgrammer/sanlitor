@@ -1,11 +1,15 @@
+from typing import Final
+
 from PySide6.QtCore import Qt, Slot
-from PySide6.QtGui import QFontDatabase, QKeyEvent
+from PySide6.QtGui import QKeyEvent
 from PySide6.QtWidgets import QPlainTextEdit, QScrollBar, QTabWidget
 
 from extensions import Extensions
 from syntax import PythonSyntaxFactory
 from theme import ThemeModes
 from utils import get_circle
+
+TAB_SIZE: Final[str] = "   "
 
 
 class Editor(QPlainTextEdit):
@@ -15,8 +19,8 @@ class Editor(QPlainTextEdit):
         self._has_changes = False
         self._is_open_mode = False
         self._scroll_bar = QScrollBar(self)
-        font = QFontDatabase.systemFont(QFontDatabase.FixedFont)
-        self.setFont(font)
+        # font = QFontDatabase.systemFont(QFontDatabase.FixedFont)
+        # self.setFont(font)
         self.setDocument(self.document())
         self.__configurate()
 
@@ -40,6 +44,8 @@ class Editor(QPlainTextEdit):
 
     def set_syntax(self, extension: str) -> None:
         match extension:
+            case Extensions.PLAIN_TEXT:
+                self.highlighter = None
             case Extensions.PYTHON:
                 self.highlighter = PythonSyntaxFactory().set_syntax(self.document())
             case _:
@@ -62,13 +68,13 @@ class Editor(QPlainTextEdit):
         else:
             raise TypeError("tab is not a QTabWidget")
 
+    def keyPressEvent(self, event: QKeyEvent):
+        if event.key() == Qt.Key_Tab:
+            self.insertPlainText(TAB_SIZE)
+        else:
+            super(Editor, self).keyPressEvent(event)
+
     def __configurate(self) -> None:
         self.textChanged.connect(self.on_change)
         self.setUndoRedoEnabled(True)
         self.setVerticalScrollBar(self._scroll_bar)
-
-    def keyPressEvent(self, event: QKeyEvent):
-        if event.key() == Qt.Key_Tab:
-            self.insertPlainText("    ")
-        else:
-            super(Editor, self).keyPressEvent(event)

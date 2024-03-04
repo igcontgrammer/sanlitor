@@ -10,7 +10,7 @@ from PySide6.QtGui import (
     QTextDocument,
 )
 
-from languages_keywords import PythonKeywords
+from languages_keywords import Python
 
 
 class HighlightFactory(ABC):
@@ -46,7 +46,6 @@ class HighlightFactory(ABC):
 
 # ************* MARKDOWN *************
 
-
 # ************* OCAML *************
 
 # ************* PHP *************
@@ -67,19 +66,21 @@ class PythonSyntaxHighlighter(QSyntaxHighlighter):
         keyword_format = QTextCharFormat()
         keyword_format.setForeground(Qt.blue)
         keyword_format.setFontWeight(QFont.Bold)
-        for keyword in PythonKeywords.keywords:
+        for keyword in Python.keywords:
             pattern = QRegularExpression(f"\\b{keyword}\\b")
             self.highlighting_rules.append((pattern, keyword_format))
 
     def _add_default_patterns(self):
         class_format = QTextCharFormat()
         class_format.setFontWeight(QFont.Bold)
-        class_format.setForeground(Qt.green)
+        class_format.setForeground(Qt.black)
         class_pattern = QRegularExpression(r"^\s*class\s+\w+\(.*$")
         function_format = QTextCharFormat()
         function_format.setFontItalic(True)
-        function_format.setForeground(Qt.green)
-        function_pattern = QRegularExpression(r"^\s*def\s+\w+\s*\(.*\)\s*:\s*$")
+        function_format.setForeground(Qt.blue)
+        function_pattern = QRegularExpression(
+            r"^\s*def\s+(\w+)\s*\((\s*\w+\s*:\s*\w+\s*(?:,\s*\w+\s*:\s*\w+\s*)*)\)\s*:\s*"
+        )
         comment_format = QTextCharFormat()
         comment_format.setBackground(QColor("#77ff77"))
         comment_pattern = QRegularExpression(r"^\s*#.*$")

@@ -7,12 +7,12 @@ from ._menus_constants import SettingsMenuActionsNames
 class SettingsMenu(QMenu):
     def __init__(self):
         super().__init__()
-        self._settings_menu = QMenu(SectionsNames.SETTINGS)
+        self.setTitle(SectionsNames.SETTINGS)
         self._create_actions()
 
     @property
     def menu(self) -> QMenu:
-        return self._settings_menu
+        return self
 
     def _create_actions(self) -> None:
         self._add_preferences_action()
@@ -28,7 +28,7 @@ class SettingsMenu(QMenu):
             status_tip="Open Preferences",
             method=self._open_preferences,
         )
-        self._settings_menu.addAction(preferences)
+        self.addAction(preferences)
 
     def _open_style_configurator_action(self) -> None:
         style_configurator = QAction(SettingsMenuActionsNames.STYLE_CONFIGURATOR, self)
@@ -38,7 +38,7 @@ class SettingsMenu(QMenu):
             status_tip="Open Style Configurator",
             method=self._open_style_configurator_action,
         )
-        self._settings_menu.addAction(style_configurator)
+        self.addAction(style_configurator)
 
     def _open_shortcut_mapper_action(self) -> None:
         shortcut_mapper = QAction(SettingsMenuActionsNames.SHORTCUT_MANAGER, self)
@@ -48,7 +48,7 @@ class SettingsMenu(QMenu):
             status_tip="Open Shortcut Mapper",
             method=self._open_shortcut_mapper_action,
         )
-        self._settings_menu.addAction(shortcut_mapper)
+        self.addAction(shortcut_mapper)
 
     def _import_menu_action(self) -> None:
         import_menu = QMenu(SettingsMenuActionsNames.IMPORT, self)
@@ -68,7 +68,7 @@ class SettingsMenu(QMenu):
         )
         import_menu.addAction(plugin_action)
         import_menu.addAction(style_action)
-        self._settings_menu.addMenu(import_menu)
+        self.addMenu(import_menu)
 
     @Slot()
     def _open_preferences(self) -> None:

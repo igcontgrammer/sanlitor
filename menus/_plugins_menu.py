@@ -7,12 +7,12 @@ from ._menus_constants import PluginsMenuActionsNames
 class PluginsMenu(QMenu):
     def __init__(self):
         super().__init__()
-        self._plugin_menu = QMenu(SectionsNames.PLUGINS)
+        self.setTitle(SectionsNames.PLUGINS)
         self._create_actions()
 
     @property
     def menu(self) -> QMenu:
-        return self._plugin_menu
+        return self
 
     def _create_actions(self) -> None:
         self._plugins_manager_action()
@@ -26,7 +26,7 @@ class PluginsMenu(QMenu):
             shortcut="",
             method=self.plugins_manager,
         )
-        self._plugin_menu.addAction(plugins_manager_action)
+        self.addAction(plugins_manager_action)
 
     def _open_plugins_folder_action(self) -> None:
         open_plugins_folder_action = QAction(
@@ -38,7 +38,7 @@ class PluginsMenu(QMenu):
             shortcut="",
             method=self.open_plugins_folder,
         )
-        self._plugin_menu.addAction(open_plugins_folder_action)
+        self.addAction(open_plugins_folder_action)
 
     @Slot()
     def plugins_manager(self) -> None:
