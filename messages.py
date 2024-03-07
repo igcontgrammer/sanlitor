@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from enum import Enum, auto
 from typing import Optional
 
-from PySide6.QtCore import QCoreApplication as CoreApp
 from PySide6.QtWidgets import QMessageBox, QWidget
 
 
@@ -23,12 +22,12 @@ def show_system_error_message(parent: QWidget, content: Optional[str] = None) ->
     msg = Messages(
         parent=parent,
         content=content if content is not None else "",
-        first_button_title=CoreApp.translate("messages", "De acuerdo"),
+        first_button_title="De acuerdo",
         message_type=MessageTypes.CRITICAL,
     )
     msg.setWindowTitle(CommonMessageTitles.ERROR)
     msg.setStandardButtons(QMessageBox.Cancel)
-    msg.button(QMessageBox.Cancel).setText(CoreApp.translate("messages", "Cancelar"))
+    msg.button(QMessageBox.Cancel).setText("Cancelar")
     msg.run()
 
 
@@ -55,19 +54,11 @@ class Messages(QMessageBox):
         self._parent = parent
         self._content = content
         self._message = QMessageBox(self._parent)
-        self._message.setWindowTitle(
-            CoreApp.translate(
-                "messages", get_title(message_type) if title is None else title
-            )
-        )
+        self._message.setWindowTitle(message_type if title is None else title)
         self._message.setStandardButtons(QMessageBox.Cancel)
         self._message.setText(self._content)
-        self._message.addButton(
-            CoreApp.translate("messages", first_button_title), QMessageBox.AcceptRole
-        )
-        self._message.button(QMessageBox.Cancel).setText(
-            CoreApp.translate("messages", "Cancelar")
-        )
+        self._message.addButton(first_button_title, QMessageBox.AcceptRole)
+        self._message.button(QMessageBox.Cancel).setText("Cancelar")
         match message_type:
             case MessageTypes.CRITICAL:
                 self._message.setIcon(QMessageBox.Critical)
@@ -88,6 +79,4 @@ class Messages(QMessageBox):
         return self._message.exec_()
 
     def add_button(self, description: str) -> None:
-        self._message.addButton(
-            CoreApp.translate("messages", description), QMessageBox.AcceptRole
-        )
+        self._message.addButton(description, QMessageBox.AcceptRole)

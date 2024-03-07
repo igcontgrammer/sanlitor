@@ -2,13 +2,8 @@ from abc import ABC, abstractmethod
 from typing import List, Tuple
 
 from PySide6.QtCore import QRegularExpression, Qt
-from PySide6.QtGui import (
-    QColor,
-    QFont,
-    QSyntaxHighlighter,
-    QTextCharFormat,
-    QTextDocument,
-)
+from PySide6.QtGui import (QColor, QFont, QSyntaxHighlighter, QTextCharFormat,
+                           QTextDocument)
 
 from languages_keywords import Python
 

@@ -1,13 +1,4 @@
 {
-    "filesWorkedOn": [
-        "Untitled.txt",
-        "new(1).txt",
-        "lalados.py"
-    ],
-    "savedPaths": [
-        "C:/Users/ignac/pruebacatorce.txt",
-        "C:/Users/ignac/prueba jaja.txt",
-        "C:/Users/ignac/lalados.py"
-    ],
-    "lastTabWorkedIndex": 2
+    "paths": [],
+    "lastTabWorked": 0
 }

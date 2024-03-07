@@ -11,22 +11,15 @@ from constants import OpenFileOptions
 from editor import Editor
 from extensions import available_extensions, get_extensions_list
 from messages import Messages, MessageTypes, show_system_error_message
+from paths import Paths
 from tab_manager import Tab
 from utils import filename_is_valid
 
-from . import QAction
-from . import QCoreApplication as CoreApp
-from . import QMenu, SectionsNames, Slot
+from . import QAction, QMenu, SectionsNames, Slot
 from ._menus_constants import FileMenuActionsNames, FileMenuShortcuts
 
 _DEFAULT_NEW_FILENAME: Final[str] = "new.txt"
 _STARTING_NEW_FILE_COUNTER: Final[int] = 1
-
-
-class SaveOptions(Enum):
-    SAVE = auto()
-    SAVE_AS = auto()
-    SAVE_ALL = auto()
 
 
 def get_content_from_file(path: str) -> str:
@@ -38,9 +31,8 @@ def get_content_from_file(path: str) -> str:
         print(error_message)
         return ""
 
-
-def has_opened_file(filepath: str) -> bool:
-    return len(filepath) > 0
+def has_opened_file(path: str) -> bool:
+    return len(path) > 0
 
 
 def get_new_filename(home, tab: Tab) -> str:
@@ -48,26 +40,18 @@ def get_new_filename(home, tab: Tab) -> str:
 
     if not isinstance(home, Home):
         raise TypeError("The home parameter must be an instance of Home")
-    files_worked_on = home.storage_manager.get_last_files_worked()
+    files_worked_on = home.storage_manager.worked_files
     if _DEFAULT_NEW_FILENAME not in files_worked_on:
         return _DEFAULT_NEW_FILENAME
+    name = ""
     for i in range(_STARTING_NEW_FILE_COUNTER, tab.count()):
         name = f"new({i}).txt"
-        if name in tab.loaded_files or name in files_worked_on:
+        if name in tab.worked_files or name in files_worked_on:
             continue
-        return name
-
-
-def get_save_dialog_title(option: SaveOptions) -> str:
-    match option:
-        case SaveOptions.SAVE:
-            return "Guardar"
-        case SaveOptions.SAVE_AS:
-            return "Guardar como"
-        case SaveOptions.SAVE_ALL:
-            return "Guardar todo"
-        case _:
-            return ""
+        else:
+            break
+    print(f"new name: {name}")
+    return name
 
 
 class FileMenu(QMenu):
@@ -100,7 +84,7 @@ class FileMenu(QMenu):
         open_file_action = QAction(FileMenuActionsNames.OPEN, self)
         config(
             action=open_file_action,
-            status_tip=CoreApp.translate("file_menu", "Open a file"),
+            status_tip="Open a file",
             shortcut=FileMenuShortcuts.OPEN,
             method=self._open_file,
         )
@@ -110,7 +94,7 @@ class FileMenu(QMenu):
         new_file_action = QAction(FileMenuActionsNames.NEW, self)
         config(
             action=new_file_action,
-            status_tip=CoreApp.translate("file_menu", "Create a new file"),
+            status_tip="Create a new file",
             shortcut=FileMenuShortcuts.NEW,
             method=self._new_file,
         )
@@ -120,7 +104,7 @@ class FileMenu(QMenu):
         save_file_action = QAction(FileMenuActionsNames.SAVE, self)
         config(
             action=save_file_action,
-            status_tip=CoreApp.translate("file_menu", "Save a file"),
+            status_tip="Save a file",
             shortcut=FileMenuShortcuts.SAVE,
             method=self._save_file,
         )
@@ -131,7 +115,7 @@ class FileMenu(QMenu):
         save_as_action = QAction(FileMenuActionsNames.SAVE_AS, self)
         config(
             action=save_as_action,
-            status_tip=CoreApp.translate("file_menu", "Save a file as..."),
+            status_tip="Save file as...",
             shortcut=FileMenuShortcuts.SAVE_AS,
             method=partial(self._save_as, old_name),
         )
@@ -141,7 +125,7 @@ class FileMenu(QMenu):
         save_all_files_action = QAction(FileMenuActionsNames.SAVE_ALL, self)
         config(
             action=save_all_files_action,
-            status_tip=CoreApp.translate("file_menu", "Save all files"),
+            status_tip="Save all files",
             shortcut=FileMenuShortcuts.SAVE_ALL,
             method=self._save_all_files,
         )
@@ -151,7 +135,7 @@ class FileMenu(QMenu):
         close_file_action = QAction(FileMenuActionsNames.CLOSE, self)
         config(
             action=close_file_action,
-            status_tip=CoreApp.translate("file_menu", "Close a file"),
+            status_tip="Close a file",
             shortcut=FileMenuShortcuts.CLOSE,
             method=None,
         )
@@ -161,7 +145,7 @@ class FileMenu(QMenu):
         close_all_files_action = QAction(FileMenuActionsNames.CLOSE_ALL, self)
         config(
             action=close_all_files_action,
-            status_tip=CoreApp.translate("file_menu", "Close all files"),
+            status_tip="Close all files",
             shortcut=FileMenuShortcuts.CLOSE_ALL,
             method=None,
         )
@@ -171,7 +155,7 @@ class FileMenu(QMenu):
         print_action = QAction(FileMenuActionsNames.PRINT, self)
         config(
             action=print_action,
-            status_tip=CoreApp.translate("file_menu", "Print a file"),
+            status_tip="Print a file",
             shortcut="",
             method=self._print_file,
         )
@@ -181,7 +165,7 @@ class FileMenu(QMenu):
         exit_action = QAction(FileMenuActionsNames.EXIT, self)
         config(
             action=exit_action,
-            status_tip=CoreApp.translate("file_menu", "Exit the application"),
+            status_tip="Exit the application",
             shortcut=FileMenuShortcuts.EXIT,
             method=self._exit_application,
         )
@@ -193,10 +177,10 @@ class FileMenu(QMenu):
     def _open_file(self) -> None:
         file = QFileDialog.getOpenFileName(
             self,
-            CoreApp.translate("file_menu", "Abrir archivo"),
+            "Abrir archivo",
             dir=os.path.expanduser("~"),
         )
-        if not has_opened_file(filepath=file[0]):
+        if not has_opened_file(path=file[0]):
             return None
         path = file[0]
         extension_detected = os.path.splitext(path)[1]
@@ -224,87 +208,44 @@ class FileMenu(QMenu):
     @Slot()
     def _new_file(self) -> None:
         tab = self._home.tab_manager
-        tab.new(get_new_filename(home=self._home, tab=tab), False)
+        tab.new()
 
     @Slot()
     def _save_file(self) -> None:
+        # TODO: vamos a trabajar con el save file
         tab_manager = self._home.tab_manager
         index = tab_manager.currentIndex()
+        file_name = tab_manager.tabText(index)
+        exists = self._home.storage_manager.path_exists(file_name)
+        if not exists:
+            msg = Messages(
+                parent=self._home,
+                content=f"Tuvimos problemas para guardar el archivo {file_name}. Asegúrese que el nombre o la ubicación sean correctos.",
+                first_button_title="De acuerdo",
+                message_type=MessageTypes.CRITICAL
+            )
+            msg.run()
+            return None
         editor = tab_manager.widget(index)
         if not isinstance(editor, Editor):
+            print("editor is not an instance of Editor")
             return None
-        file_name = tab_manager.tabText(index)
-        if editor.has_changes and self._home.is_registered(file_name):
-            content = editor.toPlainText()
-            save_status = self._home.storage_manager.save_changes(
-                file_name=file_name, value=content, old_file_name=""
-            )
-            if save_status[0] is False:
-                show_system_error_message(self._home, save_status[1])
-                return None
-            editor.has_changes = False
-            tab_manager.setTabIcon(index, QIcon())
-            return None
-        path = self._get_path_from_save_dialog(SaveOptions.SAVE)
-        if not len(path) > 0:
-            return
-        new_file_name = os.path.basename(path)
-        if not filename_is_valid(os.path.basename(new_file_name)):
-            error_message = (
-                'El nombre del archivo no puede contener los siguientes caracteres: /, \\, :, *, ?, ", <, '
-                ">, |"
-            )
-            show_system_error_message(self._home, error_message)
-            return None
-        new_file_name = os.path.basename(path)
         content = editor.toPlainText()
-        with open(path, "w") as file:
-            file.write(content)
-        save_status = self._home.storage_manager.save_changes(path=path)
-        if save_status[0] is False:
-            show_system_error_message(
-                self._home, "No se pudo guardar el archivo. Inténtelo de nuevo"
+        status = self._home.storage_manager.save_from_file_name(file_name, content)
+        if status[0] is False:
+            print(status[1])
+            error_msg = Messages(
+                parent=self._home,
+                content="Ocurrió un error inesperado. Por favor inténtelo de nuevo.",
+                first_button_title="De acuerdo",
+                message_type=MessageTypes.CRITICAL
             )
+            error_msg.run()
             return None
-        tab_manager.setTabText(index, new_file_name)
-        editor.has_changes = False
-        tab_manager.setTabIcon(index, QIcon())
 
     @Slot()
     def _save_as(self, old_name: str) -> None:
-        tab_manager = self._home.tab_manager
-        index = tab_manager.currentIndex()
-        editor = tab_manager.widget(index)
-        if not isinstance(editor, Editor):
-            show_system_error_message(self._home)
-            return None
-        file = QFileDialog.getSaveFileName(
-            self,
-            CoreApp.translate("file_menu", "Guardar Archivo Como..."),
-            filter=get_extensions_list(),
-            dir=os.path.expanduser("~"),
-        )
-        path = file[0]
-        if not len(path) > 0:
-            return
-        file_name = os.path.basename(path)
-        if not filename_is_valid(file_name):
-            error_message = (
-                'El nombre del archivo no puede contener los siguientes caracteres: /, \\, :, *, ?, ", <, '
-                ">, |"
-            )
-            show_system_error_message(self._home, error_message)
-            return
-        content = editor.toPlainText()
-        with open(path, "w") as write_file:
-            write_file.write(content)
-        if self._home.storage_manager.save_changes(path=path, old_file_name=old_name):
-            tab_manager.setTabText(index, file_name)
-            editor.has_changes = False
-            tab_manager.setTabIcon(index, QIcon())
-        else:
-            error_message = "No se pudo guardar el archivo. Inténtelo de nuevo."
-            show_system_error_message(self._home, error_message)
+        pass
 
     @Slot()
     def _save_all_files(self) -> None:
@@ -338,7 +279,7 @@ class FileMenu(QMenu):
             tab_manager.change_tab_name(file_name)
             tab_manager.add_content_to_current_tab(content=get_content_from_file(path))
         else:
-            tab_manager.new(file_name, False, get_content_from_file(path))
+            tab_manager.new()
         editor.has_changes = False
         tab_manager.set_is_open_mode(False)
         tab_manager.add_to_loaded_files(file_name)
@@ -359,10 +300,10 @@ class FileMenu(QMenu):
             return OpenFileOptions.CANCEL
         return OpenFileOptions.HERE if option_selected == 0 else OpenFileOptions.NEW_TAB
 
-    def _get_path_from_save_dialog(self, option: SaveOptions) -> str:
+    def _get_path_from_save_dialog(self, title: str) -> str:
         file = QFileDialog.getSaveFileName(
             self,
-            CoreApp.translate("file_menu", get_save_dialog_title(option)),
+            title,
             filter=get_extensions_list(),
             dir=os.path.expanduser("~"),
         )

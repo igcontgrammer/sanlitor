@@ -1,13 +1,14 @@
+import os
 from dataclasses import dataclass
 from typing import Final
 
 from PySide6.QtGui import QCloseEvent
 from PySide6.QtWidgets import QMainWindow
 
+from constants import SaveOptions
 from editor import Editor
 from menus.menu import MenuBar
 from messages import Messages, MessageTypes
-from paths import Paths
 from statusbar import StatusBar
 from storage_manager import StorageManager
 from tab_manager import Tab
@@ -26,12 +27,12 @@ class HomeDefaultDimensions:
 
 
 class Home(QMainWindow):
-    _instance = None
+    # _instance = None
 
-    def __new__(cls, *args, **kwargs):
-        if not cls._instance:
-            cls._instance = super(Home, cls).__new__(cls, *args, **kwargs)
-        return cls._instance
+    # def __new__(cls, *args, **kwargs):
+    #     if not cls._instance:
+    #         cls._instance = super(Home, cls).__new__(cls, *args, **kwargs)
+    #     return cls._instance
 
     def __init__(self):
         super().__init__()
@@ -54,59 +55,49 @@ class Home(QMainWindow):
     def last_tab_worked_index(self) -> int:
         return self.storage_manager.last_tab_worked_index
 
-    def is_registered(self, file_name: str) -> bool:
-        return self.storage_manager.is_registered(file_name)
-
     def closeEvent(self, event: QCloseEvent) -> None:
-        has_new_opened_files = self._tab.has_loaded_files
-        if not has_new_opened_files:
-            any_changes = False
-            for i in range(self._tab.count()):
-                editor = self._tab.widget(i)
-                if not isinstance(editor, Editor):
-                    raise TypeError("editor is not an Editor object")
-                if not editor.has_changes:
-                    continue
-                any_changes = True
-                file_name = self._tab.tabText(i)
-                content = editor.toPlainText()
-                # todo: esto cambiarlo despues a storage manager, aqui solo se prueba que funcione
-                try:
-                    with open(Paths.TEMP_FILES + file_name, "w") as file:
-                        file.write(content)
-                except Exception as e:
-                    print(f"exception: {e}")
-                    msg = Messages(
-                        parent=self,
-                        content=f"Tuvimos problemas para guardar el estado del archivo {file_name}. Revise si está abierto en otra aplicación o si lo cambió de sitio.",
-                        first_button_title="De acuerdo",
-                        message_type=MessageTypes.CRITICAL,
-                    )
-                    msg.run()
-                    break
-            if any_changes is False:
-                self.storage_manager.update_last_tab_worked_index(
-                    self._tab.currentIndex()
-                )
-        else:
-            opened_files = self.storage_manager.opened_files
-            if any(file in opened_files for file in self._tab.loaded_files):
-                return
-            self.storage_manager.add_new_opened_files(
-                self._tab.loaded_files, self._tab.currentIndex()
+        any_changes = self.tab_manager.tabs_has_changes()
+        has_new_tabs = len(self.tab_manager._loaded_files) > 0
+        option = None
+        if any_changes:
+            msg = Messages(
+                parent=self,
+                content="Hay cambios sin guardar ¿desea guardar todo?",
+                first_button_title="Guardar",
+                message_type=MessageTypes.QUESTION,
             )
-            for file_name in self._tab.loaded_files:
+            msg.add_button("No guardar")
+            option = msg.run()
+            if option != SaveOptions.SAVE and option != SaveOptions.NO_SAVE:
+                event.ignore()
+                msg.close()
+                return
+        if option == SaveOptions.NO_SAVE:
+            super().closeEvent(event)
+            return
+        if has_new_tabs or option == SaveOptions.YES:
+            for path in self.storage_manager.paths:
+                file_name = os.path.basename(path)
                 for i in range(self._tab.count()):
-                    if self._tab.tabText(i) != file_name:
+                    if file_name != self._tab.tabText(i):
                         continue
                     editor = self._tab.widget(i)
                     if not isinstance(editor, Editor):
-                        raise TypeError("editor is not an Editor object")
+                        print("editor is not an instance of Editor")
+                        return None
                     content = editor.toPlainText()
-                    self.storage_manager.add_new_temp_file(file_name, content)
-        if self._tab.has_closed_files:
-            self.storage_manager.delete_files(self._tab.closed_files)
-        return super().closeEvent(event)
+                    save_status = self.storage_manager.save_from_path(path, content)
+                    if save_status[0] is False:
+                        print(f"error: {save_status[1]}")
+                        msg = Messages(
+                            parent=self,
+                            content="Tuvimos problemas para cerrar correctamente los archivos. Reinicie la aplicación.",
+                            first_button_title="De acuerdo",
+                            message_type=MessageTypes.CRITICAL
+                        )
+                        msg.run()
+                        break
+        super().closeEvent(event)
 
     def _add_menu(self) -> None:
         self.menu = MenuBar(home=self)
@@ -126,7 +117,7 @@ class Home(QMainWindow):
     def __call_main_widgets(self) -> None:
         self.__set_main_window_default_config()
         self._add_menu()
-        self._add_toolbar()
+        # self._add_toolbar()
         self._add_status_bar()
 
     def __set_default_dimensions(self) -> None:

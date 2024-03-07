@@ -5,151 +5,96 @@ from typing import Dict, List, Optional, Tuple, Union
 from paths import Paths
 
 
-def _content() -> Dict[str, Union[List[str], int]]:
-    with open(Paths.STORAGE, "r") as file:
-        return json.load(file)
-
+def get_content() -> Dict[str, Union[List[str], int]]:
+    try:
+        with open(Paths.STORAGE, "r") as file:
+            return json.load(file)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+    except Exception as e:
+        print(e)
+        return {}
 
 class StorageManager:
     def __init__(self) -> None:
-        self._content = _content()
-        self._files_worked: List[str] = self._content.get("filesWorkedOn")
-        self._paths_saved: List[str] = self._content.get("savedPaths")
-        self._has_opened_tabs: bool = len(self._files_worked) > 0
-        self._last_tab_worked_index: int = self._content.get("lastTabWorkedIndex")
+        self._content: Dict[str, Union[List[str], int]] = get_content()
+        self._paths: List[str] = self._content.get("paths", []) # type: ignore
+        self._worked_files: List[str] = list(map(os.path.basename, self._paths)) # type: ignore
+        self._last_tab_worked_index: int = self._content.get("lastTabWorked") # type: ignore
 
     @property
-    def opened_files(self) -> List[str]:
-        return self._files_worked
+    def paths(self) -> List[str]:
+        return self._paths
 
     @property
-    def has_opened_tabs(self) -> bool:
-        return self._has_opened_tabs
+    def worked_files(self) -> List[str]:
+        return self._worked_files
 
     @property
     def last_tab_worked_index(self) -> int:
         return self._last_tab_worked_index
 
-    @property
-    def paths_saved(self) -> List[str]:
-        return self._paths_saved
+    def path_exists(self, file_name: str) -> bool:
+        return any(file_name in path for path in self._paths)
 
-    def is_registered(self, file_name: str) -> bool:
-        return any(file_name in path for path in self._paths_saved)
-
-    def update_last_tab_worked_index(self, index: int) -> None:
+    def save_from_file_name(self, file_name: str, content: str) -> Tuple[bool, Optional[str]]:
+        path = list(filter(lambda x: os.path.basename(x) == file_name, self._paths))[0]
         try:
-            with open(Paths.STORAGE, "w") as file:
-                self._content["lastTabWorkedIndex"] = index
-                json.dump(self._content, file, indent=4)
-        except (FileNotFoundError, json.JSONDecodeError) as fe:
-            print(f"exception at update_last_tab_worked_index: {fe}")
-            return
-        except Exception as e:
-            print(f"exception at update_last_tab_worked_index: {e}")
-            return
-
-    def add_new_opened_files(self, new_files: List[str], index: int) -> None:
-        for new_file in new_files:
-            self._files_worked.append(new_file)
-        try:
-            with open(Paths.STORAGE, "w") as file:
-                self._content["filesWorkedOn"] = self._files_worked
-                self._content["lastTabWorkedIndex"] = index
-                json.dump(self._content, file, indent=4)
-        except (FileNotFoundError, json.JSONDecodeError) as fe:
-            print(f"exception at add_new_opened_files: {fe}")
-            return
-        except Exception as e:
-            print(f"exception at add_new_opened_files: {e}")
-            return
-
-    def add_new_temp_file(self, file_name: str, content: str) -> None:
-        if file_name in self._files_worked:
-            return
-        self._files_worked.append(file_name)
-        try:
-            with open(Paths.TEMP_FILES + file_name, "w") as file:
+            with open(path, "w") as file:
                 file.write(content)
+            return True, None
+        except Exception as e:
+            return False, str(e)
+    
+    def save_from_path(self, path: str, content: str) -> Tuple[bool, Optional[str]]:
+        try:
+            with open(path, "w") as file:
+                file.write(content)
+            return True, None
+        except Exception as e:
+            return False, str(e)
+
+    def add_path(self, path: str) -> Tuple[bool, Optional[str]]:
+        if path in self._paths:
+            return False, "This path already exists"
+        self._paths.append(path)
+        try:
+            with open(Paths.STORAGE, "w") as storage:
+                self._content["paths"] = self._paths
+                json.dump(self._content, storage, indent=4)
+            return True, None
         except (FileNotFoundError, json.JSONDecodeError) as fe:
-            print(f"exception at add_new_temp_file: {fe}")
-            return
+            return True, str(fe)
         except Exception as e:
-            print(f"exception at add_new_temp_file: {e}")
-            return
+            return False, f"An error occurred: {e}"
 
-    def delete_files(self, files: List[str]) -> None:
-        for file in files:
-            if file in self._files_worked:
-                self._files_worked.remove(file)
-            if os.path.exists(Paths.TEMP_FILES + file):
-                os.remove(Paths.TEMP_FILES + file)
+    def save_all(self, files: List[str]) -> Tuple[bool, Optional[str]]:
+        return True, None
+
+    # TODO: esta condición se cuando el usuario cierra el tab 
+    def remove(self, file_name: str) -> Tuple[bool, Optional[str]]:
+        exists = any(file_name in path for path in self._paths)
+        if not exists:
+            return False, "This path does not exists"
+        for i in range(len(self._paths)):
+            if file_name in self._paths[i]:
+                del self._content["paths"][i] # type: ignore
+                break
         try:
-            with open(Paths.STORAGE, "w") as file:
-                self._content["filesWorkedOn"] = self._files_worked
-                json.dump(self._content, file, indent=4)
-        except (FileNotFoundError, json.JSONDecodeError) as fe:
-            print(f"exception at delete_files: {fe}")
-        except Exception as e:
-            print(f"exception at delete_files: {e}")
-
-    def get_last_files_worked(self) -> List[str]:
-        """Get the last tabs that were opened by the user"""
-        return self._files_worked
-
-    def get_saved_files(self) -> List[str]:
-        """Get the last tabs that were opened by the user"""
-        return self._paths_saved
-
-    def get_content_from_file(self, path: str) -> Optional[str]:
-        try:
-            with open(path, "r") as file:
-                return file.read()
-        except FileNotFoundError as fe:
-            print(f"exception at get_content_from_file: {fe}")
-            return None
-        except Exception as e:
-            print(f"exception at get_content_from_file: {e}")
-            return None
-
-    def save_changes(
-        self,
-        *,
-        file_name: Optional[str] = None,
-        value: Optional[str] = None,
-        path: Optional[str] = None,
-        old_file_name: Optional[str] = None,
-    ) -> Tuple[bool, Optional[str]]:
-        try:
-            if path is not None and old_file_name is not None:
-                if old_file_name in self._paths_saved:
-                    index_old_saved_file = self._paths_saved.index(old_file_name)
-                    self._paths_saved[index_old_saved_file] = path
-                else:
-                    self._paths_saved.append(path)
-                if old_file_name in self._files_worked:
-                    index_old_opened_files = self._files_worked.index(old_file_name)
-                    self._files_worked[index_old_opened_files] = os.path.basename(path)
-                else:
-                    self._files_worked.append(os.path.basename(path))
-                os.rename(Paths.TEMP_FILES + old_file_name, path)
-                with open(Paths.STORAGE, "w") as write_file:
-                    self._content["savedFiles"] = self._paths_saved
-                    self._content["filesWorkedOn"] = self._files_worked
-                    json.dump(self._content, write_file, indent=4)
-                return True, None
-            elif file_name is not None and value is not None:
-                for file in self._paths_saved:
-                    if os.path.basename(file) == file_name:
-                        with open(file, "w") as write_file:
-                            write_file.write(value)
-                            return True, None
-            else:
-                raise ValueError("filename and value or path must be provided")
-        except ValueError as ve:
-            print(f"exception at save_changes: {ve}")
-            return False, str(ve)
+            with open(Paths.STORAGE, "w") as storage:
+                json.dump(self._content, storage, indent=4)
+            return True, None
         except (FileNotFoundError, json.JSONDecodeError) as fe:
             return False, str(fe)
+        except Exception as e:
+            return False, str(e)
+
+    # cerrar todos
+    def remove_all(self) -> Tuple[int, Optional[str]]:
+        self._content["paths"] = []
+        try:
+            with open(Paths.STORAGE, "w") as storage:
+                json.dump(self._content, storage, indent=4)
+            return True, None
         except Exception as e:
             return False, str(e)
