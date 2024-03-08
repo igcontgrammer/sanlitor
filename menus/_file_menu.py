@@ -1,9 +1,7 @@
 import os
-from enum import Enum, auto
 from functools import partial
 from typing import Final
 
-from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QFileDialog
 
 from common.config_action import config
@@ -11,14 +9,12 @@ from constants import OpenFileOptions
 from editor import Editor
 from extensions import available_extensions, get_extensions_list
 from messages import Messages, MessageTypes, show_system_error_message
-from paths import Paths
 from tab_manager import Tab
-from utils import filename_is_valid
 
 from . import QAction, QMenu, SectionsNames, Slot
 from ._menus_constants import FileMenuActionsNames, FileMenuShortcuts
 
-_DEFAULT_NEW_FILENAME: Final[str] = "new.txt"
+_DEFAULT_NEW_FILE_NAME: Final[str] = "new.txt"
 _STARTING_NEW_FILE_COUNTER: Final[int] = 1
 
 
@@ -31,22 +27,23 @@ def get_content_from_file(path: str) -> str:
         print(error_message)
         return ""
 
+
 def has_opened_file(path: str) -> bool:
     return len(path) > 0
 
 
-def get_new_filename(home, tab: Tab) -> str:
+def get_new_file_name(home, tab: Tab) -> str:
     from home import Home
 
     if not isinstance(home, Home):
         raise TypeError("The home parameter must be an instance of Home")
     files_worked_on = home.storage_manager.worked_files
-    if _DEFAULT_NEW_FILENAME not in files_worked_on:
-        return _DEFAULT_NEW_FILENAME
+    if _DEFAULT_NEW_FILE_NAME not in files_worked_on:
+        return _DEFAULT_NEW_FILE_NAME
     name = ""
     for i in range(_STARTING_NEW_FILE_COUNTER, tab.count()):
         name = f"new({i}).txt"
-        if name in tab.worked_files or name in files_worked_on:
+        if name in tab.loaded_files or name in files_worked_on:
             continue
         else:
             break
@@ -191,9 +188,9 @@ class FileMenu(QMenu):
             return None
 
         tab_manager = self._home.tab_manager
-        filename = os.path.basename(path)
-        if tab_manager.already_opened(filename):
-            tab_manager.move(filename)
+        file_name = os.path.basename(path)
+        if tab_manager.already_opened(file_name):
+            tab_manager.move(file_name)
             return
         match self._get_open_file_option():
             case OpenFileOptions.HERE:
@@ -212,17 +209,17 @@ class FileMenu(QMenu):
 
     @Slot()
     def _save_file(self) -> None:
-        # TODO: vamos a trabajar con el save file
         tab_manager = self._home.tab_manager
         index = tab_manager.currentIndex()
         file_name = tab_manager.tabText(index)
+        # TODO: que hacemos con el untitled?
         exists = self._home.storage_manager.path_exists(file_name)
         if not exists:
             msg = Messages(
                 parent=self._home,
                 content=f"Tuvimos problemas para guardar el archivo {file_name}. Asegúrese que el nombre o la ubicación sean correctos.",
                 first_button_title="De acuerdo",
-                message_type=MessageTypes.CRITICAL
+                message_type=MessageTypes.CRITICAL,
             )
             msg.run()
             return None
@@ -238,7 +235,7 @@ class FileMenu(QMenu):
                 parent=self._home,
                 content="Ocurrió un error inesperado. Por favor inténtelo de nuevo.",
                 first_button_title="De acuerdo",
-                message_type=MessageTypes.CRITICAL
+                message_type=MessageTypes.CRITICAL,
             )
             error_msg.run()
             return None
@@ -262,7 +259,6 @@ class FileMenu(QMenu):
     # ************* SLOTS FUNCTIONS *************
 
     def _when_opening(self, tab_manager: Tab, path: str, here: bool = False) -> None:
-        # TODO: implementar el manejo de extensiones y su sintaxis
         editor = tab_manager.editor
         if editor.has_changes:
             msg = Messages(

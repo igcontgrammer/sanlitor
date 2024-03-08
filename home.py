@@ -93,7 +93,7 @@ class Home(QMainWindow):
                             parent=self,
                             content="Tuvimos problemas para cerrar correctamente los archivos. Reinicie la aplicación.",
                             first_button_title="De acuerdo",
-                            message_type=MessageTypes.CRITICAL
+                            message_type=MessageTypes.CRITICAL,
                         )
                         msg.run()
                         break
