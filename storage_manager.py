@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Final, Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 from paths import Paths
 
@@ -14,9 +14,6 @@ def get_content() -> Dict[str, Union[List[str], int]]:
     except Exception as e:
         print(e)
         return {}
-
-
-_DEFAULT_TAB_NAME: Final[str] = "Untitled.txt"
 
 
 class StorageManager:
@@ -94,7 +91,6 @@ class StorageManager:
         except Exception as e:
             return False, str(e)
 
-    # cerrar todos
     def remove_all(self) -> Tuple[int, Optional[str]]:
         self._content["paths"] = []
         try:

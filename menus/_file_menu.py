@@ -1,7 +1,6 @@
 import os
 from functools import partial
 from typing import Final
-
 from PySide6.QtWidgets import QFileDialog
 
 from common.config_action import config
@@ -14,6 +13,7 @@ from tab_manager import Tab
 from . import QAction, QMenu, SectionsNames, Slot
 from ._menus_constants import FileMenuActionsNames, FileMenuShortcuts
 
+_DEFAULT_FILE_NAME: Final[str] = "Untitled.txt"
 _DEFAULT_NEW_FILE_NAME: Final[str] = "new.txt"
 _STARTING_NEW_FILE_COUNTER: Final[int] = 1
 
@@ -212,32 +212,47 @@ class FileMenu(QMenu):
         tab_manager = self._home.tab_manager
         index = tab_manager.currentIndex()
         file_name = tab_manager.tabText(index)
-        # TODO: que hacemos con el untitled?
-        exists = self._home.storage_manager.path_exists(file_name)
-        if not exists:
-            msg = Messages(
-                parent=self._home,
-                content=f"Tuvimos problemas para guardar el archivo {file_name}. Asegúrese que el nombre o la ubicación sean correctos.",
-                first_button_title="De acuerdo",
-                message_type=MessageTypes.CRITICAL,
-            )
-            msg.run()
+        try:
+            if file_name == _DEFAULT_FILE_NAME:
+                editor = tab_manager.widget(index)
+                if not isinstance(editor, Editor):
+                    raise ValueError("editor is not an instance of Editor")
+                file = QFileDialog.getSaveFileName(
+                    parent=self._home,
+                    caption="Nuevo archivo",
+                    dir=os.path.expanduser("~"),
+                    filter=get_extensions_list(),
+                )
+                path = file[0]
+                if len(path) == 0:
+                    return None
+                content = editor.toPlainText()
+                status = self._home.storage_manager.save_from_path(path, content)
+                if status[0] is False:
+                    raise ValueError("save from path status is False")
+                path_add_status = self._home.storage_manager.add_path(path)
+                if path_add_status[0] is False:
+                    raise ValueError("add path status if False")
+                tab_manager.setTabText(index, os.path.basename(path))
+                editor.has_changes = False
+                return
+            exists = self._home.storage_manager.path_exists(file_name)
+            if not exists:
+                raise FileNotFoundError(f"the file: {file_name} not exists")
+            editor = tab_manager.widget(index)
+            if not isinstance(editor, Editor):
+                raise ValueError("editor is not an instance of Editor")
+            content = editor.toPlainText()
+            status = self._home.storage_manager.save_from_file_name(file_name, content)
+            if status[0] is False:
+                raise ValueError("not saved from file_name")
+        except ValueError as ve:
+            show_system_error_message(parent=self._home, content=str(ve))
             return None
-        editor = tab_manager.widget(index)
-        if not isinstance(editor, Editor):
-            print("editor is not an instance of Editor")
-            return None
-        content = editor.toPlainText()
-        status = self._home.storage_manager.save_from_file_name(file_name, content)
-        if status[0] is False:
-            print(status[1])
-            error_msg = Messages(
-                parent=self._home,
-                content="Ocurrió un error inesperado. Por favor inténtelo de nuevo.",
-                first_button_title="De acuerdo",
-                message_type=MessageTypes.CRITICAL,
-            )
-            error_msg.run()
+        except FileNotFoundError as fnf:
+            show_system_error_message(parent=self._home, content=str(fnf))
+        except Exception as e:
+            show_system_error_message(parent=self._home, content=str(e))
             return None
 
     @Slot()

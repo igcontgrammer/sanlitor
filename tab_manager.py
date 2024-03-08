@@ -44,6 +44,10 @@ class Tab(QTabWidget):
     def loaded_files(self) -> List[str]:
         return self._loaded_files
 
+    @property
+    def HAS_ONE_TAB(self) -> bool:
+        return self.count() == 1
+
     def already_opened(self, file_name: str) -> bool:
         return file_name in self._loaded_files
 
@@ -163,7 +167,7 @@ class Tab(QTabWidget):
             if option != TabActions.CLOSE:
                 msg.close()
                 return
-            if self.count() == 1:
+            if self.HAS_ONE_TAB:
                 if file_name == _DEFAULT_TAB_NAME:
                     self.setTabIcon(index, QIcon())
                     self.setTabText(index, _DEFAULT_TAB_NAME)
@@ -198,7 +202,13 @@ class Tab(QTabWidget):
                     return
         else:
             if self.count() == 1:
-                self.setTabText(index, _DEFAULT_TAB_NAME)
+                if file_name == _DEFAULT_TAB_NAME:
+                    self.setTabText(index, _DEFAULT_TAB_NAME)
+                else:
+                    self.setTabText(index, _DEFAULT_TAB_NAME)
+                    editor.clear()
+                    editor.has_changes = False
+                    self._home.storage_manager.remove(file_name)
             else:
                 self.removeTab(index)
                 editor.has_changes = False
