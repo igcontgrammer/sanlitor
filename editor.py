@@ -68,8 +68,8 @@ class Editor(QPlainTextEdit):
         else:
             raise TypeError("tab is not a QTabWidget")
 
-    def keyPressEvent(self, event: QKeyEvent):
-        if event.key() == Qt.Key_Tab:
+    def keyPressEvent(self, event: QKeyEvent):  # type: ignore
+        if event.key() == Qt.Key_Tab:  # type: ignore
             self.insertPlainText(TAB_SIZE)
         else:
             super(Editor, self).keyPressEvent(event)

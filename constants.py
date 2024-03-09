@@ -6,8 +6,6 @@ class FileNames:
     DEFAULT: str = "Untitled.txt"
 
 
-
-@dataclass(frozen=True)
 class OpenFileOptions:
     HERE: int = 0
     NEW_TAB: int = 1
@@ -18,7 +16,7 @@ class OpenFileOptions:
 
 @dataclass(frozen=True)
 class SaveOptions:
-    SAVE = 1
+    SAVE = 0
     SAVE_AS = 2
     SAVE_ALL = 3
     YES = 0

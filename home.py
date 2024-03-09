@@ -44,7 +44,7 @@ class Home(QMainWindow):
         self.setCentralWidget(self._tab)
 
     @property
-    def tab_manager(self) -> Tab:
+    def tab(self) -> Tab:
         return self._tab
 
     @property
@@ -56,8 +56,8 @@ class Home(QMainWindow):
         return self.storage_manager.last_tab_worked_index
 
     def closeEvent(self, event: QCloseEvent) -> None:
-        any_changes = self.tab_manager.tabs_has_changes()
-        has_new_tabs = len(self.tab_manager._loaded_files) > 0
+        any_changes = self.tab.tabs_has_changes()
+        has_new_tabs = len(self.tab._loaded_files) > 0
         option = None
         if any_changes:
             msg = Messages(
@@ -68,6 +68,7 @@ class Home(QMainWindow):
             )
             msg.add_button("No guardar")
             option = msg.run()
+            print(f"opcion seleccionada: {option}")
             if option != SaveOptions.SAVE and option != SaveOptions.NO_SAVE:
                 event.ignore()
                 msg.close()
@@ -87,6 +88,7 @@ class Home(QMainWindow):
                         return None
                     content = editor.toPlainText()
                     save_status = self.storage_manager.save_from_path(path, content)
+                    print(f"save?: {save_status}")
                     if save_status[0] is False:
                         print(f"error: {save_status[1]}")
                         msg = Messages(
@@ -97,6 +99,8 @@ class Home(QMainWindow):
                         )
                         msg.run()
                         break
+                    self._tab.set_normal(i, file_name)
+                    editor.has_changes = False
         super().closeEvent(event)
 
     def _add_menu(self) -> None:

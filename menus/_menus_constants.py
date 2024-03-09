@@ -3,6 +3,7 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class FileMenuActionsNames:
+    RENAME: str = "Rename"
     NEW: str = "New"
     OPEN: str = "Open..."
     OPEN_FOLDER: str = "Open Folder..."

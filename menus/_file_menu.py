@@ -1,8 +1,7 @@
 import os
 from functools import partial
-from typing import Final, Optional, List
+from typing import Final
 from PySide6.QtWidgets import QFileDialog
-from PySide6.QtGui import QIcon
 
 from common.config_action import config
 from constants import OpenFileOptions, FileNames
@@ -38,7 +37,7 @@ class FileMenu(QMenu):
         from home import Home
 
         self._home: Home = home
-        self._tab_manager = self._home.tab_manager
+        self._tab = self._home.tab
         self._create_actions()
 
     @property
@@ -46,6 +45,7 @@ class FileMenu(QMenu):
         return self
 
     def _create_actions(self) -> None:
+        self._rename_action()
         self._open_file_action()
         self._new_file_action()
         self._save_file_action()
@@ -57,6 +57,16 @@ class FileMenu(QMenu):
         self._exit_action()
 
     # ************* ACTIONS *************
+
+    def _rename_action(self) -> None:
+        rename_action = QAction(FileMenuActionsNames.RENAME)
+        config(
+            action=rename_action,
+            status_tip="Rename file",
+            shortcut="",
+            method=self._rename,
+        )
+        self.addAction(rename_action)
 
     def _open_file_action(self) -> None:
         open_file_action = QAction(FileMenuActionsNames.OPEN, self)
@@ -89,7 +99,7 @@ class FileMenu(QMenu):
         self.addAction(save_file_action)
 
     def _save_as_action(self) -> None:
-        old_name = self._tab_manager.tabText(self._home.tab_manager.currentIndex())
+        old_name = self._tab.tabText(self._home.tab.currentIndex())
         save_as_action = QAction(FileMenuActionsNames.SAVE_AS, self)
         config(
             action=save_as_action,
@@ -151,7 +161,6 @@ class FileMenu(QMenu):
 
     # ************* SLOTS *************
 
-    @Slot()
     def _open_file(self) -> None:
         file = QFileDialog.getOpenFileName(
             self,
@@ -168,32 +177,36 @@ class FileMenu(QMenu):
             )
             return None
         file_name = os.path.basename(path)
-        if self._tab_manager.already_opened(file_name):
-            self._tab_manager.move(file_name)
+        if self._tab.already_opened(file_name):
+            self._tab.move(file_name)
             return
-        if self._tab_manager.HAS_ONE_TAB:
-            self._when_opening(self._tab_manager, path, here=True)
+        if self._tab.HAS_ONE_TAB:
+            self._when_opening(self._tab, path, here=True)
             return
         else:
             option = self._get_open_file_option()
             match option:
                 case OpenFileOptions.HERE:
-                    self._when_opening(self._tab_manager, path, here=True)
+                    self._when_opening(self._tab, path, here=True)
                 case OpenFileOptions.NEW_TAB:
-                    self._when_opening(self._tab_manager, path)
+                    self._when_opening(self._tab, path)
                 case OpenFileOptions.CANCEL:
                     return
                 case _:
                     return
 
     @Slot()
+    def _rename(self) -> None:
+        pass
+
+    @Slot()
     def _new_file(self) -> None:
-        tab = self._tab_manager
+        tab = self._tab
         tab.new()
 
     def save_on_default(self) -> None:
-        index = self._tab_manager.currentIndex()
-        editor = self._tab_manager.widget(index)
+        index = self._tab.currentIndex()
+        editor = self._tab.widget(index)
         if not isinstance(editor, Editor):
             raise ValueError("editor is not an instance of Editor")
         file = QFileDialog.getSaveFileName(
@@ -212,13 +225,13 @@ class FileMenu(QMenu):
         path_add_status = self._home.storage_manager.add_path(path)
         if path_add_status[0] is False:
             raise ValueError("add path status if False")
-        self._tab_manager.setTabText(index, os.path.basename(path))
+        self._tab.setTabText(index, os.path.basename(path))
         editor.has_changes = False
 
     @Slot()
     def _save_file(self) -> None:
-        index = self._tab_manager.currentIndex()
-        file_name = self._tab_manager.tabText(index)
+        index = self._tab.currentIndex()
+        file_name = self._tab.tabText(index)
         try:
             if file_name == _STARTUP_FILE_NAME:
                 self.save_on_default()
@@ -226,7 +239,7 @@ class FileMenu(QMenu):
             exists = self._home.storage_manager.path_exists(file_name)
             if not exists:
                 raise FileNotFoundError(f"the file: {file_name} not exists")
-            editor = self._tab_manager.widget(index)
+            editor = self._tab.widget(index)
             if not isinstance(editor, Editor):
                 raise ValueError("editor is not an instance of Editor")
             content = editor.toPlainText()
@@ -234,7 +247,7 @@ class FileMenu(QMenu):
             if status[0] is False:
                 raise ValueError("not saved from file_name")
             editor.has_changes = False
-            self._tab_manager.setTabIcon(index, QIcon())
+            self._tab.set_normal(index)
         except ValueError as ve:
             show_system_error_message(parent=self._home, content=str(ve))
             return None
@@ -252,13 +265,13 @@ class FileMenu(QMenu):
     def _save_all_files(self) -> None:
         # TODO: el loaded files, se debe actualizar cuando se hace un cambio.
         try:
-            for i in range(self._tab_manager.count()):
-                editor = self._tab_manager.widget(i)
+            for i in range(self._tab.count()):
+                editor = self._tab.widget(i)
                 if not isinstance(editor, Editor):
                     raise ValueError("editor is not an instance of Editor")
                 if not editor.has_changes:
                     continue
-                file_name = self._tab_manager.tabText(i)
+                file_name = self._tab.tabText(i)
                 if file_name == FileNames.DEFAULT:
                     file = QFileDialog.getSaveFileName(
                         parent=self._home,
@@ -280,8 +293,7 @@ class FileMenu(QMenu):
                     if save_path[0] is False:
                         raise ValueError("default path file not saved or changed")
                     editor.has_changes = False
-                    self._tab_manager.setTabIcon(i, QIcon())
-                    self._tab_manager.setTabText(i, os.path.basename(path))
+                    self._tab.set_normal(i, os.path.basename(path))
                 else:
                     content = editor.toPlainText()
                     save_status = self._home.storage_manager.save_from_file_name(
@@ -290,8 +302,7 @@ class FileMenu(QMenu):
                     if save_status[0] is False:
                         raise ValueError("default file not saved or changed")
                     editor.has_changes = False
-                    self._tab_manager.setTabIcon(i, QIcon())
-                    self._tab_manager.setTabText(i, file_name)
+                    self._tab.set_normal(i, file_name)
         except ValueError as ve:
             show_system_error_message(parent=self._home, content=str(ve))
         except FileNotFoundError as fnf:

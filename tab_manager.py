@@ -1,5 +1,5 @@
 import os
-from typing import List
+from typing import List, Optional
 
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QFileDialog, QTabWidget
@@ -49,6 +49,15 @@ class Tab(QTabWidget):
     @property
     def HAS_ONE_TAB(self) -> bool:
         return self.count() == 1
+
+    def set_default(self, index: int) -> None:
+        self.setTabIcon(index, QIcon())
+        self.setTabText(index, FileNames.DEFAULT)
+
+    def set_normal(self, index: int, name: Optional[str] = None) -> None:
+        self.setTabIcon(index, QIcon())
+        if name is not None:
+            self.setTabText(index, name)
 
     def already_opened(self, file_name: str) -> bool:
         return file_name in self._loaded_files
