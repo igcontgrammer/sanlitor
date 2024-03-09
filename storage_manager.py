@@ -59,7 +59,7 @@ class StorageManager:
         except Exception as e:
             return False, str(e)
 
-    def add_path(self, path: str) -> Tuple[bool, Optional[str]]:
+    def add(self, path: str) -> Tuple[bool, Optional[str]]:
         if path in self._paths:
             return False, "This path already exists"
         self._paths.append(path)
@@ -73,21 +73,7 @@ class StorageManager:
         except Exception as e:
             return False, f"An error occurred: {e}"
 
-    def remove_path(self, path: str) -> Tuple[bool, Optional[str]]:
-        if path not in self._paths:
-            return False, f"The path {path} does not exist"
-        try:
-            return True, None
-        except FileNotFoundError as fe:
-            print(str(fe))
-            return False, None
-        except Exception as e:
-            print(e)
-            return False, ""
-
-    def rename_path(
-        self, old_file_name: str, new_name: str
-    ) -> Tuple[bool, Optional[str]]:
+    def rename(self, old_file_name: str, new_name: str) -> Tuple[bool, Optional[str]]:
         path = list(
             filter(lambda x: os.path.basename(x) == old_file_name, self._paths)
         )[0]

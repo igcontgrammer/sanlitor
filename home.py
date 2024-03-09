@@ -99,7 +99,7 @@ class Home(QMainWindow):
                         )
                         msg.run()
                         break
-                    self._tab.set_normal(i, file_name)
+                    self._tab.set_normal(file_name)
                     editor.has_changes = False
         super().closeEvent(event)
 

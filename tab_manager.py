@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QFileDialog, QTabWidget
-
+from utils import has_selected_file
 from constants import TabActions, FileNames
 from editor import Editor
 from extensions import get_extensions_list
@@ -54,10 +54,10 @@ class Tab(QTabWidget):
         self.setTabIcon(index, QIcon())
         self.setTabText(index, FileNames.DEFAULT)
 
-    def set_normal(self, index: int, name: Optional[str] = None) -> None:
-        self.setTabIcon(index, QIcon())
+    def set_normal(self, name: Optional[str] = None) -> None:
+        self.setTabIcon(self.currentIndex(), QIcon())
         if name is not None:
-            self.setTabText(index, name)
+            self.setTabText(self.currentIndex(), name)
 
     def already_opened(self, file_name: str) -> bool:
         return file_name in self._loaded_files
@@ -127,10 +127,10 @@ class Tab(QTabWidget):
             filter=get_extensions_list(),
         )
         path = file[0]
-        if len(path) == 0:
+        if has_selected_file(path):
             print("no se quiso agregar o guardar ningun archivo")
             return None
-        status = self._home.storage_manager.add_path(path)
+        status = self._home.storage_manager.add(path)
         if status[0] is False:
             print(f"error: {status[1]}")
             return None
@@ -147,7 +147,10 @@ class Tab(QTabWidget):
             self._loaded_files.append(file_name)
 
     def new_from_startup(self, file_name: str, content: str) -> None:
+        extension = f".{file_name.split(".")[1]}"
+        print(f"extension: {extension}")
         editor = Editor()
+        editor.set_syntax(extension)
         editor.setPlainText(content)
         editor.has_changes = False
         self.addTab(editor, file_name)

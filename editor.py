@@ -47,6 +47,7 @@ class Editor(QPlainTextEdit):
             case Extensions.PLAIN_TEXT:
                 self.highlighter = None
             case Extensions.PYTHON:
+                print("la extension es Python")
                 self.highlighter = PythonSyntaxFactory().set_syntax(self.document())
             case _:
                 pass

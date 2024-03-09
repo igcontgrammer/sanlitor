@@ -1,8 +1,7 @@
 import os
-from functools import partial
 from typing import Final
 from PySide6.QtWidgets import QFileDialog
-
+from utils import has_selected_file
 from common.config_action import config
 from constants import OpenFileOptions, FileNames
 from editor import Editor
@@ -24,10 +23,6 @@ def get_content_from_file(path: str) -> str:
         error_message = f"Error found at: {e.__class__.__name__}. Message: {e}"
         print(error_message)
         return ""
-
-
-def has_opened_file(path: str) -> bool:
-    return len(path) > 0
 
 
 class FileMenu(QMenu):
@@ -99,13 +94,12 @@ class FileMenu(QMenu):
         self.addAction(save_file_action)
 
     def _save_as_action(self) -> None:
-        old_name = self._tab.tabText(self._home.tab.currentIndex())
         save_as_action = QAction(FileMenuActionsNames.SAVE_AS, self)
         config(
             action=save_as_action,
             status_tip="Save file as...",
             shortcut=FileMenuShortcuts.SAVE_AS,
-            method=partial(self._save_as, old_name),
+            method=self._save_as,
         )
         self.addAction(save_as_action)
 
@@ -167,7 +161,7 @@ class FileMenu(QMenu):
             "Abrir archivo",
             dir=os.path.expanduser("~"),
         )
-        if not has_opened_file(path=file[0]):
+        if not has_selected_file(file[0]):
             return None
         path = file[0]
         extension_detected = os.path.splitext(path)[1]
@@ -205,11 +199,11 @@ class FileMenu(QMenu):
             filter=get_extensions_list(),
         )
         path = file[0]
-        if len(path) == 0:
+        if not has_selected_file(path):
             print("nothin selected")
             return None
         new_file_name = os.path.basename(path)
-        rename_status = self._home.storage_manager.rename_path(old_name, new_file_name)
+        rename_status = self._home.storage_manager.rename(old_name, new_file_name)
         if rename_status[0] is False:
             print(rename_status[1])
             return None
@@ -232,13 +226,13 @@ class FileMenu(QMenu):
             filter=get_extensions_list(),
         )
         path = file[0]
-        if len(path) == 0:
+        if not has_selected_file(path):
             return None
         content = editor.toPlainText()
         status = self._home.storage_manager.save_from_path(path, content)
         if status[0] is False:
             raise ValueError("save from path status is False")
-        path_add_status = self._home.storage_manager.add_path(path)
+        path_add_status = self._home.storage_manager.add(path)
         if path_add_status[0] is False:
             raise ValueError("add path status if False")
         self._tab.setTabText(index, os.path.basename(path))
@@ -263,7 +257,7 @@ class FileMenu(QMenu):
             if status[0] is False:
                 raise ValueError("not saved from file_name")
             editor.has_changes = False
-            self._tab.set_normal(index)
+            self._tab.set_normal()
         except ValueError as ve:
             show_system_error_message(parent=self._home, content=str(ve))
             return None
@@ -274,8 +268,34 @@ class FileMenu(QMenu):
             return None
 
     @Slot()
-    def _save_as(self, old_name: str) -> None:
-        pass
+    def _save_as(self) -> None:
+        editor = self._tab.widget(self._tab.currentIndex())
+        if not isinstance(editor, Editor):
+            print("editor is not an instance of Editor")
+            show_system_error_message(self._home, "editor is not an instance of Editor")
+            return None
+        file = QFileDialog.getSaveFileName(
+            parent=self._home,
+            caption="Guardar como...",
+            dir=os.path.expanduser("~"),
+            filter=get_extensions_list(),
+        )
+        path = file[0]
+        if not has_selected_file(path):
+            return None
+        old_name = self._tab.tabText(self._tab.currentIndex())
+        new_name = os.path.basename(path)
+        print(f"old name: {old_name}")
+        print(f"new name: {new_name}")
+        status = self._home.storage_manager.rename(old_name, new_name)
+        print(f"guardado?: {status[0]}")
+        if status[0] is False:
+            print(f"error: {status[1]}")
+            return
+        extension = os.path.splitext(path)[1]
+        editor.set_syntax(extension)
+        self._tab.set_normal(new_name)
+        editor.has_changes = False
 
     @Slot()
     def _save_all_files(self) -> None:
@@ -295,7 +315,7 @@ class FileMenu(QMenu):
                         filter=get_extensions_list(),
                     )
                     path = file[0]
-                    if len(path) == 0:
+                    if not has_selected_file(path):
                         print("guardado cancelado")
                         break
                     content = editor.toPlainText()
@@ -304,11 +324,11 @@ class FileMenu(QMenu):
                     )
                     if save_status[0] is False:
                         raise ValueError("default file not saved or changed")
-                    save_path = self._home.storage_manager.add_path(path)
+                    save_path = self._home.storage_manager.add(path)
                     if save_path[0] is False:
                         raise ValueError("default path file not saved or changed")
                     editor.has_changes = False
-                    self._tab.set_normal(i, os.path.basename(path))
+                    self._tab.set_normal(os.path.basename(path))
                 else:
                     content = editor.toPlainText()
                     save_status = self._home.storage_manager.save_from_file_name(
@@ -317,7 +337,7 @@ class FileMenu(QMenu):
                     if save_status[0] is False:
                         raise ValueError("default file not saved or changed")
                     editor.has_changes = False
-                    self._tab.set_normal(i, file_name)
+                    self._tab.set_normal(file_name)
         except ValueError as ve:
             show_system_error_message(parent=self._home, content=str(ve))
         except FileNotFoundError as fnf:
