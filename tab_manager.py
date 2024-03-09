@@ -1,15 +1,13 @@
 import os
-from typing import Final, List
+from typing import List
 
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QFileDialog, QTabWidget
 
-from constants import TabActions
+from constants import TabActions, FileNames
 from editor import Editor
 from extensions import get_extensions_list
 from messages import Messages, MessageTypes
-
-_DEFAULT_TAB_NAME: Final[str] = "Untitled.txt"
 
 
 class Tab(QTabWidget):
@@ -43,6 +41,10 @@ class Tab(QTabWidget):
     @property
     def loaded_files(self) -> List[str]:
         return self._loaded_files
+
+    @property
+    def has_tabs(self) -> bool:
+        return self.count() > 0
 
     @property
     def HAS_ONE_TAB(self) -> bool:
@@ -101,11 +103,12 @@ class Tab(QTabWidget):
         self._loaded_files.remove(file_name)
 
     def build_default_tab(self) -> None:
-        self.addTab(self._editor, _DEFAULT_TAB_NAME)
+        self.addTab(self._editor, FileNames.DEFAULT)
         self.setTabsClosable(True)
         self.tabCloseRequested.connect(self.on_close)
-        if _DEFAULT_TAB_NAME not in self._loaded_files:
-            self._loaded_files.append(_DEFAULT_TAB_NAME)
+        if FileNames.DEFAULT not in self._loaded_files:
+            self._loaded_files.append(FileNames.DEFAULT)
+        # self._home.storage_manager.add_default_file()
 
     def new(self) -> None:
         file = QFileDialog.getSaveFileName(
@@ -168,9 +171,9 @@ class Tab(QTabWidget):
                 msg.close()
                 return
             if self.HAS_ONE_TAB:
-                if file_name == _DEFAULT_TAB_NAME:
+                if file_name == FileNames.DEFAULT:
                     self.setTabIcon(index, QIcon())
-                    self.setTabText(index, _DEFAULT_TAB_NAME)
+                    self.setTabText(index, FileNames.DEFAULT)
                     return
                 else:
                     remove_status = self._home.storage_manager.remove(file_name)
@@ -184,7 +187,7 @@ class Tab(QTabWidget):
                         msg.run()
                         return
                 self.setTabIcon(index, QIcon())
-                self.setTabText(index, _DEFAULT_TAB_NAME)
+                self.setTabText(index, FileNames.DEFAULT)
                 editor.clear()
                 editor.has_changes = False
             else:
@@ -202,10 +205,10 @@ class Tab(QTabWidget):
                     return
         else:
             if self.count() == 1:
-                if file_name == _DEFAULT_TAB_NAME:
-                    self.setTabText(index, _DEFAULT_TAB_NAME)
+                if file_name == FileNames.DEFAULT:
+                    self.setTabText(index, FileNames.DEFAULT)
                 else:
-                    self.setTabText(index, _DEFAULT_TAB_NAME)
+                    self.setTabText(index, FileNames.DEFAULT)
                     editor.clear()
                     editor.has_changes = False
                     self._home.storage_manager.remove(file_name)

@@ -2,6 +2,12 @@ from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
+class FileNames:
+    DEFAULT: str = "Untitled.txt"
+
+
+
+@dataclass(frozen=True)
 class OpenFileOptions:
     HERE: int = 0
     NEW_TAB: int = 1

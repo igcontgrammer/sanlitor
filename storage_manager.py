@@ -1,8 +1,10 @@
 import json
 import os
-from typing import Dict, List, Optional, Tuple, Union
-
+from typing import Final, Dict, List, Optional, Tuple, Union
+from constants import FileNames
 from paths import Paths
+
+PATH_DEFAULT_FILE: Final[str] = Paths.TEMP_FILES + FileNames.DEFAULT
 
 
 def get_content() -> Dict[str, Union[List[str], int]]:
@@ -70,6 +72,18 @@ class StorageManager:
             return True, str(fe)
         except Exception as e:
             return False, f"An error occurred: {e}"
+
+    def remove_path(self, path: str) -> Tuple[bool, Optional[str]]:
+        if path not in self._paths:
+            return False, f"The path {path} does not exist"
+        try:
+            return True, None
+        except FileNotFoundError as fe:
+            print(str(fe))
+            return False, None
+        except Exception as e:
+            print(e)
+            return False, ""
 
     def save_all(self, files: List[str]) -> Tuple[bool, Optional[str]]:
         return True, None
