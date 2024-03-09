@@ -59,7 +59,7 @@ class FileMenu(QMenu):
     # ************* ACTIONS *************
 
     def _rename_action(self) -> None:
-        rename_action = QAction(FileMenuActionsNames.RENAME)
+        rename_action = QAction(FileMenuActionsNames.RENAME, self)
         config(
             action=rename_action,
             status_tip="Rename file",
@@ -197,7 +197,23 @@ class FileMenu(QMenu):
 
     @Slot()
     def _rename(self) -> None:
-        pass
+        old_name = self._tab.tabText(self._tab.currentIndex())
+        file = QFileDialog.getSaveFileName(
+            parent=self._home,
+            caption="Renombrar archivo",
+            dir=os.path.expanduser("~"),
+            filter=get_extensions_list(),
+        )
+        path = file[0]
+        if len(path) == 0:
+            print("nothin selected")
+            return None
+        new_file_name = os.path.basename(path)
+        rename_status = self._home.storage_manager.rename_path(old_name, new_file_name)
+        if rename_status[0] is False:
+            print(rename_status[1])
+            return None
+        self._tab.setTabText(self._tab.currentIndex(), new_file_name)
 
     @Slot()
     def _new_file(self) -> None:
@@ -263,7 +279,6 @@ class FileMenu(QMenu):
 
     @Slot()
     def _save_all_files(self) -> None:
-        # TODO: el loaded files, se debe actualizar cuando se hace un cambio.
         try:
             for i in range(self._tab.count()):
                 editor = self._tab.widget(i)

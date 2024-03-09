@@ -85,6 +85,30 @@ class StorageManager:
             print(e)
             return False, ""
 
+    def rename_path(
+        self, old_file_name: str, new_name: str
+    ) -> Tuple[bool, Optional[str]]:
+        path = list(
+            filter(lambda x: os.path.basename(x) == old_file_name, self._paths)
+        )[0]
+        new_path = path.replace(old_file_name, new_name)
+        try:
+            os.rename(path, new_path)
+            for i, p in enumerate(self._paths):
+                if p == path:
+                    self._paths[i] = new_path
+                    break
+            self._content["paths"] = self._paths
+            with open(Paths.STORAGE, "w") as storage:
+                json.dump(self._content, storage, indent=4)
+            return True, None
+        except FileNotFoundError as fnf:
+            print(fnf)
+            return False, str(fnf)
+        except Exception as e:
+            print(e)
+            return False, str(e)
+
     def save_all(self, files: List[str]) -> Tuple[bool, Optional[str]]:
         return True, None
 
@@ -92,8 +116,8 @@ class StorageManager:
         exists = any(file_name in path for path in self._paths)
         if not exists:
             return False, "This path does not exists"
-        for i in range(len(self._paths)):
-            if file_name in self._paths[i]:
+        for i, path in enumerate(self._paths):
+            if file_name in path:
                 del self._content["paths"][i]  # type: ignore
                 break
         try:
