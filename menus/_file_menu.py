@@ -1,18 +1,20 @@
 import os
 from typing import Final
+
 from PySide6.QtWidgets import QFileDialog
-from utils import has_selected_file
+
 from common.config_action import config
-from constants import OpenFileOptions, FileNames
+from constants import FileNames, OpenFileOptions, SaveOptions
 from editor import Editor
 from extensions import available_extensions, get_extensions_list
 from messages import Messages, MessageTypes, show_system_error_message
 from tab_manager import Tab
+from utils import has_selected_file
 
 from . import QAction, QMenu, SectionsNames, Slot
 from ._menus_constants import FileMenuActionsNames, FileMenuShortcuts
 
-_STARTUP_FILE_NAME: Final[str] = "Untitled.txt"
+DEFAULT_FILE_NAME: Final[str] = "Untitled.txt"
 
 
 def get_content_from_file(path: str) -> str:
@@ -119,7 +121,7 @@ class FileMenu(QMenu):
             action=close_file_action,
             status_tip="Close a file",
             shortcut=FileMenuShortcuts.CLOSE,
-            method=None,
+            method=self._close,
         )
         self.addAction(close_file_action)
 
@@ -243,7 +245,7 @@ class FileMenu(QMenu):
         index = self._tab.currentIndex()
         file_name = self._tab.tabText(index)
         try:
-            if file_name == _STARTUP_FILE_NAME:
+            if file_name == DEFAULT_FILE_NAME:
                 self.save_on_default()
                 return
             exists = self._home.storage_manager.path_exists(file_name)
@@ -271,7 +273,6 @@ class FileMenu(QMenu):
     def _save_as(self) -> None:
         editor = self._tab.widget(self._tab.currentIndex())
         if not isinstance(editor, Editor):
-            print("editor is not an instance of Editor")
             show_system_error_message(self._home, "editor is not an instance of Editor")
             return None
         file = QFileDialog.getSaveFileName(
@@ -285,12 +286,8 @@ class FileMenu(QMenu):
             return None
         old_name = self._tab.tabText(self._tab.currentIndex())
         new_name = os.path.basename(path)
-        print(f"old name: {old_name}")
-        print(f"new name: {new_name}")
         status = self._home.storage_manager.rename(old_name, new_name)
-        print(f"guardado?: {status[0]}")
         if status[0] is False:
-            print(f"error: {status[1]}")
             return
         extension = os.path.splitext(path)[1]
         editor.set_syntax(extension)
@@ -345,14 +342,135 @@ class FileMenu(QMenu):
         except Exception as e:
             show_system_error_message(parent=self._home, content=str(e))
 
+    @Slot()
+    def _close(self) -> None:
+        editor = self._tab.widget(self._tab.currentIndex())
+        if not isinstance(editor, Editor):
+            print("editor is not an instance of Editor")
+            return None
+        file_name = self._tab.tabText(self._tab.currentIndex())
+        if editor.has_changes:
+            msg = Messages(
+                parent=self._home,
+                content="Se identificaron cambios en este archivo ¿desea guardar y cerrar?",
+                first_button_title="Guardar",
+                message_type=MessageTypes.QUESTION,
+            )
+            msg.add_button("Cerrar de todas formas")
+            option = msg.run()
+            if option != SaveOptions.SAVE and option != SaveOptions.NO_SAVE:
+                return
+            content = editor.toPlainText()
+            if option == SaveOptions.SAVE:
+                if file_name == DEFAULT_FILE_NAME and self._tab.HAS_ONE_TAB:
+                    file = QFileDialog.getSaveFileName(
+                        parent=self._home,
+                        caption="Guardar archivo",
+                        dir=os.path.expanduser("~"),
+                        filter=get_extensions_list(),
+                    )
+                    path = file[0]
+                    if not has_selected_file(path):
+                        print("se cancela el guardado...")
+                        return
+                    save_status = self._home.storage_manager.save_from_path(
+                        path, content
+                    )
+                    if save_status[0] is False:
+                        show_system_error_message(
+                            self._home,
+                            "Tuvimos problemas para guardar el archivo. Por favor inténtelo de nuevo.",
+                        )
+                        return
+                    save_path_status = self._home.storage_manager.add(path)
+                    if save_path_status[0] is False:
+                        show_system_error_message(
+                            self._home,
+                            "Tuvimos problemas para guardar el archivo. Por favor inténtelo de nuevo.",
+                        )
+                        return
+                    editor.clear()
+                    editor.has_changes = False
+                    self._tab.set_normal(DEFAULT_FILE_NAME)
+                    return
+                else:
+                    save_status = self._home.storage_manager.save_from_file_name(
+                        file_name, content
+                    )
+                    if save_status[0] is False:
+                        show_system_error_message(
+                            self._home,
+                            "tuvimos problemas para guardar el archivo, por favor inténtelo de nuevo",
+                        )
+            self._tab.removeTab(self._tab.currentIndex())
+            editor.clear()
+            editor.has_changes = False
+            self._tab.set_normal()
+        else:
+            if self._tab.HAS_ONE_TAB:
+                editor.clear()
+                editor.has_changes = False
+                self._tab.set_normal(FileNames.DEFAULT)
+            else:
+                self._tab.removeTab(self._tab.currentIndex())
+            self._home.storage_manager.remove(file_name)
+
+    @Slot()
+    def _close_all(self) -> None:
+        for i in range(self._tab.count()):
+            editor = self._tab.widget(i)
+            if not isinstance(editor, Editor):
+                return None
+            if not editor.has_changes:
+                self._tab.removeTab(i)
+                continue
+            file_name = self._tab.tabText(i)
+            content = editor.toPlainText()
+            if file_name == DEFAULT_FILE_NAME and self._tab.HAS_ONE_TAB:
+                file = QFileDialog.getSaveFileName(
+                    parent=self._home,
+                    caption="Guardar archivo",
+                    dir=os.path.expanduser("~"),
+                    filter=get_extensions_list(),
+                )
+                path = file[0]
+                if not has_selected_file(path):
+                    print("se cancela el guardado...")
+                    return
+                save_status = self._home.storage_manager.save_from_path(path, content)
+                if save_status[0] is False:
+                    show_system_error_message(
+                        self._home,
+                        "Tuvimos problemas para guardar el archivo. Por favor inténtelo de nuevo.",
+                    )
+                    return
+                save_path_status = self._home.storage_manager.add(path)
+                if save_path_status[0] is False:
+                    show_system_error_message(
+                        self._home,
+                        "Tuvimos problemas para guardar el archivo. Por favor inténtelo de nuevo.",
+                    )
+                    return
+                editor.clear()
+                editor.has_changes = False
+                self._tab.set_normal(DEFAULT_FILE_NAME)
+            else:
+                if self._tab.HAS_ONE_TAB:
+                    editor.clear()
+                    editor.has_changes = False
+                    self._tab.set_normal(FileNames.DEFAULT)
+                else:
+                    self._tab.removeTab(self._tab.currentIndex())
+            self._home.storage_manager.remove(file_name)
+
+    @Slot()
     def _print_file(self) -> None:
         print("Printing a file...")
+        return
 
     @Slot()
     def _exit_application(self) -> None:
         print("Exiting the application...")
-
-    # ************* SLOTS FUNCTIONS *************
 
     def _when_opening(self, tab_manager: Tab, path: str, here: bool = False) -> None:
         editor = tab_manager.editor

@@ -1,6 +1,7 @@
 import json
 import os
-from typing import Final, Dict, List, Optional, Tuple, Union
+from typing import Dict, Final, List, Optional, Tuple, Union
+
 from constants import FileNames
 from paths import Paths
 
@@ -81,7 +82,7 @@ class StorageManager:
         try:
             os.rename(path, new_path)
             for i, p in enumerate(self._paths):
-                if p == path:
+                if path == p:
                     self._paths[i] = new_path
                     break
             self._content["paths"] = self._paths
@@ -94,9 +95,6 @@ class StorageManager:
         except Exception as e:
             print(e)
             return False, str(e)
-
-    def save_all(self, files: List[str]) -> Tuple[bool, Optional[str]]:
-        return True, None
 
     def remove(self, file_name: str) -> Tuple[bool, Optional[str]]:
         exists = any(file_name in path for path in self._paths)

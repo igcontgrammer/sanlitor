@@ -3,11 +3,12 @@ from typing import List, Optional
 
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QFileDialog, QTabWidget
-from utils import has_selected_file
-from constants import TabActions, FileNames
+
+from constants import FileNames, TabActions
 from editor import Editor
 from extensions import get_extensions_list
 from messages import Messages, MessageTypes
+from utils import has_selected_file
 
 
 class Tab(QTabWidget):
@@ -66,7 +67,6 @@ class Tab(QTabWidget):
         for i in range(self.count()):
             editor = self.widget(i)
             if not isinstance(editor, Editor):
-                print("editor is not an Editor object")
                 return False
             if editor.has_changes:
                 return True
@@ -128,7 +128,6 @@ class Tab(QTabWidget):
         )
         path = file[0]
         if has_selected_file(path):
-            print("no se quiso agregar o guardar ningun archivo")
             return None
         status = self._home.storage_manager.add(path)
         if status[0] is False:
@@ -148,7 +147,6 @@ class Tab(QTabWidget):
 
     def new_from_startup(self, file_name: str, content: str) -> None:
         extension = f".{file_name.split(".")[1]}"
-        print(f"extension: {extension}")
         editor = Editor()
         editor.set_syntax(extension)
         editor.setPlainText(content)

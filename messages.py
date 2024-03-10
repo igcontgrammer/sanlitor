@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum, auto
 from typing import Optional
+
 from PySide6.QtWidgets import QMessageBox, QWidget
 
 
