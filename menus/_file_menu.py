@@ -131,7 +131,7 @@ class FileMenu(QMenu):
             action=close_all_files_action,
             status_tip="Close all files",
             shortcut=FileMenuShortcuts.CLOSE_ALL,
-            method=None,
+            method=self._close_all,
         )
         self.addAction(close_all_files_action)
 
@@ -421,10 +421,17 @@ class FileMenu(QMenu):
             editor = self._tab.widget(i)
             if not isinstance(editor, Editor):
                 return None
-            if not editor.has_changes:
-                self._tab.removeTab(i)
-                continue
             file_name = self._tab.tabText(i)
+            if not editor.has_changes:
+                if self._tab.HAS_ONE_TAB:
+                    editor.clear()
+                    editor.has_changes = False
+                    self._tab.set_normal(FileNames.DEFAULT)
+                else:
+                    self._tab.removeTab(self._tab.currentIndex())
+                    self._home.storage_manager.remove(file_name)
+                self._home.storage_manager.remove(file_name)
+                continue
             content = editor.toPlainText()
             if file_name == DEFAULT_FILE_NAME and self._tab.HAS_ONE_TAB:
                 file = QFileDialog.getSaveFileName(
@@ -461,6 +468,7 @@ class FileMenu(QMenu):
                     self._tab.set_normal(FileNames.DEFAULT)
                 else:
                     self._tab.removeTab(self._tab.currentIndex())
+            print(f"file_name to remove: {file_name}")
             self._home.storage_manager.remove(file_name)
 
     @Slot()

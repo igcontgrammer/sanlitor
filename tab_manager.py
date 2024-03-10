@@ -7,7 +7,7 @@ from PySide6.QtWidgets import QFileDialog, QTabWidget
 from constants import FileNames, TabActions
 from editor import Editor
 from extensions import get_extensions_list
-from messages import Messages, MessageTypes
+from messages import Messages, MessageTypes, show_system_error_message
 from utils import has_selected_file
 
 
@@ -20,7 +20,6 @@ class Tab(QTabWidget):
         self._has_on_close = None
         self._editor = Editor()
         self._loaded_files: List[str] = []
-        self._closed_files: List[str] = []
         self._build_on_startup()
 
     @property
@@ -73,11 +72,17 @@ class Tab(QTabWidget):
         return False
 
     def _build_on_startup(self) -> None:
+        any_exists = False
+        files_removed_or_moved: List[str] = []
         has_worked = len(self._home.storage_manager.paths) > 0
         if not has_worked:
             self.build_default_tab()
             return
         for path in self._home.storage_manager.paths:
+            if not os.path.exists(path):
+                files_removed_or_moved.append(path)
+                continue
+            any_exists = True
             file_name = os.path.basename(path)
             try:
                 with open(path, "r") as file:
@@ -85,7 +90,29 @@ class Tab(QTabWidget):
                     self.new_from_startup(file_name, content)
             except Exception as e:
                 print(e)
-                break
+                show_system_error_message(
+                    self._home,
+                    f"Tuvimos problemas con la siguiente ubicación: \n\n{path}. \n\nPor favor revise si el archivo existe o si tiene permisos para leerlo.",
+                )
+                return
+        if len(files_removed_or_moved) > 0:
+            content = ""
+            for i, moved in enumerate(files_removed_or_moved):
+                if i == 7:
+                    content += "..."
+                    break
+                else:
+                    content += f"{os.path.basename(moved)}\n"
+            msg = Messages(
+                parent=self._home,
+                content="Los siguientes archivos no existen o fueron movidos:\n\n"
+                + content,
+                first_button_title="De acuerdo",
+                message_type=MessageTypes.WARNING,
+            )
+            msg.run()
+        if not any_exists:
+            self.build_default_tab()
 
     def add_content_to_current_tab(self, content: str) -> None:
         editor = self.widget(self.currentIndex())
@@ -214,7 +241,7 @@ class Tab(QTabWidget):
                     msg.run()
                     return
         else:
-            if self.count() == 1:
+            if self.HAS_ONE_TAB:
                 if file_name == FileNames.DEFAULT:
                     self.setTabText(index, FileNames.DEFAULT)
                 else:
