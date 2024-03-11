@@ -50,7 +50,6 @@ class FileMenu(QMenu):
         self._save_all_files_action()
         self._close_file_action()
         self._close_all_files_action()
-        self._print_action()
         self._exit_action()
 
     # ************* ACTIONS *************
@@ -135,16 +134,6 @@ class FileMenu(QMenu):
         )
         self.addAction(close_all_files_action)
 
-    def _print_action(self) -> None:
-        print_action = QAction(FileMenuActionsNames.PRINT, self)
-        config(
-            action=print_action,
-            status_tip="Print a file",
-            shortcut="",
-            method=self._print_file,
-        )
-        self.addAction(print_action)
-
     def _exit_action(self) -> None:
         exit_action = QAction(FileMenuActionsNames.EXIT, self)
         config(
@@ -155,7 +144,7 @@ class FileMenu(QMenu):
         )
         self.addAction(exit_action)
 
-    # ************* SLOTS *************
+    # ************* SLOTS ************
 
     def _open_file(self) -> None:
         file = QFileDialog.getOpenFileName(
@@ -470,11 +459,6 @@ class FileMenu(QMenu):
                     self._tab.removeTab(self._tab.currentIndex())
             print(f"file_name to remove: {file_name}")
             self._home.storage_manager.remove(file_name)
-
-    @Slot()
-    def _print_file(self) -> None:
-        print("Printing a file...")
-        return
 
     @Slot()
     def _exit_application(self) -> None:

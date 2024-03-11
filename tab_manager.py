@@ -72,12 +72,12 @@ class Tab(QTabWidget):
         return False
 
     def _build_on_startup(self) -> None:
-        any_exists = False
-        files_removed_or_moved: List[str] = []
         has_worked = len(self._home.storage_manager.paths) > 0
         if not has_worked:
             self.build_default_tab()
             return
+        any_exists = False
+        files_removed_or_moved: List[str] = []
         for path in self._home.storage_manager.paths:
             if not os.path.exists(path):
                 files_removed_or_moved.append(path)
