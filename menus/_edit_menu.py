@@ -5,8 +5,13 @@ from ._menus_constants import EditMenuActionsNames, EditMenuShortcuts
 
 
 class EditMenu(QMenu):
-    def __init__(self):
+    def __init__(self, home):
         super().__init__()
+        from home import Home
+        from tab_manager import Tab
+
+        self._home: Home = home
+        self._tab: Tab = self._home.tab
         self.setTitle(SectionsNames.EDIT)
         self._create_actions()
 
@@ -17,9 +22,6 @@ class EditMenu(QMenu):
     def _create_actions(self) -> None:
         self._undo_action()
         self._redo_action()
-        self._cut_action()
-        self._copy_action()
-        self._paste_action()
         self._select_all_action()
 
     def _undo_action(self) -> None:
@@ -42,36 +44,6 @@ class EditMenu(QMenu):
         )
         self.addAction(redo_action)
 
-    def _cut_action(self) -> None:
-        cut_action = QAction(EditMenuActionsNames.CUT, self)
-        config(
-            action=cut_action,
-            shortcut=EditMenuShortcuts.CUT,
-            status_tip="Cut",
-            method=self._cut,
-        )
-        self.addAction(cut_action)
-
-    def _copy_action(self) -> None:
-        copy_action = QAction(EditMenuActionsNames.COPY, self)
-        config(
-            action=copy_action,
-            shortcut=EditMenuShortcuts.COPY,
-            status_tip="Copy",
-            method=self._copy,
-        )
-        self.addAction(copy_action)
-
-    def _paste_action(self) -> None:
-        paste_action = QAction(EditMenuActionsNames.PASTE, self)
-        config(
-            action=paste_action,
-            shortcut=EditMenuShortcuts.PASTE,
-            status_tip="Paste",
-            method=self._paste,
-        )
-        self.addAction(paste_action)
-
     def _select_all_action(self) -> None:
         select_all_action = QAction(EditMenuActionsNames.SELECT_ALL, self)
         config(
@@ -84,24 +56,15 @@ class EditMenu(QMenu):
 
     @Slot()
     def _undo(self) -> None:
-        print("Undo...")
+        editor = self._tab.editor
+        editor.undo()
 
     @Slot()
     def _redo(self) -> None:
-        print("Redo...")
-
-    @Slot()
-    def _cut(self) -> None:
-        print("Cut...")
-
-    @Slot()
-    def _copy(self) -> None:
-        print("Copy...")
-
-    @Slot()
-    def _paste(self) -> None:
-        print("Paste...")
+        editor = self._tab.editor
+        editor.redo()
 
     @Slot()
     def _select_all(self) -> None:
-        print("Select All...")
+        editor = self._tab.editor
+        editor.selectAll()

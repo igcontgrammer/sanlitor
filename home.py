@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from typing import Final
 
 from PySide6.QtGui import QCloseEvent
-from PySide6.QtWidgets import QMainWindow
+from PySide6.QtWidgets import QMainWindow, QToolBar
 
 from constants import SaveOptions
 from editor import Editor
@@ -13,7 +13,6 @@ from statusbar import StatusBar
 from storage_manager import StorageManager
 from tab_manager import Tab
 from theme import ThemeModes
-from toolbar import ToolBar
 
 _MAIN_WINDOW_TITLE: Final[str] = "Sanlitor"
 
@@ -54,6 +53,11 @@ class Home(QMainWindow):
     @property
     def last_tab_worked_index(self) -> int:
         return self.storage_manager.last_tab_worked_index
+
+    def get_toolbar(self) -> QToolBar:  # type: ignore
+        for widget in self.children():
+            if isinstance(widget, QToolBar):
+                return widget
 
     def closeEvent(self, event: QCloseEvent) -> None:
         any_changes = self.tab.tabs_has_changes()
@@ -106,10 +110,6 @@ class Home(QMainWindow):
     def _add_menu(self) -> None:
         self.menu = MenuBar(home=self)
 
-    def _add_toolbar(self) -> None:
-        self.toolbar = ToolBar()
-        self.addToolBar(self.toolbar.get_toolbar())
-
     def _add_status_bar(self) -> None:
         self.statusbar = StatusBar()
         self.setStatusBar(self.statusbar.get_status_bar())
@@ -121,7 +121,6 @@ class Home(QMainWindow):
     def __call_main_widgets(self) -> None:
         self.__set_main_window_default_config()
         self._add_menu()
-        # self._add_toolbar()
         self._add_status_bar()
 
     def __set_default_dimensions(self) -> None:
