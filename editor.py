@@ -6,7 +6,6 @@ from PySide6.QtWidgets import QPlainTextEdit, QScrollBar, QTabWidget
 
 from extensions import Extensions
 from syntax import PythonSyntaxFactory
-from theme import ThemeModes
 from utils import get_circle
 
 TAB_SIZE: Final[str] = "   "

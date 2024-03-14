@@ -1,46 +1,31 @@
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QTextCursor, QTextDocument
+from PySide6.QtWidgets import QInputDialog, QSizePolicy, QToolBar, QWidget
 from common.config_action import config
+from editor import Editor
+from typing import Optional
 from . import QAction, QMenu, SectionsNames, Slot
-from PySide6.QtWidgets import QInputDialog, QPushButton, QToolBar
-from PySide6.QtGui import QTextCursor
 from ._menus_constants import SearchMenuActionsNames, SearchMenuShortcuts
-from PySide6.QtCore import QSize
-
-"""
-Features:
-    - Search
-    - Search in files
-    - Search Next
-    - Search Back
-"""
 
 
 class SearchMenu(QMenu):
     def __init__(self, home):
         super().__init__()
+        self.setTitle(SectionsNames.SEARCH)
         from home import Home
 
         self._home: Home = home
-        self.setTitle(SectionsNames.SEARCH)
+        self._editor: Editor = self._home.tab.widget(self._home.tab.currentIndex())
+        self._current_index: int = 0
+        self._number_of_ocurrences: int = 0
+        self._value_to_search: Optional[str] = ""
+        self._cursor: Optional[QTextCursor] = None
+        self._toolbar: Optional[QToolBar] = None
         self._create_actions()
-        self._build_toolbar()
 
     @property
     def menu(self) -> QMenu:
         return self
-
-    def _build_toolbar(self) -> None:
-        toolbar = QToolBar(self._home)
-        next_action = QAction("Next", toolbar)
-        prev_action = QAction("Prev", toolbar)
-        toolbar.addAction(next_action)
-        toolbar.addAction(prev_action)
-        self._home.addToolBar(toolbar)
-
-    def _show_toolbar(self) -> None:
-        self._home.toolbar.show()
-
-    def _hide_toolbar(self) -> None:
-        self._home.toolbar.hide()
 
     def _create_actions(self) -> None:
         self._search_action()
@@ -74,7 +59,7 @@ class SearchMenu(QMenu):
             action=next_action,
             shortcut=SearchMenuShortcuts.NEXT,
             status_tip="Search Next",
-            method=self._search_next,
+            method=self._go_to_next,
         )
         self.addAction(next_action)
 
@@ -84,7 +69,7 @@ class SearchMenu(QMenu):
             action=back_action,
             shortcut=SearchMenuShortcuts.BACK,
             status_tip="Search Back",
-            method=self._search_back,
+            method=self._go_to_prev,
         )
         self.addAction(back_action)
 
@@ -93,35 +78,66 @@ class SearchMenu(QMenu):
         value, ok = QInputDialog.getText(self._home, "Buscar", "Texto a buscar:")
         if not ok or len(value) == 0:
             return None
-        self._show_toolbar()
-        # construir el toolbar con sus botones de next y prev
-        # 1) obtener el numero de ocurrencias
-        editor = self._home.tab.editor
-        content = editor.toPlainText()
-        number_of_ocurrences = content.count(value)
-        # 2) buscar la primera ocurrencia
-        cursor = editor.textCursor()
-        ok = editor.find(value)
-        print(f"ok: {ok}")
-        print(f"anchor: {cursor.anchor()}")
-        print(f"position: {cursor.position()}")
-        print(f"selectionStart: {cursor.selectionStart()}")
-
-    def _search_in_files(self) -> None:
-        print("Search in files...")
-
-    @Slot()
-    def _search_next(self) -> None:
-        print("Search Next...")
-
-    @Slot()
-    def _search_back(self) -> None:
-        print("Search Back...")
+        self._value_to_search = value
+        self._build_move_between_ocurrences()
+        editor = self._home.tab.widget(self._home.tab.currentIndex())
+        if not isinstance(editor, Editor):
+            return
+        self._editor = editor
+        content = self._editor.toPlainText()
+        self._number_of_ocurrences = content.count(value)
+        if self._cursor is None:
+            self._cursor = self._editor.textCursor()
 
     @Slot()
     def _go_to_next(self) -> None:
-        pass
+        if self._current_index + 1 > self._number_of_ocurrences:
+            self._current_index = 0
+            self._cursor.setPosition(0)
+            self._editor.setTextCursor(self._cursor)
+        else:
+            self._current_index += 1
+            self._editor.find(self._value_to_search)
 
     @Slot()
     def _go_to_prev(self) -> None:
-        pass
+        if self._current_index - 1 < 0:
+            self._current_index = self._number_of_ocurrences
+            self._cursor.movePosition(QTextCursor.End)
+            self._editor.setTextCursor(self._cursor)
+        else:
+            self._current_index -= 1
+            self._editor.find(self._value_to_search, QTextDocument.FindBackward)
+
+    def _build_move_between_ocurrences(self) -> None:
+        self._toolbar = QToolBar(self._home)
+        self._toolbar.setMovable(False)
+        self._toolbar.setFloatable(True)
+        prev = QAction("Prev", self._home)
+        next = QAction("Next", self._home)
+        close = QAction("x", self._home)
+        self._toolbar.addWidget(self._get_spacer())
+        prev.triggered.connect(self._go_to_prev)
+        next.triggered.connect(self._go_to_next)
+        close.triggered.connect(self._on_close_toolbar)
+        self._toolbar.addAction(prev)
+        self._toolbar.addAction(next)
+        self._toolbar.addAction(close)
+        self._home.addToolBar(self._toolbar)
+
+    def _on_close_toolbar(self) -> None:
+        self._value_to_search = None
+        self._current_index = 0
+        self._number_of_ocurrences = 0
+        self._cursor.removeSelectedText()
+        self._editor.setTextCursor(self._cursor)
+        self._toolbar.close()
+
+    def _get_spacer(self) -> QWidget:
+        spacer = QWidget()
+        spacer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        spacer.setAttribute(Qt.WA_TransparentForMouseEvents)
+        return spacer
+
+    def _search_in_files(self) -> None:
+        print("Search in files...")

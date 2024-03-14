@@ -1,6 +1,7 @@
 import os
 from typing import Final
 
+from PySide6.QtWidgets import QFileDialog
 
 from common.config_action import config
 from constants import FileNames, OpenFileOptions, SaveOptions
@@ -12,7 +13,6 @@ from utils import has_selected_file
 
 from . import QAction, QMenu, SectionsNames, Slot
 from ._menus_constants import FileMenuActionsNames, FileMenuShortcuts
-from PySide6.QtWidgets import QFileDialog
 
 DEFAULT_FILE_NAME: Final[str] = "Untitled.txt"
 

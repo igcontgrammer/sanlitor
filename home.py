@@ -5,14 +5,13 @@ from typing import Final
 from PySide6.QtGui import QCloseEvent
 from PySide6.QtWidgets import QMainWindow, QToolBar
 
-from constants import SaveOptions
+from constants import SaveOptions, ThemeModes
 from editor import Editor
 from menus.menu import MenuBar
 from messages import Messages, MessageTypes
 from statusbar import StatusBar
 from storage_manager import StorageManager
 from tab_manager import Tab
-from theme import ThemeModes
 
 _MAIN_WINDOW_TITLE: Final[str] = "Sanlitor"
 

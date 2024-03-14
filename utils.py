@@ -1,7 +1,7 @@
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor, QIcon, QPixmap
 
-from theme import ThemeModes
+from constants import ThemeModes
 
 
 def filename_is_valid(filename: str) -> bool:

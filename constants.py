@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from enum import Enum, auto
 
 
 @dataclass(frozen=True)
@@ -27,3 +28,9 @@ class SaveOptions:
 @dataclass(frozen=True)
 class TabActions:
     CLOSE: int = 0
+
+
+# theme modes
+class ThemeModes(Enum):
+    LIGHT = auto()
+    DARK = auto()
