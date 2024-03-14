@@ -4,6 +4,7 @@ from PySide6.QtCore import Qt, Slot
 from PySide6.QtGui import QKeyEvent
 from PySide6.QtWidgets import QPlainTextEdit, QScrollBar, QTabWidget
 
+from constants import ThemeModes
 from extensions import Extensions
 from syntax import PythonSyntaxFactory
 from utils import get_circle

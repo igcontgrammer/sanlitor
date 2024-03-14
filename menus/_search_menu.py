@@ -1,10 +1,14 @@
+from typing import Optional
+
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QTextCursor, QTextDocument
 from PySide6.QtWidgets import QInputDialog, QSizePolicy, QToolBar, QWidget
+
 from common.config_action import config
 from editor import Editor
-from typing import Optional
+
 from . import QAction, QMenu, SectionsNames, Slot
+from ._components._toolbar import ToolBar
 from ._menus_constants import SearchMenuActionsNames, SearchMenuShortcuts
 
 
@@ -20,7 +24,7 @@ class SearchMenu(QMenu):
         self._number_of_ocurrences: int = 0
         self._value_to_search: Optional[str] = ""
         self._cursor: Optional[QTextCursor] = None
-        self._toolbar: Optional[QToolBar] = None
+        self._toolbar: Optional[ToolBar] = None
         self._create_actions()
 
     @property
@@ -110,20 +114,16 @@ class SearchMenu(QMenu):
             self._editor.find(self._value_to_search, QTextDocument.FindBackward)
 
     def _build_move_between_ocurrences(self) -> None:
-        self._toolbar = QToolBar(self._home)
-        self._toolbar.setMovable(False)
-        self._toolbar.setFloatable(True)
+        # creating actions
         prev = QAction("Prev", self._home)
         next = QAction("Next", self._home)
         close = QAction("x", self._home)
-        self._toolbar.addWidget(self._get_spacer())
         prev.triggered.connect(self._go_to_prev)
         next.triggered.connect(self._go_to_next)
         close.triggered.connect(self._on_close_toolbar)
-        self._toolbar.addAction(prev)
-        self._toolbar.addAction(next)
-        self._toolbar.addAction(close)
-        self._home.addToolBar(self._toolbar)
+        actions = [prev, next, close]
+        self._toolbar = ToolBar(self._home, actions, is_search_menu=True)
+        self._toolbar.show()
 
     def _on_close_toolbar(self) -> None:
         self._value_to_search = None
@@ -132,12 +132,6 @@ class SearchMenu(QMenu):
         self._cursor.removeSelectedText()
         self._editor.setTextCursor(self._cursor)
         self._toolbar.close()
-
-    def _get_spacer(self) -> QWidget:
-        spacer = QWidget()
-        spacer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        spacer.setAttribute(Qt.WA_TransparentForMouseEvents)
-        return spacer
 
     def _search_in_files(self) -> None:
         print("Search in files...")
