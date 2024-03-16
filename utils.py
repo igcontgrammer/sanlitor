@@ -1,7 +1,17 @@
+import os
+
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor, QIcon, QPixmap
 
 from constants import ThemeModes
+
+
+def get_extension(file_name: str) -> str:
+    return f".{file_name.split('.')[1]}"
+
+
+def get_extension_from_path(path: str) -> str:
+    return os.path.splitext(path)[1]
 
 
 def filename_is_valid(filename: str) -> bool:

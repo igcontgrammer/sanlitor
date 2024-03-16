@@ -6,6 +6,7 @@ from PySide6.QtWidgets import QFileSystemModel, QTreeView
 
 from constants import AppMode
 from extensions import available_extensions
+from utils import get_extension
 
 
 class Tree:
@@ -49,8 +50,10 @@ class Tree:
             return True, None
         elif os.path.isfile(path):
             file_name = os.path.basename(path)
-            extension = f".{file_name.split(".")[1]}"
-            print(f"extension: {extension}")
+            if self._home._storage_manager.file_exists(file_name):
+                self._home.tab.move(file_name)
+                return True, None
+            extension = get_extension(file_name)
             if extension not in available_extensions():
                 return False, "La extensión no es válida."
             content = ""

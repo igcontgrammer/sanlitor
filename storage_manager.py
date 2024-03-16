@@ -2,7 +2,7 @@ import json
 import os
 from typing import Dict, Final, List, Optional, Tuple, Union
 
-from constants import FileNames, VALID_MODES
+from constants import VALID_MODES, FileNames
 from paths import Paths
 
 PATH_DEFAULT_FILE: Final[str] = Paths.TEMP_FILES + FileNames.DEFAULT
@@ -57,6 +57,9 @@ class StorageManager:
 
     def path_exists(self, file_name: str) -> bool:
         return any(file_name in path for path in self._paths)
+
+    def file_exists(self, file_name: str) -> bool:
+        return file_name in self._worked_files
 
     def save_from_file_name(
         self, file_name: str, content: str

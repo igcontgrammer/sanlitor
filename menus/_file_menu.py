@@ -10,7 +10,7 @@ from extensions import available_extensions, get_extensions_list
 from messages import Messages, MessageTypes, show_system_error_message
 from tab_manager import Tab
 from tree import Tree
-from utils import has_selected_file
+from utils import get_extension_from_path, has_selected_file
 
 from . import QAction, QMenu, SectionsNames, Slot
 from ._menus_constants import FileMenuActionsNames, FileMenuShortcuts
@@ -156,8 +156,7 @@ class FileMenu(QMenu):
         if not has_selected_file(file[0]):
             return None
         path = file[0]
-        extension_detected = os.path.splitext(path)[1]
-        if extension_detected not in available_extensions():
+        if get_extension_from_path(path) not in available_extensions():
             show_system_error_message(
                 self._home, content="La extensión de este archivo no es permitida."
             )
@@ -294,8 +293,7 @@ class FileMenu(QMenu):
         status = self._home._storage_manager.rename(old_name, new_name)
         if status[0] is False:
             return
-        extension = os.path.splitext(path)[1]
-        editor.set_syntax(extension)
+        editor.set_syntax(get_extension_from_path(path))
         self._tab.set_normal(new_name)
         editor.has_changes = False
 

@@ -8,7 +8,7 @@ from constants import FileNames, TabActions
 from editor import Editor
 from extensions import get_extensions_list
 from messages import Messages, MessageTypes, show_system_error_message
-from utils import has_selected_file
+from utils import get_extension, has_selected_file
 
 
 class Tab(QTabWidget):
@@ -180,7 +180,7 @@ class Tab(QTabWidget):
         pass
 
     def new_from_already_exists(self, file_name: str, content: str) -> None:
-        extension = f".{file_name.split(".")[1]}"
+        extension = get_extension(file_name)
         editor = Editor()
         editor.set_syntax(extension)
         editor.setPlainText(content)
