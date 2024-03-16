@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from enum import Enum, auto
 
 
-class AppModes(Enum):
+class AppMode(Enum):
     DEFAULT = auto()
     TREE = auto()
     SEARCH_IN_FILES = auto()

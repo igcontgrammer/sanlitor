@@ -2,18 +2,17 @@ import os
 from dataclasses import dataclass
 from typing import Final, Optional
 
-from PySide6.QtGui import QCloseEvent
-from PySide6.QtWidgets import QMainWindow, QWidget, QSplitter
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QCloseEvent
+from PySide6.QtWidgets import QMainWindow, QSplitter, QWidget
 
-from constants import SaveOptions, ThemeModes
+from constants import AppMode, SaveOptions, ThemeModes
 from editor import Editor
 from menus.menu import MenuBar
 from messages import Messages, MessageTypes
 from statusbar import StatusBar
 from storage_manager import StorageManager
 from tab_manager import Tab
-from constants import AppModes
 
 _MAIN_WINDOW_TITLE: Final[str] = "Sanlitor"
 
@@ -27,13 +26,6 @@ class HomeDefaultDimensions:
 
 
 class Home(QMainWindow):
-    # _instance = None
-
-    # def __new__(cls, *args, **kwargs):
-    #     if not cls._instance:
-    #         cls._instance = super(Home, cls).__new__(cls, *args, **kwargs)
-    #     return cls._instance
-
     def __init__(self):
         super().__init__()
         self.storage_manager = StorageManager()
@@ -41,7 +33,7 @@ class Home(QMainWindow):
         self._theme_mode = ThemeModes.LIGHT
         self.__set_main_window_default_config()
         self.__call_main_widgets()
-        self.set_central(AppModes.DEFAULT)
+        self.set_central(AppMode.DEFAULT)
 
     @property
     def tab(self) -> Tab:
@@ -55,16 +47,12 @@ class Home(QMainWindow):
     def last_tab_worked_index(self) -> int:
         return self.storage_manager.last_tab_worked_index
 
-    def set_central(
-        self, utilities: AppModes, widget: Optional[QWidget] = None
-    ) -> None:
-        if utilities != AppModes.DEFAULT and widget is not None:
-            # TODO: cambiar el layout para que permita un tipo split
+    def set_central(self, mode: AppMode, widget: Optional[QWidget] = None) -> None:
+        if mode != AppMode.DEFAULT and widget is not None:
             splitter = QSplitter(Qt.Horizontal)
             splitter.addWidget(widget)
             splitter.addWidget(self._tab)
             self.setCentralWidget(splitter)
-            # self.setCentralWidget(widget)
         else:
             self.setCentralWidget(self._tab)
 

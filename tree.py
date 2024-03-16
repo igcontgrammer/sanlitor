@@ -1,7 +1,8 @@
 import os
 
 from PySide6.QtWidgets import QFileSystemModel, QTreeView
-from constants import AppModes
+
+from constants import AppMode
 
 
 class Tree:
@@ -19,7 +20,6 @@ class Tree:
         self._is_active = value
 
     def build(self) -> None:
-        """Construye el arbol de archivos."""
         from home import Home
 
         if not isinstance(self._parent, Home):
@@ -28,8 +28,7 @@ class Tree:
             raise ValueError(f"El directorio {self._path} no existe o no es válido.")
         tree = self._get_tree()
         self._hide_columns(tree)
-        self._parent.set_central(utilities=AppModes.TREE, widget=tree)
-        # TODO: llamar al componente main y cambiar su estructura
+        self._parent.set_central(AppMode.TREE, tree)
 
     def _is_ok(self) -> bool:
         return os.path.exists(self._path) and os.path.isdir(self._path)
