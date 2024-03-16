@@ -1,9 +1,10 @@
 import os
 from dataclasses import dataclass
-from typing import Final
+from typing import Final, Optional
 
 from PySide6.QtGui import QCloseEvent
-from PySide6.QtWidgets import QMainWindow, QToolBar
+from PySide6.QtWidgets import QMainWindow, QWidget, QSplitter
+from PySide6.QtCore import Qt
 
 from constants import SaveOptions, ThemeModes
 from editor import Editor
@@ -12,6 +13,7 @@ from messages import Messages, MessageTypes
 from statusbar import StatusBar
 from storage_manager import StorageManager
 from tab_manager import Tab
+from constants import AppModes
 
 _MAIN_WINDOW_TITLE: Final[str] = "Sanlitor"
 
@@ -39,7 +41,7 @@ class Home(QMainWindow):
         self._theme_mode = ThemeModes.LIGHT
         self.__set_main_window_default_config()
         self.__call_main_widgets()
-        self.setCentralWidget(self._tab)
+        self.set_central(AppModes.DEFAULT)
 
     @property
     def tab(self) -> Tab:
@@ -53,10 +55,18 @@ class Home(QMainWindow):
     def last_tab_worked_index(self) -> int:
         return self.storage_manager.last_tab_worked_index
 
-    def get_toolbar(self) -> QToolBar:  # type: ignore
-        for widget in self.children():
-            if isinstance(widget, QToolBar):
-                return widget
+    def set_central(
+        self, utilities: AppModes, widget: Optional[QWidget] = None
+    ) -> None:
+        if utilities != AppModes.DEFAULT and widget is not None:
+            # TODO: cambiar el layout para que permita un tipo split
+            splitter = QSplitter(Qt.Horizontal)
+            splitter.addWidget(widget)
+            splitter.addWidget(self._tab)
+            self.setCentralWidget(splitter)
+            # self.setCentralWidget(widget)
+        else:
+            self.setCentralWidget(self._tab)
 
     def closeEvent(self, event: QCloseEvent) -> None:
         any_changes = self.tab.tabs_has_changes()
@@ -93,7 +103,6 @@ class Home(QMainWindow):
                     save_status = self.storage_manager.save_from_path(path, content)
                     print(f"save?: {save_status}")
                     if save_status[0] is False:
-                        print(f"error: {save_status[1]}")
                         msg = Messages(
                             parent=self,
                             content="Tuvimos problemas para cerrar correctamente los archivos. Reinicie la aplicación.",

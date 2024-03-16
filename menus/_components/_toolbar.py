@@ -1,8 +1,8 @@
 from typing import List
 
-from PySide6.QtGui import QAction
-from PySide6.QtWidgets import QToolBar, QWidget, QSizePolicy
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QAction
+from PySide6.QtWidgets import QSizePolicy, QToolBar, QWidget
 
 
 class ToolBar(QToolBar):

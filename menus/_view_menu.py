@@ -26,6 +26,7 @@ class ViewMenu(QMenu):
         self._document_map_action()
         self._document_list_action()
         self._function_list_action()
+        # TODO: crear una opcion para que se muestre el arbol de proyecto
 
     def _toggle_full_screen_action(self) -> None:
         toggle_action = QAction(ViewMenuActionsNames.TOGGLE_FULL_SCREEN, self)

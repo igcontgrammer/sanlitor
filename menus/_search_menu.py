@@ -1,8 +1,7 @@
 from typing import Optional
 
-from PySide6.QtCore import Qt
 from PySide6.QtGui import QTextCursor, QTextDocument
-from PySide6.QtWidgets import QInputDialog, QSizePolicy, QToolBar, QWidget
+from PySide6.QtWidgets import QInputDialog
 
 from common.config_action import config
 from editor import Editor
@@ -14,8 +13,6 @@ from ._menus_constants import SearchMenuActionsNames, SearchMenuShortcuts
 
 class SearchMenu(QMenu):
     def __init__(self, home):
-        super().__init__()
-        self.setTitle(SectionsNames.SEARCH)
         from home import Home
 
         self._home: Home = home
@@ -25,6 +22,8 @@ class SearchMenu(QMenu):
         self._value_to_search: Optional[str] = ""
         self._cursor: Optional[QTextCursor] = None
         self._toolbar: Optional[ToolBar] = None
+        super().__init__()
+        self.setTitle(SectionsNames.SEARCH)
         self._create_actions()
 
     @property
@@ -114,7 +113,6 @@ class SearchMenu(QMenu):
             self._editor.find(self._value_to_search, QTextDocument.FindBackward)
 
     def _build_move_between_ocurrences(self) -> None:
-        # creating actions
         prev = QAction("Prev", self._home)
         next = QAction("Next", self._home)
         close = QAction("x", self._home)
@@ -134,4 +132,5 @@ class SearchMenu(QMenu):
         self._toolbar.close()
 
     def _search_in_files(self) -> None:
+        # TODO: construir un arbol de archivos y buscar en ellos?
         print("Search in files...")

@@ -2,11 +2,19 @@ from dataclasses import dataclass
 from enum import Enum, auto
 
 
+class AppModes(Enum):
+    DEFAULT = auto()
+    TREE = auto()
+    SEARCH_IN_FILES = auto()
+    REFERENCES = auto()
+
+
 @dataclass(frozen=True)
 class FileNames:
     DEFAULT: str = "Untitled.txt"
 
 
+@dataclass(frozen=True)
 class OpenFileOptions:
     HERE: int = 0
     NEW_TAB: int = 1

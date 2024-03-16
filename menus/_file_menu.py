@@ -9,6 +9,7 @@ from editor import Editor
 from extensions import available_extensions, get_extensions_list
 from messages import Messages, MessageTypes, show_system_error_message
 from tab_manager import Tab
+from tree import Tree
 from utils import has_selected_file
 
 from . import QAction, QMenu, SectionsNames, Slot
@@ -31,9 +32,8 @@ class FileMenu(QMenu):
     def __init__(self, home):
         super().__init__()
         self.setTitle(SectionsNames.FILE)
-        from home import Home
 
-        self._home: Home = home
+        self._home = home
         self._tab = self._home.tab
         self._create_actions()
 
@@ -44,6 +44,7 @@ class FileMenu(QMenu):
     def _create_actions(self) -> None:
         self._rename_action()
         self._open_file_action()
+        self._open_folder_action()
         self._new_file_action()
         self._save_file_action()
         self._save_as_action()
@@ -72,6 +73,16 @@ class FileMenu(QMenu):
             method=self._open_file,
         )
         self.addAction(open_file_action)
+
+    def _open_folder_action(self) -> None:
+        open_folder_action = QAction(FileMenuActionsNames.OPEN_FOLDER, self)
+        config(
+            action=open_folder_action,
+            status_tip="Open a folder",
+            shortcut="",
+            method=self._open_folder,
+        )
+        self.addAction(open_folder_action)
 
     def _new_file_action(self) -> None:
         new_file_action = QAction(FileMenuActionsNames.NEW, self)
@@ -168,6 +179,17 @@ class FileMenu(QMenu):
                     return
                 case _:
                     return
+
+    @Slot()
+    def _open_folder(self) -> None:
+        # TODO: implementar la apertura de una carpeta
+        path = QFileDialog.getExistingDirectory(
+            self,
+            "Abrir carpeta",
+            dir=os.path.expanduser("~"),
+        )
+        tree = Tree(self._home, path)
+        tree.build()
 
     @Slot()
     def _rename(self) -> None:
