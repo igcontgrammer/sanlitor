@@ -28,12 +28,13 @@ class HomeDefaultDimensions:
 class Home(QMainWindow):
     def __init__(self):
         super().__init__()
+        self._splitter = QSplitter(Qt.Horizontal)  # type: ignore
         self.storage_manager = StorageManager()
         self._tab = Tab(home=self)
         self._theme_mode = ThemeModes.LIGHT
         self.__set_main_window_default_config()
         self.__call_main_widgets()
-        self.set_central(AppMode.DEFAULT)
+        self.change_central(AppMode.DEFAULT)
 
     @property
     def tab(self) -> Tab:
@@ -47,12 +48,11 @@ class Home(QMainWindow):
     def last_tab_worked_index(self) -> int:
         return self.storage_manager.last_tab_worked_index
 
-    def set_central(self, mode: AppMode, widget: Optional[QWidget] = None) -> None:
+    def change_central(self, mode: AppMode, widget: Optional[QWidget] = None) -> None:
         if mode != AppMode.DEFAULT and widget is not None:
-            splitter = QSplitter(Qt.Horizontal)
-            splitter.addWidget(widget)
-            splitter.addWidget(self._tab)
-            self.setCentralWidget(splitter)
+            self._splitter.addWidget(widget)
+            self._splitter.addWidget(self._tab)
+            self.setCentralWidget(self._splitter)
         else:
             self.setCentralWidget(self._tab)
 
@@ -69,7 +69,6 @@ class Home(QMainWindow):
             )
             msg.add_button("No guardar")
             option = msg.run()
-            print(f"opcion seleccionada: {option}")
             if option != SaveOptions.SAVE and option != SaveOptions.NO_SAVE:
                 event.ignore()
                 msg.close()
@@ -89,7 +88,6 @@ class Home(QMainWindow):
                         return None
                     content = editor.toPlainText()
                     save_status = self.storage_manager.save_from_path(path, content)
-                    print(f"save?: {save_status}")
                     if save_status[0] is False:
                         msg = Messages(
                             parent=self,

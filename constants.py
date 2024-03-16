@@ -3,6 +3,13 @@ from enum import Enum, auto
 
 
 class AppMode(Enum):
+    """
+    DEFAULT: show only the tab widget with their editors
+    TREE: show the tree view
+    SEARCH_IN_FILES: show the search in files view
+    REFERENCES: show the references view
+    """
+
     DEFAULT = auto()
     TREE = auto()
     SEARCH_IN_FILES = auto()

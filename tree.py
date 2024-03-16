@@ -1,6 +1,7 @@
 import os
 
 from PySide6.QtWidgets import QFileSystemModel, QTreeView
+from PySide6.QtCore import Slot, QModelIndex
 
 from constants import AppMode
 
@@ -27,8 +28,29 @@ class Tree:
         if not self._is_ok():
             raise ValueError(f"El directorio {self._path} no existe o no es válido.")
         tree = self._get_tree()
+        tree.clicked.connect(lambda: self.on_click_element(tree.currentIndex()))
         self._hide_columns(tree)
-        self._parent.set_central(AppMode.TREE, tree)
+        self._parent.change_central(AppMode.TREE, tree)
+        self.is_active = True
+
+    @Slot()
+    def on_click_element(self, element: QModelIndex) -> None:
+        file_selected = element.data()
+        path = os.path.join(self._path, file_selected)
+        # TODO: ir al storage manager y ver si existe o no
+        # TODO: al hacerle click, que se visualice en el editor
+        return None
+
+    # TODO: implementar esto
+    def remove(self) -> None:
+        self._parent.set_central(AppMode.DEFAULT)
+        self.is_active = False
+
+    def open_file(self, index: int) -> None:
+        return None
+
+    def open_dir(self, index: int) -> None:
+        return None
 
     def _is_ok(self) -> bool:
         return os.path.exists(self._path) and os.path.isdir(self._path)
