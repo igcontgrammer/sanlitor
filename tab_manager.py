@@ -50,6 +50,10 @@ class Tab(QTabWidget):
     def HAS_ONE_TAB(self) -> bool:
         return self.count() == 1
 
+    @property
+    def has_new_tabs(self) -> bool:
+        return len(self._loaded_files) > 0
+
     def set_default(self, index: int) -> None:
         self.setTabIcon(index, QIcon())
         self.setTabText(index, FileNames.DEFAULT)
@@ -72,13 +76,13 @@ class Tab(QTabWidget):
         return False
 
     def _build_on_startup(self) -> None:
-        has_worked = len(self._home.storage_manager.paths) > 0
+        has_worked = len(self._home._storage_manager.paths) > 0
         if not has_worked:
             self.build_default_tab()
             return
         any_exists = False
         files_removed_or_moved: List[str] = []
-        for path in self._home.storage_manager.paths:
+        for path in self._home._storage_manager.paths:
             if not os.path.exists(path):
                 files_removed_or_moved.append(path)
                 continue
@@ -87,7 +91,7 @@ class Tab(QTabWidget):
             try:
                 with open(path, "r") as file:
                     content = file.read()
-                    self.new_from_startup(file_name, content)
+                    self.new_from_already_exists(file_name, content)
             except Exception as e:
                 print(e)
                 show_system_error_message(
@@ -156,7 +160,7 @@ class Tab(QTabWidget):
         path = file[0]
         if has_selected_file(path):
             return None
-        status = self._home.storage_manager.add(path)
+        status = self._home._storage_manager.add(path)
         if status[0] is False:
             print(f"error: {status[1]}")
             return None
@@ -172,7 +176,10 @@ class Tab(QTabWidget):
         if file_name not in self._loaded_files:
             self._loaded_files.append(file_name)
 
-    def new_from_startup(self, file_name: str, content: str) -> None:
+    def new_from_tree(self, path: str) -> None:
+        pass
+
+    def new_from_already_exists(self, file_name: str, content: str) -> None:
         extension = f".{file_name.split(".")[1]}"
         editor = Editor()
         editor.set_syntax(extension)
@@ -213,7 +220,7 @@ class Tab(QTabWidget):
                     self.setTabText(index, FileNames.DEFAULT)
                     return
                 else:
-                    remove_status = self._home.storage_manager.remove(file_name)
+                    remove_status = self._home._storage_manager.remove(file_name)
                     if remove_status[0] is False:
                         msg = Messages(
                             parent=self._home,
@@ -230,7 +237,7 @@ class Tab(QTabWidget):
             else:
                 self.removeTab(index)
                 editor.has_changes = False
-                remove_status = self._home.storage_manager.remove(file_name)
+                remove_status = self._home._storage_manager.remove(file_name)
                 if remove_status[0] is False:
                     msg = Messages(
                         parent=self._home,
@@ -248,11 +255,11 @@ class Tab(QTabWidget):
                     self.setTabText(index, FileNames.DEFAULT)
                     editor.clear()
                     editor.has_changes = False
-                    self._home.storage_manager.remove(file_name)
+                    self._home._storage_manager.remove(file_name)
             else:
                 self.removeTab(index)
                 editor.has_changes = False
-                self._home.storage_manager.remove(file_name)
+                self._home._storage_manager.remove(file_name)
         editor.clear()
         editor.has_changes = False
         self.setTabIcon(index, QIcon())

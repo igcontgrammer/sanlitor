@@ -18,7 +18,7 @@ _MAIN_WINDOW_TITLE: Final[str] = "Sanlitor"
 
 
 @dataclass(frozen=True)
-class HomeDefaultDimensions:
+class _DefaultDimension:
     MAIN_WINDOW_MIN_HEIGHT: int = 300
     MAIN_WINDOW_MIN_WIDTH: int = 400
     MAIN_WINDOW_DEFAULT_HEIGHT: int = 600
@@ -29,12 +29,13 @@ class Home(QMainWindow):
     def __init__(self):
         super().__init__()
         self._splitter = QSplitter(Qt.Horizontal)  # type: ignore
-        self.storage_manager = StorageManager()
+        self._storage_manager = StorageManager()
+        self._mode = self._storage_manager.app_mode
         self._tab = Tab(home=self)
         self._theme_mode = ThemeModes.LIGHT
         self.__set_main_window_default_config()
         self.__call_main_widgets()
-        self.change_central(AppMode.DEFAULT)
+        self.load_central()
 
     @property
     def tab(self) -> Tab:
@@ -45,10 +46,39 @@ class Home(QMainWindow):
         return self._theme_mode
 
     @property
-    def last_tab_worked_index(self) -> int:
-        return self.storage_manager.last_tab_worked_index
+    def mode(self) -> int:
+        return self._mode
 
-    def change_central(self, mode: AppMode, widget: Optional[QWidget] = None) -> None:
+    @mode.setter
+    def mode(self, value: int) -> None:
+        self._mode = value
+
+    @property
+    def last_tab_worked_index(self) -> int:
+        return self._storage_manager.last_tab_worked_index
+
+    def load_central(self) -> None:
+        mode = self._storage_manager.app_mode
+        if mode == AppMode.DEFAULT:
+            self.change_central(AppMode.DEFAULT)
+        elif mode == AppMode.TREE:
+            from tree import Tree
+
+            path = self._storage_manager.folder_selected
+            if path is None:
+                # TODO: si no existe o fue eliminado, que hacer?
+                self.change_central(AppMode.DEFAULT)
+            else:
+                tree = Tree(self, path)
+                self.change_central(AppMode.TREE, tree.get())  # type: ignore
+        elif mode == AppMode.SEARCH_IN_FILES:
+            pass
+        elif mode == AppMode.REFERENCES:
+            pass
+        else:
+            self.change_central(AppMode.DEFAULT)
+
+    def change_central(self, mode: int, widget: Optional[QWidget] = None) -> None:
         if mode != AppMode.DEFAULT and widget is not None:
             self._splitter.addWidget(widget)
             self._splitter.addWidget(self._tab)
@@ -58,7 +88,6 @@ class Home(QMainWindow):
 
     def closeEvent(self, event: QCloseEvent) -> None:
         any_changes = self.tab.tabs_has_changes()
-        has_new_tabs = len(self.tab._loaded_files) > 0
         option = None
         if any_changes:
             msg = Messages(
@@ -76,8 +105,8 @@ class Home(QMainWindow):
         if option == SaveOptions.NO_SAVE:
             super().closeEvent(event)
             return
-        if has_new_tabs or option == SaveOptions.YES:
-            for path in self.storage_manager.paths:
+        if self._tab.has_new_tabs or option == SaveOptions.YES:
+            for path in self._storage_manager.paths:
                 file_name = os.path.basename(path)
                 for i in range(self._tab.count()):
                     if file_name != self._tab.tabText(i):
@@ -87,7 +116,7 @@ class Home(QMainWindow):
                         print("editor is not an instance of Editor")
                         return None
                     content = editor.toPlainText()
-                    save_status = self.storage_manager.save_from_path(path, content)
+                    save_status = self._storage_manager.save_from_path(path, content)
                     if save_status[0] is False:
                         msg = Messages(
                             parent=self,
@@ -99,6 +128,9 @@ class Home(QMainWindow):
                         break
                     self._tab.set_normal(file_name)
                     editor.has_changes = False
+        ok, error_msg = self._storage_manager.update_mode(self._mode)
+        if not ok:
+            print(error_msg)
         super().closeEvent(event)
 
     def _add_menu(self) -> None:
@@ -118,9 +150,9 @@ class Home(QMainWindow):
         self._add_status_bar()
 
     def __set_default_dimensions(self) -> None:
-        self.setMinimumHeight(HomeDefaultDimensions.MAIN_WINDOW_MIN_HEIGHT)
-        self.setMinimumWidth(HomeDefaultDimensions.MAIN_WINDOW_MIN_WIDTH)
+        self.setMinimumHeight(_DefaultDimension.MAIN_WINDOW_MIN_HEIGHT)
+        self.setMinimumWidth(_DefaultDimension.MAIN_WINDOW_MIN_WIDTH)
         self.resize(
-            HomeDefaultDimensions.MAIN_WINDOW_DEFAULT_WIDTH,
-            HomeDefaultDimensions.MAIN_WINDOW_DEFAULT_HEIGHT,
+            _DefaultDimension.MAIN_WINDOW_DEFAULT_WIDTH,
+            _DefaultDimension.MAIN_WINDOW_DEFAULT_HEIGHT,
         )

@@ -32,8 +32,9 @@ class FileMenu(QMenu):
     def __init__(self, home):
         super().__init__()
         self.setTitle(SectionsNames.FILE)
+        from home import Home
 
-        self._home = home
+        self._home: Home = home
         self._tab = self._home.tab
         self._create_actions()
 
@@ -182,14 +183,18 @@ class FileMenu(QMenu):
 
     @Slot()
     def _open_folder(self) -> None:
-        # TODO: implementar la apertura de una carpeta
         path = QFileDialog.getExistingDirectory(
             self,
             "Abrir carpeta",
             dir=os.path.expanduser("~"),
         )
-        tree = Tree(self._home, path)
-        tree.build()
+        if not has_selected_file(path):
+            return None
+        try:
+            tree = Tree(self._home, path)
+            tree.build()
+        except Exception as e:
+            show_system_error_message(self._home, str(e))
 
     @Slot()
     def _rename(self) -> None:
@@ -205,7 +210,7 @@ class FileMenu(QMenu):
             print("nothin selected")
             return None
         new_file_name = os.path.basename(path)
-        rename_status = self._home.storage_manager.rename(old_name, new_file_name)
+        rename_status = self._home._storage_manager.rename(old_name, new_file_name)
         if rename_status[0] is False:
             print(rename_status[1])
             return None
@@ -231,10 +236,10 @@ class FileMenu(QMenu):
         if not has_selected_file(path):
             return None
         content = editor.toPlainText()
-        ok, error_msg = self._home.storage_manager.save_from_path(path, content)
+        ok, error_msg = self._home._storage_manager.save_from_path(path, content)
         if not ok:
             raise ValueError(error_msg)
-        path_add_status = self._home.storage_manager.add(path)
+        path_add_status = self._home._storage_manager.add(path)
         if path_add_status[0] is False:
             raise ValueError("add path status if False")
         self._tab.setTabText(index, os.path.basename(path))
@@ -248,14 +253,14 @@ class FileMenu(QMenu):
             if file_name == DEFAULT_FILE_NAME:
                 self.save_on_default()
                 return
-            exists = self._home.storage_manager.path_exists(file_name)
+            exists = self._home._storage_manager.path_exists(file_name)
             if not exists:
                 raise FileNotFoundError(f"the file: {file_name} not exists")
             editor = self._tab.widget(index)
             if not isinstance(editor, Editor):
                 raise ValueError("editor is not an instance of Editor")
             content = editor.toPlainText()
-            status = self._home.storage_manager.save_from_file_name(file_name, content)
+            status = self._home._storage_manager.save_from_file_name(file_name, content)
             if status[0] is False:
                 raise ValueError("not saved from file_name")
             editor.has_changes = False
@@ -286,7 +291,7 @@ class FileMenu(QMenu):
             return None
         old_name = self._tab.tabText(self._tab.currentIndex())
         new_name = os.path.basename(path)
-        status = self._home.storage_manager.rename(old_name, new_name)
+        status = self._home._storage_manager.rename(old_name, new_name)
         if status[0] is False:
             return
         extension = os.path.splitext(path)[1]
@@ -316,19 +321,19 @@ class FileMenu(QMenu):
                         print("guardado cancelado")
                         break
                     content = editor.toPlainText()
-                    ok, error_msg = self._home.storage_manager.save_from_path(
+                    ok, error_msg = self._home._storage_manager.save_from_path(
                         path, content
                     )
                     if not ok:
                         raise ValueError(error_msg)
-                    ok, error_msg = self._home.storage_manager.add(path)
+                    ok, error_msg = self._home._storage_manager.add(path)
                     if not ok:
                         raise ValueError(error_msg)
                     editor.has_changes = False
                     self._tab.set_normal(os.path.basename(path))
                 else:
                     content = editor.toPlainText()
-                    ok, error_msg = self._home.storage_manager.save_from_file_name(
+                    ok, error_msg = self._home._storage_manager.save_from_file_name(
                         file_name, content
                     )
                     if not ok:
@@ -373,13 +378,13 @@ class FileMenu(QMenu):
                     if not has_selected_file(path):
                         print("se cancela el guardado...")
                         return
-                    ok, error_msg = self._home.storage_manager.save_from_path(
+                    ok, error_msg = self._home._storage_manager.save_from_path(
                         path, content
                     )
                     if not ok:
                         show_system_error_message(self._home, error_msg)
                         return
-                    ok, error_msg = self._home.storage_manager.add(path)
+                    ok, error_msg = self._home._storage_manager.add(path)
                     if not ok:
                         show_system_error_message(self._home, error_msg)
                         return
@@ -388,7 +393,7 @@ class FileMenu(QMenu):
                     self._tab.set_normal(DEFAULT_FILE_NAME)
                     return
                 else:
-                    ok, error_msg = self._home.storage_manager.save_from_file_name(
+                    ok, error_msg = self._home._storage_manager.save_from_file_name(
                         file_name, content
                     )
                     if ok is False:
@@ -404,7 +409,7 @@ class FileMenu(QMenu):
                 self._tab.set_normal(FileNames.DEFAULT)
             else:
                 self._tab.removeTab(self._tab.currentIndex())
-            self._home.storage_manager.remove(file_name)
+            self._home._storage_manager.remove(file_name)
 
     @Slot()
     def _close_all(self) -> None:
@@ -420,8 +425,8 @@ class FileMenu(QMenu):
                     self._tab.set_normal(FileNames.DEFAULT)
                 else:
                     self._tab.removeTab(self._tab.currentIndex())
-                    self._home.storage_manager.remove(file_name)
-                self._home.storage_manager.remove(file_name)
+                    self._home._storage_manager.remove(file_name)
+                self._home._storage_manager.remove(file_name)
                 continue
             content = editor.toPlainText()
             if file_name == DEFAULT_FILE_NAME and self._tab.HAS_ONE_TAB:
@@ -435,11 +440,13 @@ class FileMenu(QMenu):
                 if not has_selected_file(path):
                     print("se cancela el guardado...")
                     return
-                ok, error_msg = self._home.storage_manager.save_from_path(path, content)
+                ok, error_msg = self._home._storage_manager.save_from_path(
+                    path, content
+                )
                 if not ok:
                     show_system_error_message(self._home, error_msg)
                     return
-                ok, error_msg = self._home.storage_manager.add(path)
+                ok, error_msg = self._home._storage_manager.add(path)
                 if not ok:
                     show_system_error_message(self._home, error_msg)
                     return
@@ -454,7 +461,7 @@ class FileMenu(QMenu):
                 else:
                     self._tab.removeTab(self._tab.currentIndex())
             print(f"file_name to remove: {file_name}")
-            self._home.storage_manager.remove(file_name)
+            self._home._storage_manager.remove(file_name)
 
     def _when_opening(self, tab_manager: Tab, path: str, here: bool = False) -> None:
         editor = tab_manager.editor

@@ -2,7 +2,7 @@ import json
 import os
 from typing import Dict, Final, List, Optional, Tuple, Union
 
-from constants import FileNames
+from constants import FileNames, VALID_MODES
 from paths import Paths
 
 PATH_DEFAULT_FILE: Final[str] = Paths.TEMP_FILES + FileNames.DEFAULT
@@ -24,7 +24,12 @@ class StorageManager:
         self._content: Dict[str, Union[List[str], int]] = get_content()
         self._paths: List[str] = self._content.get("paths", [])  # type: ignore
         self._worked_files: List[str] = list(map(os.path.basename, self._paths))  # type: ignore
+        # get the path of the last folder selected
+        self._folder_selected = self._content.get("folderSelected") or None  # type: ignore
         self._last_tab_worked_index: int = self._content.get("lastTabWorked")  # type: ignore
+        self._app_mode: int = self._content.get("appMode")  # type: ignore
+        print(f"folder selected: {self._folder_selected}")
+        print(f"app mode: {self._app_mode}")
 
     @property
     def paths(self) -> List[str]:
@@ -35,8 +40,20 @@ class StorageManager:
         return self._worked_files
 
     @property
+    def app_mode(self) -> int:
+        return self._app_mode
+
+    @app_mode.setter
+    def app_mode(self, value: int) -> None:
+        self._app_mode = value
+
+    @property
     def last_tab_worked_index(self) -> int:
         return self._last_tab_worked_index
+
+    @property
+    def folder_selected(self) -> Optional[str]:
+        return self._folder_selected  # type: ignore
 
     def path_exists(self, file_name: str) -> bool:
         return any(file_name in path for path in self._paths)
@@ -70,9 +87,33 @@ class StorageManager:
                 json.dump(self._content, storage, indent=4)
             return True, None
         except (FileNotFoundError, json.JSONDecodeError) as fe:
-            return True, str(fe)
+            return False, str(fe)
         except Exception as e:
             return False, f"An error occurred: {e}"
+
+    def add_folder(self, path: str) -> Tuple[bool, Optional[str]]:
+        try:
+            with open(Paths.STORAGE, "w") as storage:
+                self._content["folderSelected"] = path  # type: ignore
+                json.dump(self._content, storage, indent=4)
+            return True, None
+        except (FileNotFoundError, json.JSONDecodeError) as fe:
+            return False, str(fe)
+        except Exception as e:
+            return False, f"An error occurred: {e}"
+
+    def update_mode(self, mode: int) -> Tuple[bool, Optional[str]]:
+        if mode not in VALID_MODES:
+            return False, "Invalid app mode"
+        try:
+            with open(Paths.STORAGE, "w") as storage:
+                self._content["appMode"] = mode
+                json.dump(self._content, storage, indent=4)
+            return True, None
+        except (FileNotFoundError, json.JSONDecodeError) as fe:
+            return False, str(fe)
+        except Exception as e:
+            return False, str(e)
 
     def rename(self, old_file_name: str, new_name: str) -> Tuple[bool, Optional[str]]:
         path = list(

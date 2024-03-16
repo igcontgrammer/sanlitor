@@ -1,19 +1,21 @@
 from dataclasses import dataclass
 from enum import Enum, auto
+from typing import Tuple
+
+# ************* TREE FILES *************
 
 
-class AppMode(Enum):
-    """
-    DEFAULT: show only the tab widget with their editors
-    TREE: show the tree view
-    SEARCH_IN_FILES: show the search in files view
-    REFERENCES: show the references view
-    """
+@dataclass(frozen=True)
+class AppMode:
+    DEFAULT: int = 1
+    TREE: int = 2
+    SEARCH_IN_FILES: int = 3
+    REFERENCES: int = 4
 
-    DEFAULT = auto()
-    TREE = auto()
-    SEARCH_IN_FILES = auto()
-    REFERENCES = auto()
+
+VALID_MODES: Tuple[int] = (1, 2, 3, 4)
+
+# *************  *************
 
 
 @dataclass(frozen=True)
