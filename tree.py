@@ -46,13 +46,13 @@ class Tree:
             print(error_msg)
             return
         ok, error_msg = self._home.storage_manager.add(path)
-        if not ok:
+        if not ok and error_msg is not None:
             print(error_msg)
             return
 
     def _open_element(self, path: str) -> Tuple[bool, Optional[str]]:
         if os.path.isdir(path):
-            return True, None
+            return False, None
         elif os.path.isfile(path):
             file_name = os.path.basename(path)
             if self._home.storage_manager.file_exists(file_name):

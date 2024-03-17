@@ -14,6 +14,10 @@ def get_extension_from_path(path: str) -> str:
     return os.path.splitext(path)[1]
 
 
+def is_dir(path: str) -> bool:
+    return os.path.isdir(path)
+
+
 def filename_is_valid(filename: str) -> bool:
     for char in filename:
         if char in ["/", "\\", ":", "*", "?", '"', "<", ">", "|"]:

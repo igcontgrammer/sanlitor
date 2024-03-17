@@ -13,6 +13,7 @@ from messages import Messages, MessageTypes
 from statusbar import StatusBar
 from storage_manager import StorageManager, save_from_path
 from tab_manager import Tab
+from utils import is_dir
 
 _MAIN_WINDOW_TITLE: Final[str] = "Sanlitor"
 
@@ -111,6 +112,9 @@ class Home(QMainWindow):
             return
         if self._tab.has_new_tabs or option == SaveOptions.YES:
             for path in self._storage_manager.paths:
+                # no se debe guardar la direccion de un directorio como archivo trabajado
+                if is_dir(path):
+                    continue
                 file_name = os.path.basename(path)
                 for i in range(self._tab.count()):
                     if file_name != self._tab.tabText(i):
