@@ -9,6 +9,11 @@ from extensions import available_extensions
 from utils import get_extension
 
 
+def hide_columns(tree: QTreeView) -> None:
+    for i in range(1, tree.model().columnCount()):
+        tree.hideColumn(i)
+
+
 class Tree:
     def __init__(self, home, path: str):
         from home import Home
@@ -26,7 +31,7 @@ class Tree:
         tree.setRootIndex(model.index(self._path))
         tree.setHeaderHidden(True)
         tree.clicked.connect(lambda: self._on_click(tree.currentIndex()))
-        self._hide_columns(tree)
+        hide_columns(tree)
         return tree
 
     def remove(self) -> None:
@@ -40,7 +45,7 @@ class Tree:
         if not ok:
             print(error_msg)
             return
-        ok, error_msg = self._home._storage_manager.add(path)
+        ok, error_msg = self._home.storage_manager.add(path)
         if not ok:
             print(error_msg)
             return
@@ -50,13 +55,12 @@ class Tree:
             return True, None
         elif os.path.isfile(path):
             file_name = os.path.basename(path)
-            if self._home._storage_manager.file_exists(file_name):
+            if self._home.storage_manager.file_exists(file_name):
                 self._home.tab.move(file_name)
                 return True, None
             extension = get_extension(file_name)
             if extension not in available_extensions():
                 return False, "La extensión no es válida."
-            content = ""
             try:
                 with open(path, "r") as file:
                     content = file.read()
@@ -72,6 +76,4 @@ class Tree:
     def _is_ok(self) -> bool:
         return os.path.exists(self._path) and os.path.isdir(self._path)
 
-    def _hide_columns(self, tree: QTreeView) -> None:
-        for i in range(1, tree.model().columnCount()):
-            tree.hideColumn(i)
+

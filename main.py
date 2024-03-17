@@ -5,9 +5,8 @@ from PySide6.QtWidgets import QApplication
 
 from home import Home
 
+
 # from typing import Self
-
-
 
 
 class Main(QApplication):

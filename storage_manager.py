@@ -19,6 +19,15 @@ def get_content() -> Dict[str, Union[List[str], int]]:
         return {}
 
 
+def save_from_path(path: str, content: str) -> Tuple[bool, Optional[str]]:
+    try:
+        with open(path, "w") as file:
+            file.write(content)
+        return True, None
+    except Exception as e:
+        return False, str(e)
+
+
 class StorageManager:
     def __init__(self) -> None:
         self._content: Dict[str, Union[List[str], int]] = get_content()
@@ -28,8 +37,6 @@ class StorageManager:
         self._folder_selected = self._content.get("folderSelected") or None  # type: ignore
         self._last_tab_worked_index: int = self._content.get("lastTabWorked")  # type: ignore
         self._app_mode: int = self._content.get("appMode")  # type: ignore
-        print(f"folder selected: {self._folder_selected}")
-        print(f"app mode: {self._app_mode}")
 
     @property
     def paths(self) -> List[str]:
@@ -62,17 +69,9 @@ class StorageManager:
         return file_name in self._worked_files
 
     def save_from_file_name(
-        self, file_name: str, content: str
+            self, file_name: str, content: str
     ) -> Tuple[bool, Optional[str]]:
         path = list(filter(lambda x: os.path.basename(x) == file_name, self._paths))[0]
-        try:
-            with open(path, "w") as file:
-                file.write(content)
-            return True, None
-        except Exception as e:
-            return False, str(e)
-
-    def save_from_path(self, path: str, content: str) -> Tuple[bool, Optional[str]]:
         try:
             with open(path, "w") as file:
                 file.write(content)

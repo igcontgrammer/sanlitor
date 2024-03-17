@@ -11,7 +11,7 @@ from editor import Editor
 from menus.menu import MenuBar
 from messages import Messages, MessageTypes
 from statusbar import StatusBar
-from storage_manager import StorageManager
+from storage_manager import StorageManager, save_from_path
 from tab_manager import Tab
 
 _MAIN_WINDOW_TITLE: Final[str] = "Sanlitor"
@@ -56,6 +56,10 @@ class Home(QMainWindow):
     @property
     def last_tab_worked_index(self) -> int:
         return self._storage_manager.last_tab_worked_index
+
+    @property
+    def storage_manager(self):
+        return self._storage_manager
 
     def load_central(self) -> None:
         mode = self._storage_manager.app_mode
@@ -116,11 +120,11 @@ class Home(QMainWindow):
                         print("editor is not an instance of Editor")
                         return None
                     content = editor.toPlainText()
-                    save_status = self._storage_manager.save_from_path(path, content)
-                    if save_status[0] is False:
+                    ok, error_msg = save_from_path(path, content)
+                    if not ok:
                         msg = Messages(
                             parent=self,
-                            content="Tuvimos problemas para cerrar correctamente los archivos. Reinicie la aplicación.",
+                            content=error_msg,
                             first_button_title="De acuerdo",
                             message_type=MessageTypes.CRITICAL,
                         )
@@ -156,3 +160,4 @@ class Home(QMainWindow):
             _DefaultDimension.MAIN_WINDOW_DEFAULT_WIDTH,
             _DefaultDimension.MAIN_WINDOW_DEFAULT_HEIGHT,
         )
+

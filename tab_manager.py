@@ -47,7 +47,7 @@ class Tab(QTabWidget):
         return self.count() > 0
 
     @property
-    def HAS_ONE_TAB(self) -> bool:
+    def has_one_tab(self) -> bool:
         return self.count() == 1
 
     @property
@@ -76,13 +76,13 @@ class Tab(QTabWidget):
         return False
 
     def _build_on_startup(self) -> None:
-        has_worked = len(self._home._storage_manager.paths) > 0
+        has_worked = len(self._home.storage_manager.paths) > 0
         if not has_worked:
             self.build_default_tab()
             return
         any_exists = False
         files_removed_or_moved: List[str] = []
-        for path in self._home._storage_manager.paths:
+        for path in self._home.storage_manager.paths:
             if not os.path.exists(path):
                 files_removed_or_moved.append(path)
                 continue
@@ -96,7 +96,8 @@ class Tab(QTabWidget):
                 print(e)
                 show_system_error_message(
                     self._home,
-                    f"Tuvimos problemas con la siguiente ubicación: \n\n{path}. \n\nPor favor revise si el archivo existe o si tiene permisos para leerlo.",
+                    f"Tuvimos problemas con la siguiente ubicación: \n\n{path}. \n\nPor favor revise si el archivo "
+                    f"existe o si tiene permisos para leerlo.",
                 )
                 return
         if len(files_removed_or_moved) > 0:
@@ -148,7 +149,6 @@ class Tab(QTabWidget):
         self.tabCloseRequested.connect(self.on_close)
         if FileNames.DEFAULT not in self._loaded_files:
             self._loaded_files.append(FileNames.DEFAULT)
-        # self._home.storage_manager.add_default_file()
 
     def new(self) -> None:
         file = QFileDialog.getSaveFileName(
@@ -160,7 +160,7 @@ class Tab(QTabWidget):
         path = file[0]
         if has_selected_file(path):
             return None
-        status = self._home._storage_manager.add(path)
+        status = self._home.storage_manager.add(path)
         if status[0] is False:
             print(f"error: {status[1]}")
             return None
@@ -214,13 +214,13 @@ class Tab(QTabWidget):
             if option != TabActions.CLOSE:
                 msg.close()
                 return
-            if self.HAS_ONE_TAB:
+            if self.has_one_tab:
                 if file_name == FileNames.DEFAULT:
                     self.setTabIcon(index, QIcon())
                     self.setTabText(index, FileNames.DEFAULT)
                     return
                 else:
-                    remove_status = self._home._storage_manager.remove(file_name)
+                    remove_status = self._home.storage_manager.remove(file_name)
                     if remove_status[0] is False:
                         msg = Messages(
                             parent=self._home,
@@ -237,7 +237,7 @@ class Tab(QTabWidget):
             else:
                 self.removeTab(index)
                 editor.has_changes = False
-                remove_status = self._home._storage_manager.remove(file_name)
+                remove_status = self._home.storage_manager.remove(file_name)
                 if remove_status[0] is False:
                     msg = Messages(
                         parent=self._home,
@@ -248,18 +248,18 @@ class Tab(QTabWidget):
                     msg.run()
                     return
         else:
-            if self.HAS_ONE_TAB:
+            if self.has_one_tab:
                 if file_name == FileNames.DEFAULT:
                     self.setTabText(index, FileNames.DEFAULT)
                 else:
                     self.setTabText(index, FileNames.DEFAULT)
                     editor.clear()
                     editor.has_changes = False
-                    self._home._storage_manager.remove(file_name)
+                    self._home.storage_manager.remove(file_name)
             else:
                 self.removeTab(index)
                 editor.has_changes = False
-                self._home._storage_manager.remove(file_name)
+                self._home.storage_manager.remove(file_name)
         editor.clear()
         editor.has_changes = False
         self.setTabIcon(index, QIcon())
