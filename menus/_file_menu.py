@@ -1,5 +1,6 @@
+import datetime
 import os
-from typing import Final
+from typing import Final, Dict
 
 from PySide6.QtWidgets import QFileDialog
 from PySide6.QtGui import QIcon
@@ -20,7 +21,7 @@ from ._menus_constants import FileMenuActionsNames, FileMenuShortcuts
 DEFAULT_FILE_NAME: Final[str] = "Untitled.txt"
 
 
-def get_content_from_file(path: str) -> str:
+def get_content_from_file(path: Path) -> str:
     try:
         with open(path, "r") as file:
             return file.read()
@@ -39,6 +40,7 @@ class FileMenu(QMenu):
         self._home: Home = home
         self._tab = self._home.tab
         self._create_actions()
+        self._errors = []
 
     @property
     def menu(self) -> QMenu:
@@ -148,7 +150,7 @@ class FileMenu(QMenu):
         self.addAction(close_all_files_action)
 
     # ************* SLOTS ************
-
+    # TODO: fix this.
     def _open_file(self) -> None:
         file = QFileDialog.getOpenFileName(
             self,
@@ -379,13 +381,62 @@ class FileMenu(QMenu):
                 self._tab.removeTab(self._tab.currentIndex())
             self._home.storage_manager.remove(file_name)
 
+    # TODO: fix this
     @Slot()
     def _close_all(self) -> None:
-        pass
+        paths_with_errors = []
+        save_all = False
+        for i in range(self._tab.count()):
+            editor = self._tab.widget(i)
+            print(type(editor))
+            if not isinstance(editor, Editor):
+                print("editor is not an instance of Editor")
+                continue
+            file_name = self._tab.tabText(i)
+            if editor.has_changes:
+                if save_all is False:
+                    msg = Messages(
+                        parent=self._home,
+                        content=f"Se identificaron cambios en {file_name} ¿desea guardar?",
+                        first_button_title="Guardar",
+                        message_type=MessageTypes.QUESTION
+                    )
+                    msg.add_button("Guardar todo")
+                    option = msg.run()
+                    if option != SaveOptions.SAVE and option != 1:
+                        # cancel
+                        msg.close()
+                        break
+                    if option == 1:
+                        save_all = True
+                path = self._home.storage_manager.get_path_from_file_name(file_name)
+                content = editor.toPlainText()
+                ok, error_msg = save_from_path(path, content)
+                if not ok:
+                    print(error_msg)
+                    paths_with_errors.append(path + "error: " + error_msg)
+                    continue
+                self._home.storage_manager.remove(file_name)
+                editor.has_changes = False
+        # remove tabs
+        for i in range(self._tab.count()):
+            if i > 0:
+                self._tab.removeTab(i)
+            else:
+                self._tab.setTabText(i, DEFAULT_FILE_NAME)
+                self._tab.setTabIcon(i, QIcon())
+                editor = self._tab.widget(i)
+                if isinstance(editor, Editor):
+                    editor.clear()
+                    editor.has_changes = False
+
+        if len(paths_with_errors) > 0:
+            pass
 
     def _when_opening(self, tab_manager: Tab, path: Path, here: bool = False) -> None:
         editor = tab_manager.editor
         if editor.has_changes:
+            # TODO: crear una funcion que recicle esto
             msg = Messages(
                 parent=self._home,
                 content="Se detectaron cambios en este archivo ¿desea abrir de todas formas?",
@@ -397,14 +448,16 @@ class FileMenu(QMenu):
         tab_manager.set_is_open_mode(True)
         if here:
             tab_manager.change_tab_name(path.name)
-            tab_manager.add_content_to_current_tab(content=get_content_from_file(path.name))
+            tab_manager.add_content_to_current_tab(get_content_from_file(path))
+            added, error_msg = self._home.storage_manager.add(path)
+            if not added:
+                print(error_msg)
         else:
             tab_manager.new()
         editor.has_changes = False
         tab_manager.set_is_open_mode(False)
         tab_manager.add_to_loaded_files(path.name)
-        extension = os.path.splitext(path)[1]
-        editor.set_syntax(extension)
+        editor.set_syntax(path.suffix)
 
     def _get_open_file_option(self) -> int:
         msg = Messages(
