@@ -8,7 +8,8 @@ from constants import FileNames, TabActions
 from editor import Editor
 from extensions import get_extensions_list
 from messages import Messages, MessageTypes, show_system_error_message
-from utils import get_extension, has_selected_file
+from utils import get_extension, has_selected
+from pathlib import Path
 
 
 class Tab(QTabWidget):
@@ -81,17 +82,16 @@ class Tab(QTabWidget):
             self.build_default_tab()
             return
         any_exists = False
-        files_removed_or_moved: List[str] = []
+        paths_removed_or_moved: List[Path] = []
         for path in self._home.storage_manager.paths:
             if not os.path.exists(path):
-                files_removed_or_moved.append(path)
+                paths_removed_or_moved.append(path)
                 continue
             any_exists = True
-            file_name = os.path.basename(path)
             try:
                 with open(path, "r") as file:
                     content = file.read()
-                    self.new_from_already_exists(file_name, content)
+                    self.new_from_already_exists(path.name, content)
             except Exception as e:
                 print(e)
                 show_system_error_message(
@@ -100,9 +100,9 @@ class Tab(QTabWidget):
                     f"existe o si tiene permisos para leerlo.",
                 )
                 return
-        if len(files_removed_or_moved) > 0:
+        if len(paths_removed_or_moved) > 0:
             content = ""
-            for i, moved in enumerate(files_removed_or_moved):
+            for i, moved in enumerate(paths_removed_or_moved):
                 if i == 7:
                     content += "..."
                     break
@@ -111,7 +111,7 @@ class Tab(QTabWidget):
             msg = Messages(
                 parent=self._home,
                 content="Los siguientes archivos no existen o fueron movidos:\n\n"
-                + content,
+                        + content,
                 first_button_title="De acuerdo",
                 message_type=MessageTypes.WARNING,
             )
@@ -158,7 +158,7 @@ class Tab(QTabWidget):
             filter=get_extensions_list(),
         )
         path = file[0]
-        if has_selected_file(path):
+        if has_selected(path):
             return None
         status = self._home.storage_manager.add(path)
         if status[0] is False:

@@ -1,7 +1,7 @@
 import os
 from dataclasses import dataclass
 from typing import Final, Optional
-
+from pathlib import Path
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QCloseEvent
 from PySide6.QtWidgets import QMainWindow, QSplitter, QWidget
@@ -104,38 +104,34 @@ class Home(QMainWindow):
             msg.add_button("No guardar")
             option = msg.run()
             if option != SaveOptions.SAVE and option != SaveOptions.NO_SAVE:
-                event.ignore()
                 msg.close()
+                event.ignore()
                 return
         if option == SaveOptions.NO_SAVE:
             super().closeEvent(event)
             return
+        has_error = False
         if self._tab.has_new_tabs or option == SaveOptions.YES:
-            for path in self._storage_manager.paths:
-                # no se debe guardar la direccion de un directorio como archivo trabajado
-                if is_dir(path):
+            for i in range(self._tab.count()):
+                editor = self._tab.widget(i)
+                if not isinstance(editor, Editor):
+                    has_error = True
                     continue
-                file_name = os.path.basename(path)
-                for i in range(self._tab.count()):
-                    if file_name != self._tab.tabText(i):
-                        continue
-                    editor = self._tab.widget(i)
-                    if not isinstance(editor, Editor):
-                        print("editor is not an instance of Editor")
-                        return None
-                    content = editor.toPlainText()
-                    ok, error_msg = save_from_path(path, content)
-                    if not ok:
-                        msg = Messages(
-                            parent=self,
-                            content=error_msg,
-                            first_button_title="De acuerdo",
-                            message_type=MessageTypes.CRITICAL,
-                        )
-                        msg.run()
-                        break
-                    self._tab.set_normal(file_name)
-                    editor.has_changes = False
+                file_name = self._tab.tabText(i)
+                path = self._storage_manager.get_path_from_file_name(file_name)
+                content = editor.toPlainText()
+                ok, error_msg = save_from_path(path, content)
+                if not ok:
+                    print(error_msg)
+        if has_error:
+            msg = Messages(
+                parent=self,
+                content="Ocurrió un error inesperado al cerrar el archivo",
+                first_button_title="De acuerdo",
+                message_type=MessageTypes.CRITICAL,
+            )
+            msg.run()
+            return
         ok, error_msg = self._storage_manager.update_mode(self._mode)
         if not ok:
             print(error_msg)

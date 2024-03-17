@@ -6,7 +6,7 @@ from PySide6.QtWidgets import QFileSystemModel, QTreeView
 
 from constants import AppMode
 from extensions import available_extensions
-from utils import get_extension
+from pathlib import Path
 
 
 def hide_columns(tree: QTreeView) -> None:
@@ -15,20 +15,20 @@ def hide_columns(tree: QTreeView) -> None:
 
 
 class Tree:
-    def __init__(self, parent, path: str):
+    def __init__(self, parent, path: Path):
         from home import Home
 
         self._home: Home = parent
-        self._path = path
+        self.path = path
 
     def get(self) -> QTreeView:
         if not self._is_ok():
-            raise ValueError(f"El directorio {self._path} no existe o no es válido.")
+            raise ValueError(f"El directorio {str(self.path)} no existe o no es válido.")
         model = QFileSystemModel()
-        model.setRootPath(self._path)
+        model.setRootPath(str(self.path))
         tree = QTreeView()
         tree.setModel(model)
-        tree.setRootIndex(model.index(self._path))
+        tree.setRootIndex(model.index(str(self.path)))
         tree.setHeaderHidden(True)
         tree.clicked.connect(lambda: self._on_click(tree.currentIndex()))
         hide_columns(tree)
@@ -40,7 +40,7 @@ class Tree:
     @Slot()
     def _on_click(self, element: QModelIndex) -> None:
         file_selected = element.data()
-        path = os.path.join(self._path, file_selected)
+        path = self.path.joinpath(file_selected)
         ok, error_msg = self._open_element(path)
         if not ok:
             print(error_msg)
@@ -50,21 +50,19 @@ class Tree:
             print(error_msg)
             return
 
-    def _open_element(self, path: str) -> Tuple[bool, Optional[str]]:
-        if os.path.isdir(path):
+    def _open_element(self, path: Path) -> Tuple[bool, Optional[str]]:
+        if path.is_dir():
             return False, None
-        elif os.path.isfile(path):
-            file_name = os.path.basename(path)
-            if self._home.storage_manager.file_exists(file_name):
-                self._home.tab.move(file_name)
+        elif path.is_file():
+            if self._home.storage_manager.file_exists(path.name):
+                self._home.tab.move(path.name)
                 return True, None
-            extension = get_extension(file_name)
-            if extension not in available_extensions():
+            if path.suffix not in available_extensions():
                 return False, "La extensión no es válida."
             try:
                 with open(path, "r") as file:
                     content = file.read()
-                self._home.tab.new_from_already_exists(file_name, content)
+                self._home.tab.new_from_already_exists(path.name, content)
                 return True, None
             except FileNotFoundError as fnf:
                 return False, str(fnf)
@@ -74,4 +72,4 @@ class Tree:
             raise ValueError(f"El archivo {path} no existe o no es válido.")
 
     def _is_ok(self) -> bool:
-        return os.path.exists(self._path) and os.path.isdir(self._path)
+        return self.path.exists() and self.path.is_dir()

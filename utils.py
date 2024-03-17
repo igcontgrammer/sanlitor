@@ -25,7 +25,7 @@ def filename_is_valid(filename: str) -> bool:
     return True
 
 
-def has_selected_file(path: str) -> bool:
+def has_selected(path: str) -> bool:
     return len(path) > 0
 
 

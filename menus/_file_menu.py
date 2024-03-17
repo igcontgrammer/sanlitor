@@ -11,8 +11,8 @@ from messages import Messages, MessageTypes, show_system_error_message
 from storage_manager import save_from_path
 from tab_manager import Tab
 from tree import Tree
-from utils import get_extension_from_path, has_selected_file
-
+from utils import get_extension_from_path, has_selected
+from pathlib import Path
 from . import QAction, QMenu, SectionsNames, Slot
 from ._menus_constants import FileMenuActionsNames, FileMenuShortcuts
 
@@ -154,17 +154,16 @@ class FileMenu(QMenu):
             "Abrir archivo",
             dir=os.path.expanduser("~"),
         )
-        if not has_selected_file(file[0]):
+        if not has_selected(file[0]):
             return None
-        path = file[0]
-        if get_extension_from_path(path) not in available_extensions():
+        path = Path(file[0])
+        if path.suffix not in available_extensions():
             show_system_error_message(
                 self._home, content="La extensión de este archivo no es permitida."
             )
             return None
-        file_name = os.path.basename(path)
-        if self._tab.already_opened(file_name):
-            self._tab.move(file_name)
+        if self._tab.already_opened(path.name):
+            self._tab.move(path.name)
             return
         if self._tab.has_one_tab:
             self._when_opening(self._tab, path, here=True)
@@ -188,10 +187,10 @@ class FileMenu(QMenu):
             "Abrir carpeta",
             dir=os.path.expanduser("~"),
         )
-        if not has_selected_file(path):
+        if not has_selected(path):
             return None
         try:
-            tree = Tree(self._home, path)
+            tree = Tree(self._home, Path(path))
             self._home.change_central(AppMode.TREE, tree.get())
         except Exception as e:
             show_system_error_message(self._home, str(e))
@@ -201,14 +200,13 @@ class FileMenu(QMenu):
         old_name = self._tab.tabText(self._tab.currentIndex())
         file = self._get_path_from_save_dialog("Renombrar Archivo")
         path = file[0]
-        if not has_selected_file(path):
-            print("nothin selected")
-            return None
+        if not has_selected(path):
+            return
         new_file_name = os.path.basename(path)
-        rename_status = self._home.storage_manager.rename(old_name, new_file_name)
-        if rename_status[0] is False:
-            print(rename_status[1])
-            return None
+        ok, error_msg = self._home.storage_manager.rename(old_name, new_file_name)
+        if not ok:
+            print(error_msg)
+            return
         self._tab.setTabText(self._tab.currentIndex(), new_file_name)
 
     @Slot()
@@ -228,15 +226,15 @@ class FileMenu(QMenu):
             filter=get_extensions_list(),
         )
         path = file[0]
-        if not has_selected_file(path):
-            return None
+        if not has_selected(path):
+            return
         content = editor.toPlainText()
         ok, error_msg = save_from_path(path, content)
         if not ok:
             raise ValueError(error_msg)
-        path_add_status = self._home.storage_manager.add(path)
-        if path_add_status[0] is False:
-            raise ValueError("add path status if False")
+        ok, error_msg = self._home.storage_manager.add(path)
+        if not ok:
+            raise ValueError(error_msg)
         self._tab.setTabText(index, os.path.basename(path))
         editor.has_changes = False
 
@@ -248,7 +246,7 @@ class FileMenu(QMenu):
             if file_name == DEFAULT_FILE_NAME:
                 self.save_on_default()
                 return
-            exists = self._home.storage_manager.path_exists(file_name)
+            exists = self._home.storage_manager.file_exists(file_name)
             if not exists:
                 raise FileNotFoundError(f"the file: {file_name} not exists")
             editor = self._tab.widget(index)
@@ -282,7 +280,7 @@ class FileMenu(QMenu):
             filter=get_extensions_list(),
         )
         path = file[0]
-        if not has_selected_file(path):
+        if not has_selected(path):
             return None
         old_name = self._tab.tabText(self._tab.currentIndex())
         new_name = os.path.basename(path)
@@ -293,6 +291,7 @@ class FileMenu(QMenu):
         self._tab.set_normal(new_name)
         editor.has_changes = False
 
+    # TODO: esto no funciona correctamente. De dos archivos, solo guarda uno.
     @Slot()
     def _save_all_files(self) -> None:
         try:
@@ -311,7 +310,7 @@ class FileMenu(QMenu):
                         filter=get_extensions_list(),
                     )
                     path = file[0]
-                    if not has_selected_file(path):
+                    if not has_selected(path):
                         print("guardado cancelado")
                         break
                     content = editor.toPlainText()
@@ -369,7 +368,7 @@ class FileMenu(QMenu):
                         filter=get_extensions_list(),
                     )
                     path = file[0]
-                    if has_selected_file(path):
+                    if has_selected(path):
                         ok, error_msg = save_from_path(
                             path, content
                         )
@@ -423,7 +422,7 @@ class FileMenu(QMenu):
             if file_name == DEFAULT_FILE_NAME and self._tab.has_one_tab:
                 file = self._get_path_from_save_dialog("Guardar")
                 path = file[0]
-                if not has_selected_file(path):
+                if not has_selected(path):
                     print("se cancela el guardado...")
                     return
                 ok, error_msg = save_from_path(
@@ -446,10 +445,9 @@ class FileMenu(QMenu):
                     self._tab.set_normal(FileNames.DEFAULT)
                 else:
                     self._tab.removeTab(self._tab.currentIndex())
-            print(f"file_name to remove: {file_name}")
             self._home.storage_manager.remove(file_name)
 
-    def _when_opening(self, tab_manager: Tab, path: str, here: bool = False) -> None:
+    def _when_opening(self, tab_manager: Tab, path: Path, here: bool = False) -> None:
         editor = tab_manager.editor
         if editor.has_changes:
             msg = Messages(
@@ -461,15 +459,14 @@ class FileMenu(QMenu):
             if msg.run() != OpenFileOptions.OPEN_ANYWAY:
                 return
         tab_manager.set_is_open_mode(True)
-        file_name = os.path.basename(path)
         if here:
-            tab_manager.change_tab_name(file_name)
-            tab_manager.add_content_to_current_tab(content=get_content_from_file(path))
+            tab_manager.change_tab_name(path.name)
+            tab_manager.add_content_to_current_tab(content=get_content_from_file(path.name))
         else:
             tab_manager.new()
         editor.has_changes = False
         tab_manager.set_is_open_mode(False)
-        tab_manager.add_to_loaded_files(file_name)
+        tab_manager.add_to_loaded_files(path.name)
         extension = os.path.splitext(path)[1]
         editor.set_syntax(extension)
 
