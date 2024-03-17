@@ -71,7 +71,6 @@ class Home(QMainWindow):
 
             path = self._storage_manager.folder_selected
             if path is None:
-                # TODO: si no existe o fue eliminado, que hacer?
                 self.change_central(AppMode.DEFAULT)
             else:
                 tree = Tree(self, path)

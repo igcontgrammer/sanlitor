@@ -2,6 +2,7 @@ import os
 from typing import Final
 
 from PySide6.QtWidgets import QFileDialog
+from PySide6.QtGui import QIcon
 
 from common.config_action import config
 from constants import AppMode, FileNames, OpenFileOptions, SaveOptions
@@ -291,48 +292,25 @@ class FileMenu(QMenu):
         self._tab.set_normal(new_name)
         editor.has_changes = False
 
-    # TODO: esto no funciona correctamente. De dos archivos, solo guarda uno.
     @Slot()
     def _save_all_files(self) -> None:
+        paths_with_errors = []
         try:
             for i in range(self._tab.count()):
                 editor = self._tab.widget(i)
                 if not isinstance(editor, Editor):
-                    raise ValueError("editor is not an instance of Editor")
-                if not editor.has_changes:
                     continue
+                content = editor.toPlainText()
                 file_name = self._tab.tabText(i)
-                if file_name == FileNames.DEFAULT:
-                    file = QFileDialog.getSaveFileName(
-                        parent=self._home,
-                        caption="Guardar archivo",
-                        dir=os.path.expanduser("~"),
-                        filter=get_extensions_list(),
-                    )
-                    path = file[0]
-                    if not has_selected(path):
-                        print("guardado cancelado")
-                        break
-                    content = editor.toPlainText()
-                    ok, error_msg = save_from_path(
-                        path, content
-                    )
-                    if not ok:
-                        raise ValueError(error_msg)
-                    ok, error_msg = self._home.storage_manager.add(path)
-                    if not ok:
-                        raise ValueError(error_msg)
-                    editor.has_changes = False
-                    self._tab.set_normal(os.path.basename(path))
-                else:
-                    content = editor.toPlainText()
-                    ok, error_msg = self._home.storage_manager.save_from_file_name(
-                        file_name, content
-                    )
-                    if not ok:
-                        raise ValueError(error_msg)
-                    editor.has_changes = False
-                    self._tab.set_normal(file_name)
+                path = self._home.storage_manager.get_path_from_file_name(file_name)
+                ok, error_msg = save_from_path(path, content)
+                if not ok:
+                    paths_with_errors.append(str(path))
+                    continue
+                editor.has_changes = False
+                self._tab.setTabIcon(i, QIcon())
+            if len(paths_with_errors) > 0:
+                print(paths_with_errors)
         except ValueError as ve:
             show_system_error_message(parent=self._home, content=str(ve))
         except FileNotFoundError as fnf:
@@ -403,49 +381,7 @@ class FileMenu(QMenu):
 
     @Slot()
     def _close_all(self) -> None:
-        for i in range(self._tab.count()):
-            editor = self._tab.widget(i)
-            if not isinstance(editor, Editor):
-                return None
-            file_name = self._tab.tabText(i)
-            if not editor.has_changes:
-                if self._tab.has_one_tab:
-                    editor.clear()
-                    editor.has_changes = False
-                    self._tab.set_normal(FileNames.DEFAULT)
-                else:
-                    self._tab.removeTab(self._tab.currentIndex())
-                    self._home.storage_manager.remove(file_name)
-                self._home.storage_manager.remove(file_name)
-                continue
-            content = editor.toPlainText()
-            if file_name == DEFAULT_FILE_NAME and self._tab.has_one_tab:
-                file = self._get_path_from_save_dialog("Guardar")
-                path = file[0]
-                if not has_selected(path):
-                    print("se cancela el guardado...")
-                    return
-                ok, error_msg = save_from_path(
-                    path, content
-                )
-                if not ok:
-                    show_system_error_message(self._home, error_msg)
-                    return
-                ok, error_msg = self._home.storage_manager.add(path)
-                if not ok:
-                    show_system_error_message(self._home, error_msg)
-                    return
-                editor.clear()
-                editor.has_changes = False
-                self._tab.set_normal(DEFAULT_FILE_NAME)
-            else:
-                if self._tab.has_one_tab:
-                    editor.clear()
-                    editor.has_changes = False
-                    self._tab.set_normal(FileNames.DEFAULT)
-                else:
-                    self._tab.removeTab(self._tab.currentIndex())
-            self._home.storage_manager.remove(file_name)
+        pass
 
     def _when_opening(self, tab_manager: Tab, path: Path, here: bool = False) -> None:
         editor = tab_manager.editor

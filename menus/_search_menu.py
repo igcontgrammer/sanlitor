@@ -132,5 +132,4 @@ class SearchMenu(QMenu):
         self._toolbar.close()
 
     def _search_in_files(self) -> None:
-        # TODO: construir un arbol de archivos y buscar en ellos?
         print("Search in files...")

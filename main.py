@@ -9,7 +9,6 @@ from home import Home
 
 
 class Main(QApplication):
-    # TODO: por qué este singleton falla en MacOS?
     # _instance = None
 
     # def __new__(cls, *args, **kwargs) -> Self:
