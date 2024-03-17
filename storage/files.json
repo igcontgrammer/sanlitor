@@ -1,8 +1,7 @@
 {
     "paths": [
         "/Users/ignaciosanmartin/prueba_busqueda.txt",
-        "/Users/ignaciosanmartin/Documents/dir_prueba/prueba.txt",
-        "/Users/ignaciosanmartin/Documents/dir_prueba/sub_dir"
+        "/Users/ignaciosanmartin/Documents/dir_prueba/prueba.txt"
     ],
     "appMode": 2,
     "folderSelected": "/Users/ignaciosanmartin/Documents/dir_prueba/",

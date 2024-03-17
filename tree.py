@@ -15,10 +15,10 @@ def hide_columns(tree: QTreeView) -> None:
 
 
 class Tree:
-    def __init__(self, home, path: str):
+    def __init__(self, parent, path: str):
         from home import Home
 
-        self._home: Home = home
+        self._home: Home = parent
         self._path = path
 
     def get(self) -> QTreeView:
@@ -75,5 +75,3 @@ class Tree:
 
     def _is_ok(self) -> bool:
         return os.path.exists(self._path) and os.path.isdir(self._path)
-
-

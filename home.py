@@ -160,4 +160,3 @@ class Home(QMainWindow):
             _DefaultDimension.MAIN_WINDOW_DEFAULT_WIDTH,
             _DefaultDimension.MAIN_WINDOW_DEFAULT_HEIGHT,
         )
-

@@ -4,10 +4,11 @@ from typing import Final
 from PySide6.QtWidgets import QFileDialog
 
 from common.config_action import config
-from constants import FileNames, OpenFileOptions, SaveOptions
+from constants import AppMode, FileNames, OpenFileOptions, SaveOptions
 from editor import Editor
 from extensions import available_extensions, get_extensions_list
 from messages import Messages, MessageTypes, show_system_error_message
+from storage_manager import save_from_path
 from tab_manager import Tab
 from tree import Tree
 from utils import get_extension_from_path, has_selected_file
@@ -191,6 +192,7 @@ class FileMenu(QMenu):
             return None
         try:
             tree = Tree(self._home, path)
+            self._home.change_central(AppMode.TREE, tree.get())
         except Exception as e:
             show_system_error_message(self._home, str(e))
 
@@ -229,7 +231,7 @@ class FileMenu(QMenu):
         if not has_selected_file(path):
             return None
         content = editor.toPlainText()
-        ok, error_msg = self._home.storage_manager.save_from_path(path, content)
+        ok, error_msg = save_from_path(path, content)
         if not ok:
             raise ValueError(error_msg)
         path_add_status = self._home.storage_manager.add(path)
@@ -313,7 +315,7 @@ class FileMenu(QMenu):
                         print("guardado cancelado")
                         break
                     content = editor.toPlainText()
-                    ok, error_msg = self._home.storage_manager.save_from_path(
+                    ok, error_msg = save_from_path(
                         path, content
                     )
                     if not ok:
@@ -367,23 +369,20 @@ class FileMenu(QMenu):
                         filter=get_extensions_list(),
                     )
                     path = file[0]
-                    if not has_selected_file(path):
-                        print("se cancela el guardado...")
-                        return
-                    ok, error_msg = self._home.storage_manager.save_from_path(
-                        path, content
-                    )
-                    if not ok:
+                    if has_selected_file(path):
+                        ok, error_msg = save_from_path(
+                            path, content
+                        )
+                        if ok:
+                            ok, error_msg = self._home.storage_manager.add(path)
+                            if not ok:
+                                show_system_error_message(self._home, error_msg)
+                                return
+                            editor.clear()
+                            editor.has_changes = False
+                            self._tab.set_normal(DEFAULT_FILE_NAME)
+                            return
                         show_system_error_message(self._home, error_msg)
-                        return
-                    ok, error_msg = self._home.storage_manager.add(path)
-                    if not ok:
-                        show_system_error_message(self._home, error_msg)
-                        return
-                    editor.clear()
-                    editor.has_changes = False
-                    self._tab.set_normal(DEFAULT_FILE_NAME)
-                    return
                 else:
                     ok, error_msg = self._home.storage_manager.save_from_file_name(
                         file_name, content
@@ -427,7 +426,7 @@ class FileMenu(QMenu):
                 if not has_selected_file(path):
                     print("se cancela el guardado...")
                     return
-                ok, error_msg = self._home.storage_manager.save_from_path(
+                ok, error_msg = save_from_path(
                     path, content
                 )
                 if not ok:
@@ -497,4 +496,3 @@ class FileMenu(QMenu):
         )
         path = file[0]
         return path if path is not None else ""
-
