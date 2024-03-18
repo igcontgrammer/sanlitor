@@ -85,10 +85,10 @@ class StorageManager:
                 return path
         return None
 
-    def add(self, path: str) -> Tuple[bool, Optional[str]]:
-        if Path(path) in self._paths:
+    def add(self, path: Path) -> Tuple[bool, Optional[str]]:
+        if path in self._paths:
             return False, "This path already exists"
-        self._paths.append(Path(path))
+        self._paths.append(path)
         try:
             with open(Paths.STORAGE, "w") as storage:
                 self._content["paths"] = [str(path) for path in self._paths]

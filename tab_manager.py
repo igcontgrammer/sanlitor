@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from typing import List, Optional
 
 from PySide6.QtGui import QIcon
@@ -9,7 +10,6 @@ from editor import Editor
 from extensions import get_extensions_list
 from messages import Messages, MessageTypes, show_system_error_message
 from utils import get_extension, has_selected
-from pathlib import Path
 
 
 class Tab(QTabWidget):

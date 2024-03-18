@@ -1,12 +1,13 @@
 import os
 from dataclasses import dataclass
-from typing import Final, Optional
 from pathlib import Path
+from typing import Final, Optional
+
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QCloseEvent
 from PySide6.QtWidgets import QMainWindow, QSplitter, QWidget
 
-from constants import AppMode, SaveOptions, ThemeModes
+from constants import AppMode, ThemeModes
 from editor import Editor
 from menus.menu import MenuBar
 from messages import Messages, MessageTypes

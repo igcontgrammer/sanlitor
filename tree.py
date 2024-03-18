@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from typing import Optional, Tuple
 
 from PySide6.QtCore import QModelIndex, Slot
@@ -6,7 +7,6 @@ from PySide6.QtWidgets import QFileSystemModel, QTreeView
 
 from constants import AppMode
 from extensions import available_extensions
-from pathlib import Path
 
 
 def hide_columns(tree: QTreeView) -> None:

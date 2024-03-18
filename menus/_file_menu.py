@@ -1,20 +1,20 @@
-import datetime
 import os
-from typing import Final, Dict
+from pathlib import Path
+from typing import Final
 
-from PySide6.QtWidgets import QFileDialog
 from PySide6.QtGui import QIcon
+from PySide6.QtWidgets import QFileDialog
 
 from common.config_action import config
-from constants import AppMode, FileNames, OpenFileOptions, SaveOptions
+from constants import AppMode, OpenFileOptions, SaveOptions
 from editor import Editor
 from extensions import available_extensions, get_extensions_list
 from messages import Messages, MessageTypes, show_system_error_message
 from storage_manager import save_from_path
 from tab_manager import Tab
 from tree import Tree
-from utils import get_extension_from_path, has_selected
-from pathlib import Path
+from utils import has_selected
+
 from . import QAction, QMenu, SectionsNames, Slot
 from ._menus_constants import FileMenuActionsNames, FileMenuShortcuts
 
@@ -150,15 +150,14 @@ class FileMenu(QMenu):
         self.addAction(close_all_files_action)
 
     # ************* SLOTS ************
-    # TODO: fix this.
     def _open_file(self) -> None:
         file = QFileDialog.getOpenFileName(
             self,
             "Abrir archivo",
             dir=os.path.expanduser("~"),
         )
-        if not has_selected(file[0]):
-            return None
+        if not len(file[0]) > 0:
+            return
         path = Path(file[0])
         if path.suffix not in available_extensions():
             show_system_error_message(
@@ -202,15 +201,14 @@ class FileMenu(QMenu):
     def _rename(self) -> None:
         old_name = self._tab.tabText(self._tab.currentIndex())
         file = self._get_path_from_save_dialog("Renombrar Archivo")
-        path = file[0]
-        if not has_selected(path):
+        if not len(file[0]) > 0:
             return
-        new_file_name = os.path.basename(path)
-        ok, error_msg = self._home.storage_manager.rename(old_name, new_file_name)
-        if not ok:
+        path = Path(file[0])
+        renamed, error_msg = self._home.storage_manager.rename(old_name, path.name)
+        if not renamed:
             print(error_msg)
             return
-        self._tab.setTabText(self._tab.currentIndex(), new_file_name)
+        self._tab.setTabText(self._tab.currentIndex(), path.name)
 
     @Slot()
     def _new_file(self) -> None:
@@ -228,9 +226,9 @@ class FileMenu(QMenu):
             dir=os.path.expanduser("~"),
             filter=get_extensions_list(),
         )
-        path = file[0]
-        if not has_selected(path):
+        if not len(file[0]) > 0:
             return
+        path = Path(file[0])
         content = editor.toPlainText()
         ok, error_msg = save_from_path(path, content)
         if not ok:
@@ -238,7 +236,7 @@ class FileMenu(QMenu):
         ok, error_msg = self._home.storage_manager.add(path)
         if not ok:
             raise ValueError(error_msg)
-        self._tab.setTabText(index, os.path.basename(path))
+        self._tab.setTabText(index, path.name)
         editor.has_changes = False
 
     @Slot()
@@ -282,16 +280,15 @@ class FileMenu(QMenu):
             dir=os.path.expanduser("~"),
             filter=get_extensions_list(),
         )
-        path = file[0]
-        if not has_selected(path):
-            return None
+        if not len(file[0]) > 0:
+            return
+        path = Path(file[0])
         old_name = self._tab.tabText(self._tab.currentIndex())
-        new_name = os.path.basename(path)
-        status = self._home.storage_manager.rename(old_name, new_name)
+        status = self._home.storage_manager.rename(old_name, path.name)
         if status[0] is False:
             return
-        editor.set_syntax(get_extension_from_path(path))
-        self._tab.set_normal(new_name)
+        editor.set_syntax(path.suffix)
+        self._tab.set_normal(path.name)
         editor.has_changes = False
 
     @Slot()
@@ -322,66 +319,38 @@ class FileMenu(QMenu):
 
     @Slot()
     def _close(self) -> None:
-        editor = self._tab.widget(self._tab.currentIndex())
+        index = self._tab.currentIndex()
+        editor = self._tab.widget(index)
         if not isinstance(editor, Editor):
-            print("editor is not an instance of Editor")
-            return None
-        file_name = self._tab.tabText(self._tab.currentIndex())
+            show_system_error_message(self._home, "editor is not an instance of Editor")
+            return
         if editor.has_changes:
             msg = Messages(
                 parent=self._home,
-                content="Se identificaron cambios en este archivo ¿desea guardar y cerrar?",
+                content="Se identificaron cambios ¿desea guardar?",
                 first_button_title="Guardar",
-                message_type=MessageTypes.QUESTION,
+                message_type=MessageTypes.QUESTION
             )
-            msg.add_button("Cerrar de todas formas")
             option = msg.run()
-            if option != SaveOptions.SAVE and option != SaveOptions.NO_SAVE:
+            if option != SaveOptions.SAVE:
+                msg.close()
                 return
-            content = editor.toPlainText()
-            if option == SaveOptions.SAVE:
-                if file_name == DEFAULT_FILE_NAME and self._tab.has_one_tab:
-                    file = QFileDialog.getSaveFileName(
-                        parent=self._home,
-                        caption="Guardar archivo",
-                        dir=os.path.expanduser("~"),
-                        filter=get_extensions_list(),
-                    )
-                    path = file[0]
-                    if has_selected(path):
-                        ok, error_msg = save_from_path(
-                            path, content
-                        )
-                        if ok:
-                            ok, error_msg = self._home.storage_manager.add(path)
-                            if not ok:
-                                show_system_error_message(self._home, error_msg)
-                                return
-                            editor.clear()
-                            editor.has_changes = False
-                            self._tab.set_normal(DEFAULT_FILE_NAME)
-                            return
-                        show_system_error_message(self._home, error_msg)
-                else:
-                    ok, error_msg = self._home.storage_manager.save_from_file_name(
-                        file_name, content
-                    )
-                    if ok is False:
-                        show_system_error_message(self._home, error_msg)
-            self._tab.removeTab(self._tab.currentIndex())
+            file_name = self._tab.tabText(index)
+            path = self._home.storage_manager.get_path_from_file_name(file_name)
+            if path is not None:
+                saved, error_msg = save_from_path(path, editor.toPlainText())
+                if not saved:
+                    print(error_msg)
+                    show_system_error_message(self._home, error_msg)
+                    return
+        if self._tab.has_one_tab:
+            self._tab.setTabText(index, DEFAULT_FILE_NAME)
+            self._tab.setTabIcon(index, QIcon())
             editor.clear()
             editor.has_changes = False
-            self._tab.set_normal()
         else:
-            if self._tab.has_one_tab:
-                editor.clear()
-                editor.has_changes = False
-                self._tab.set_normal(FileNames.DEFAULT)
-            else:
-                self._tab.removeTab(self._tab.currentIndex())
-            self._home.storage_manager.remove(file_name)
+            self._tab.removeTab(index)
 
-    # TODO: fix this
     @Slot()
     def _close_all(self) -> None:
         paths_with_errors = []
@@ -403,8 +372,7 @@ class FileMenu(QMenu):
                     )
                     msg.add_button("Guardar todo")
                     option = msg.run()
-                    if option != SaveOptions.SAVE and option != 1:
-                        # cancel
+                    if option != SaveOptions.SAVE and option != SaveOptions.SAVE_ALL:
                         msg.close()
                         break
                     if option == 1:
